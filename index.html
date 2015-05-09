@@ -8,8 +8,15 @@
 <script type="text/javascript" src="json2.js"></script>
 <script type="text/javascript" src="easemob.im-1.0.6.js"></script>
 <script type="text/javascript" src="bootstrap.js"></script>
+<!--[if lte IE 6]>
+    <script type="text/javascript" src="bootstrap-ie.js"></script>
+<![endif]-->
 <link rel="stylesheet" type="text/css" href="css/webim.css" />
 <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+<!--[if lte IE 6]>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-ie6.css">
+    <link rel="stylesheet" type="text/css" href="css/ie.css">
+<![endif]-->
 <script type="text/javascript">
 	var apiURL = null;
 	var curUserId = null;
