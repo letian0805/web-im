@@ -2954,7 +2954,8 @@ Strophe.Connection.prototype = {
         this._authentication.legacy_auth = false;
 
         // Check for the stream:features tag
-        var hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
+        //var hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
+        var hasFeatures = this._easemob_findFeature(bodyWrap.xml);
         var mechanisms = bodyWrap.getElementsByTagName("mechanism");
         var matched = [];
         var i, mech, found_authentication = false;
@@ -2978,6 +2979,13 @@ Strophe.Connection.prototype = {
         }
         if (this.do_authentication !== false)
             this.authenticate(matched);
+    },
+
+    _easemob_findFeature: function(xml) {
+        if (xml.indexOf("stream:features") != -1) {
+            return true;
+        }
+        return false;
     },
 
     /** Function: authenticate
@@ -4510,7 +4518,7 @@ Strophe.Bosh.prototype = {
 
             try {
                 req.xhr.open("POST", this._conn.service, this._conn.options.sync ? false : true);
-                req.xhr.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+                //req.xhr.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
             } catch (e2) {
                 Strophe.error("XHR open failed.");
                 if (!this._conn.connected) {
