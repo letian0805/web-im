@@ -2955,7 +2955,12 @@ Strophe.Connection.prototype = {
 
         // Check for the stream:features tag
         //var hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
-        var hasFeatures = this._easemob_findFeature(bodyWrap.xml);
+        var hasFeatures;
+        if (bodyWrap.xml) {
+            hasFeatures = this._easemob_findFeature(bodyWrap.xml);
+        } else {
+            hasFeatures = this._easemob_findFeature(bodyWrap.outerHTML);
+        }
         var mechanisms = bodyWrap.getElementsByTagName("mechanism");
         var matched = [];
         var i, mech, found_authentication = false;
