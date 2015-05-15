@@ -4524,6 +4524,9 @@ Strophe.Bosh.prototype = {
             try {
                 req.xhr.open("POST", this._conn.service, this._conn.options.sync ? false : true);
                 //req.xhr.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+                if (req.xhr.setRequestHeader) {
+                    req.xhr.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+                }
             } catch (e2) {
                 Strophe.error("XHR open failed.");
                 if (!this._conn.connected) {
