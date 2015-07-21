@@ -41,6 +41,7 @@
   _margin-top:0;
   _width:expression(eval(document.documentElement.scrollWidth));
   _height:expression(eval(document.documentElement.scrollHeight));
+  *display: none;
 }
 .modal {
   _position:absolute;
