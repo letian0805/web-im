@@ -1,4 +1,17 @@
 /** custom login button **/
+html, body {
+    width: 100%;
+    height: 100%;
+}
+.em-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: url(../img/bg.jpg) no-repeat;
+    background-size: 100% 100%;
+}
 .flatbtn-blu {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
@@ -28,7 +41,7 @@
 }
 
 .flatbtn-blu:hover {
-	color: #fff;
+	color: #E8E8E9;
 	background-color: #519dde;
 }
 
@@ -74,10 +87,10 @@ a:hover {
 }
 
 .content {
-	width: 1000px;
-	height: auto;
+	min-width: 600px;
+	max-width: 1000px;
+	height: 100%;
 	margin: 0 auto;
-	valign: middle;
 	text-align: center;
 }
 
@@ -92,59 +105,85 @@ a:hover {
 
 .leftcontact {
 	float: left;
-	width: 196px;
-	border: 1px #666666 solid;
-	height: auto;
-	margin: 0 auto;
-	margin-top: 80px;
-	margin-left: 120px;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
+	width: 270px;
+	height: 100%;
 	position: relative;
 }
-
+.em-list {
+    position: absolute;
+    top: 28px;
+    right: 16px;
+    background: url(../img/list_1.png) no-repeat;
+    width: 64px;
+    height: 64px;
+    zoom: 45%;
+}
+.em-list:hover {
+    background: url(../img/list_2.png) no-repeat;
+}
+.em-list .dropdown-menu {
+    zoom: 200%;
+}
+.em-list button {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    background: none;
+}
 .leftheader {
-	border: 1px #666666 solid;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
 	z-index: 1000;
 	position: relative;
-	width: 196px;
-	background-color: #5D6978;
+	width: 100%;
+	background-color: #2E3238;
+    height: 60px;
+    line-height: 60px;
 }
-
+.accordion-heading {
+    padding: 10px 0;
+}
+.accordion-inner {
+    border-top: 1px solid #24272C;  
+}
+.leftheader img {
+    width: 48px;
+    height: 48px;
+    margin: -48px 6px 0 6px;
+    border-radius: 4px;
+}
+.btn-group {
+    position: absolute;
+    right: 6px;
+    top: 14px;
+}
 .login_user_title {
-	display: -moz-inline-box;
 	display: inline-block;
 	width: 65px;
 	overflow: hidden;
-}
-
-.leftheader-font {
-	font-size: 14px;
+    text-overflow: ellipsis;
+    font-size: 14px;
 	font-weight: bold;
-	color: #333;
-	text-decoration: none;
+	color: #E8E8E9;
 }
-
+.accordion-group {
+    border-radius: 0;
+    height: 100%;
+    border: none;
+}
 .chatRight {
-	border-right: 1px #bebebe solid;
-	width: 562px;
-	height: auto;
-	margin-left: 340px;
+	height: 100%;
+	margin-left: 270px;
 	position: relative;
-	border: 1px #666666 solid;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
+    background-color: #eee;
 }
-
+#roomMemberImg {
+    position: absolute;
+    right: 60px;
+    top: 15px;
+    width: 20px;
+}
 .chat01_title {
-	background-color: #5D6978;
-	height: 42px;
-	margin-top: -10px;
+	height: 50px;
+    border-bottom: 1px solid #d6d6d6;
 }
 
 .chat03_title {
@@ -154,17 +193,17 @@ a:hover {
 }
 
 .talkTo {
-	
+	position: relative;
+    margin: 0;
 }
-
-.talkTo li {
-	line-height: 17px;
-	float: left;
-	padding-left: 6px;
-	margin: 12px 20px;
-	_margin-left: 9px;
+#talkTo {
+    float: none;
+    text-align: center;
+    line-height: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #4F4F4F;
 }
-
 .talkTo li a {
 	padding: 4px 11px 4px 7px;
 	_padding-top: 0px;
@@ -185,27 +224,44 @@ a:hover {
 	width: 15px;
 	height: 15px;
 }
-
+.chat02 {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+}
+.accordion-body {
+    height: 100%;
+    overflow-y: auto;
+    width: 100%;
+}
+.accordion-body li {
+    padding: 12px 0;
+}
+.accordion-body img {
+    margin: 0 6px;
+    width: 36px;
+    height: 36px;
+}
 .chat02_title {
-	background: url('../img/chat_title_bg.jpg') repeat-x 0 0;
-	height: 25px;
 	position: relative;
+    border-top: 1px solid #d6d6d6;
 }
-
 .chat02_bar {
-	background: url('../img/chat_bar_bg.jpg') repeat-x 0 0;
-	height: 35px;
-	position: relative;
-	margin-bottom: 0px;
+	width: 100%;
+    text-align: right;
 }
-
-.chat02_bar ul {
-	height: 100%;
-	background: url('../img/wlf_bg.png') no-repeat 10px 8px;
-}
-
-.chat02_bar li {
-	position: absolute;
+.chat02_bar button {
+    outline: none;
+    border: 1px solid #4b4b4b;
+    border-radius: 4px;
+    margin: 5px 10px 10px 0;
+    width: 100px;
+    height: 30px;
+    background-color: #eee;
+    color: #444;
+    text-align: center;
+    line-height: 30px;
+    font-size: 16px;
 }
 
 .chat03_title_t {
@@ -222,9 +278,7 @@ a:hover {
 }
 
 .chat01_content {
-	height: 312px;
-	width: 555px;
-	overflow-x: none;
+	width: 100%;
 	overflow-y: auto;
 }
 
@@ -234,8 +288,7 @@ a:hover {
 
 .chat03_content_ul {
 	text-align: left;
-	font-size: 12px;
-	color: #333;
+	color: #E8E8E9;
 	margin: 0px 0px;
 	overflow-y: auto;
 	position: relative;
@@ -252,17 +305,55 @@ a:hover {
 	position: relative;
 	resize: vertical;
 }
-
+.chat02_content textarea:focus {
+    border: none;
+    box-shadow: none;
+}
 .chat02_content textarea {
-	border: medium none;
-	display: block;
-	width: 552px;
+    box-shadow: none;
+    outline: none;
+	width: 100%;
 	height: 96px;
 	overflow-y: auto;
-	padding: 5px;
-	resize: vertical;
+	padding: 0;
+	resize: none;
+    border: none;
+    margin: 0;
+    background-color: #eee;
 }
-
+#recycle {
+    position: absolute;
+    top: 13px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+}
+#contractlist11 {
+    height: 100%;
+    background-color: #2E3238;
+    color: #E8E8E9;
+}
+.accordion {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+#accordion1,
+#accordion2,
+#accordion3 {
+    width: 31.8999999%;
+    display: inline-block;
+    padding: 0;
+    text-align: center;
+    line-height: 16px;
+    position: relative;
+    color: #00A0E9;
+    font-size: 14px;
+}
+#accordion1,
+#accordion2 {
+    border-right: 1px solid #e5e5e5;
+}
 .chat03_name {
 	color: #333;
 	position: absolute;
@@ -307,7 +398,6 @@ a:hover {
 	width: 30px;
 	height: 30px;
 }
-
 .chat02_title_btn {
 	background: url('../img/icon.png') no-repeat 0 0;
 	cursor: pointer;
@@ -317,21 +407,36 @@ a:hover {
 	height: 15px;
 	margin: 5px 6px;
 }
-
-.ctb01 {
-	background-position: 0 -90px;
-	margin-left: 18px;
-	_margin-left: 8px;
-}
-
+.ctb01,
+.ctb02,
 .ctb03 {
-	background-position: 0 -152px;
+    width: 64px;
+    height: 64px;
+    zoom: 50%;
 }
-
+.ctb01 {
+    zoom: 45%;
+    background: url(../img/face_1.png) no-repeat;
+    margin: 12px 12px 12px 20px;
+}
+.ctb01:hover {
+    background: url(../img/face_2.png) no-repeat;
+}
 .ctb02 {
-	background-position: 0 -457px;
+    background: url(../img/audio_1.png) no-repeat;
+    zoom: 56%;
+    margin-top: 2px;
 }
-
+.ctb02:hover {
+    background: url(../img/audio_2.png) no-repeat;
+}
+.ctb03 {
+    background: url(../img/pic_1.png) no-repeat;
+    margin-right: 12px;
+}
+.ctb03:hover {
+    background: url(../img/pic_2.png) no-repeat;
+}
 .chat02_title_t {
 	background: url('../img/icon.png') no-repeat 0px -487px;
 	position: absolute;
@@ -342,13 +447,11 @@ a:hover {
 	width: auto;
 	height: 15px;
 }
-
 .chat02_title_t a {
 	color: #333;
 	font-size: 12px;
 	text-decoration: none;
 }
-
 .chat02_title_t a:hover {
 	color: #f60;
 	text-decoration: underline;
@@ -357,18 +460,14 @@ a:hover {
 .wl_faces_box {
 	background: url('../img/wlf_bg.png') repeat 0 0;
 	position: absolute;
-	width: 428px;
-	height: 225px;
-	bottom: 22px;
-	left: -50px;
+	bottom: 2px;
+	left: 0;
 	display: none;
 }
 
 .wl_faces_content {
-	background: #fff;
+	background: #E8E8E9;
 	border: 1px #ccc solid;
-	width: 417px;
-	height: 216px;
 	margin: 3px 4px;
 }
 
@@ -418,29 +517,15 @@ a:hover {
 }
 
 .wl_faces_main ul {
-	margin: 12px 28px;
 	overflow: hidden;
-	border-top: 1px #CCC solid;
-	border-left: 1px #CCC solid;
-	width: 360px;
+    margin: 0;
+    padding: 0 6px 6px 0;
 }
-
-.wl_faces_main ul li {
-	float: left;
-	border-right: 1px #CCC solid;
-	border-bottom: 1px #CCC solid;
-	height: 22px;
-	width: 26px;
-	margin: -1px 0 0 -1px;
-	padding: 4px 2px;
-	text-align: center;
-}
-
 .wl_faces_main ul li img {
-	width: 22px;
-	height: 22px;
+	width: 30px;
+	height: 30px;
+    margin: 6px 0 0 6px;
 }
-
 .wlf_icon {
 	background: url('../img/layer_arrow.png') no-repeat 0 0;
 	position: absolute;
@@ -486,10 +571,19 @@ label.offline {
 .fade.in {
 	opacity: 1;
 }
-.badgegroup,
+.badgegroup {
+    position: absolute;
+    right: 1px;
+    top: -10px;
+    padding: 0 1px;
+    font-size: 6px;
+    border-radius: 2px;
+}
 .badge {
     *margin-top: -30px;
 }
 .accordion-inner {
     *position: relative;
+    height: 100%;
+    padding: 0;
 }
