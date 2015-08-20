@@ -1,39 +1,37 @@
-/*******************************************
-    config
-*******************************************/
-Easemob.im.config = {
+;(function(window, undefined){
     /*
-        The global value set for xmpp server
-        ws://im-api.easemob.com/ws/
-        ws://im-api.sandbox.easemob.com/ws/
-        http://im-api.easemob.com/http-bind/
-        http://im-api.sandbox.easemob.com/http-bind/
+        Config here
     */
-    xmppURL: 'ws://im-api.easemob.com/ws/',
-    /*
-        The global value set for Easemob backend REST API
-        http://a1.easemob.com
-        http://a1.sdb.easemob.com
-    */
-    apiURL: '',
-    /*
-        连接时提供appkey
-    */
-    appkey: "easemob-demo#chatdemoui",
-    https : false,
-    wss: false
-}
+    Easemob.im.config = {
+        /*
+            The global value set for xmpp server
+            ws://im-api.easemob.com/ws/
+            ws://im-api.sandbox.easemob.com/ws/
+            http://im-api.easemob.com/http-bind/
+            http://im-api.sandbox.easemob.com/http-bind/
+        */
+        xmppURL: 'ws://im-api.easemob.com/ws/',
+        /*
+            The global value set for Easemob backend REST API
+            http://a1.easemob.com
+            http://a1.sdb.easemob.com
+        */
+        apiURL: '',
+        /*
+            连接时提供appkey
+        */
+        appkey: "easemob-demo#chatdemoui",
+        https : false,
+        wss: false
+    }
 
-/*******************************************
- demo相关代码
-*******************************************/
-(function(window, undefined){
-
+    /**************************************************************************
+    ---                             demo相关代码                            ---
+    **************************************************************************/
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
     var curUserId = null;
     var curChatUserId = null;
-    var conn = null;
     var curRoomId = null;
     var msgCardDivId = "chat01";
     var talkToDivId = "talkTo";
@@ -46,6 +44,315 @@ Easemob.im.config = {
     var groupQuering = false;
     var textSending = false;
     var time = 0;
+
+    
+    
+    avalon.ready(function() {
+
+        var conn = new Easemob.im.Connection();
+
+
+        /*
+            初始化连接
+        */
+        conn.init({
+            https : Easemob.im.config.https,
+            wss: Easemob.im.config.wss,
+            url: Easemob.im.config.xmppURL,
+            onOpened : function() {//当连接成功时的回调方法
+                handleOpen(conn);
+            },
+            onClosed : function() {//当连接关闭时的回调方法
+                handleClosed();
+            },
+            onTextMessage : function(message) {//收到文本消息时的回调方法
+                handleTextMessage(message);
+            },
+            onEmotionMessage : function(message) {//收到表情消息时的回调方法
+                handleEmotion(message);
+            },
+            onPictureMessage : function(message) {//收到图片消息时的回调方法
+                handlePictureMessage(message);
+            },
+            onAudioMessage : function(message) {//收到音频消息的回调方法
+                handleAudioMessage(message);
+            },
+            onLocationMessage : function(message) {//收到位置消息的回调方法
+                handleLocationMessage(message);
+            },
+            onFileMessage : function(message) {//收到文件消息的回调方法
+                handleFileMessage(message);
+            },
+            onVideoMessage : function(message) {//收到视频消息的回调方法
+                handleVideoMessage(message);
+            },
+            onPresence : function(message) {//收到联系人订阅请求的回调方法
+                handlePresence(message);
+            },
+            onRoster : function(message) {//收到联系人信息的回调方法
+                handleRoster(message);
+            },
+            onInviteMessage : function(message) {//收到群组邀请时的回调方法
+                handleInviteMessage(message);
+            },
+            onError : function(message) {//异常时的回调方法
+                handleError(message);
+            }
+        });
+
+        
+        /*
+            loading
+        */
+        var loading = avalon.define({
+            $id: 'loading'
+            , display: false
+            , show: function() {
+                loading.display = true;
+            }
+            , hide: function() {
+                loading.display = false;
+            }
+        });
+
+
+        /*
+            提示信息
+        */
+        var emprompt = avalon.define({
+            $id: 'prompt'
+            , content: ''
+            , t: '-60px'
+            , ts: 0
+            , show: function(html) {
+                emprompt.t = '0';
+                emprompt.content = html;
+                clearTimeout(emprompt.ts);
+                emprompt.ts = setTimeout(emprompt.hide, 2000);
+            }
+            , hide: function() {
+                emprompt.t = '-60px';
+            }
+        });
+
+
+        /*
+            登录
+        */
+        var signin = avalon.define({
+            $id: "signin"
+            , username: ''
+            , password: ''
+            , content: 'j'
+            , port: 'Password'
+            , display: true
+            , show: function() {
+                signin.display = true;
+            }
+            , hide: function() {
+                signin.display = false;
+            }
+            , transfer: function() {
+                switch(signin.content) {
+                    case 'j':
+                        signin.content = 'k';
+                        signin.port = 'Token';
+                        break;
+                    default:
+                        signin.content = 'j';
+                        signin.port = 'Password';
+                }
+            }
+            , signin: function() {
+                if (!signin.username) {
+                    emprompt.show('请输入用户名');
+                    return;
+                } else if (!signin.password) {
+                    emprompt.show('请输入密码');
+                    return;
+                }
+                loading.show();
+                if (signin.content === 'k') {
+                    conn.open({//根据用户名令牌登录系统
+                        apiUrl : Easemob.im.config.apiURL,
+                        user : signin.username,
+                        accessToken : signin.token,
+                        appKey : Easemob.im.config.appkey
+                    });
+                } else {
+                    conn.open({//根据用户名密码登录系统
+                        apiUrl : Easemob.im.config.apiURL,
+                        user : signin.username,
+                        pwd : signin.password,
+                        appKey : Easemob.im.config.appkey
+                    });
+                }               
+            }
+            , showSignup: function() {
+                signin.hide();
+                signup.show();
+            }
+        });
+
+
+        /*
+            注册
+        */
+        var signup = avalon.define({
+            $id: 'signup'
+            , username: ''
+            , password: ''
+            , nickname: ''
+            , display: false
+            , show: function() {
+                signup.display = true;
+            }
+            , hide: function() {
+                signup.display = false;
+            }
+            , signup: function() {
+                if (!signup.username) {
+                    emprompt.show('请输入用户名');
+                    return;
+                } else if (!signup.password) {
+                    emprompt.show('请输入密码');
+                    return;
+                } else if (!signup.nickname) {
+                    emprompt.show('请输入昵称');
+                    return;
+                }
+                loading.show();
+                var options = {
+                    username : signup.username
+                    , password : signup.password
+                    , nickname : signup.nickname
+                    , appKey : Easemob.im.config.appkey
+                    , success : function(result) {
+                        loading.hide();
+                        emprompt.show("注册成功!");
+                        signup.hide();
+                        signin.show();
+                    }
+                    , error : function(e) {
+                        loading.hide();
+                        emprompt.show(e.error);
+                    }
+                    , apiUrl : Easemob.im.config.apiURL
+                };
+                Easemob.im.Helper.registerUser(options);   
+            }
+            , back: function() {
+                signup.hide();
+                signin.show();
+            }
+        });
+ 
+       
+        /*
+            聊天主窗口
+        */
+        var chat = avalon.define({
+            $id: 'chat'
+            , display: false 
+            , show: function() {
+                chat.display = true;
+            }
+            , hide: function() {
+                chat.display = false;
+            }
+        });
+
+
+        /*
+            处理连接时函数,主要是登录成功后对页面元素做处理
+        */
+        var handleOpen = function(conn) {
+            
+            curUserId = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
+
+            /*
+                获取当前登录人的联系人列表
+            */
+            conn.getRoster({
+                success : function(roster) {
+                    loading.hide();
+                    signin.hide();
+                    chat.show();
+                    var curroster;
+                    for ( var i in roster) {
+                        var ros = roster[i];
+                        //both为双方互为好友，要显示的联系人,from我是对方的单向好友
+                        if (ros.subscription == 'both' || ros.subscription == 'from') {
+                            bothRoster.push(ros);
+                        } else if (ros.subscription == 'to') {
+                            toRoster.push(ros);//to表明了联系人是我的单向好友
+                        }
+                    }
+                    if (bothRoster.length > 0) {
+                        curroster = bothRoster[0];
+                        //buildContactDiv("contractlist", bothRoster);//联系人列表页面处理
+                        if (curroster) {
+                            //setCurrentContact(curroster.name);//页面处理将第一个联系人作为当前聊天div
+                        }
+                    }
+
+                    /*
+                        获取当前登录人的群组列表
+                    */
+                    conn.listRooms({
+                        success : function(rooms) {
+                            if (rooms && rooms.length > 0) {
+                                //buildListRoomDiv("contracgrouplist", rooms);//群组列表页面处理
+                                if (curChatUserId == null) {
+                                    //setCurrentContact(groupFlagMark + rooms[0].roomId);
+                                    //$('#accordion2').click();
+                                }
+                            }
+                            conn.setPresence();//设置用户上线状态，必须调用
+                        },
+                        error : function(e) {
+                        }
+                    });
+                }
+            });
+            
+            if (conn.isOpened()) {//启动心跳
+                conn.heartBeat(conn);
+            }
+        };
+
+
+        /*
+            异常情况下的处理方法
+        */
+        var handleError = function(e) {
+            if (curUserId == null) {
+                loading.hide();
+                signin.show();
+                emprompt.show(e.msg + ",请重新登录");
+            } else {
+                if (e.type == EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR) {
+                    if (e.msg == "" || e.msg == 'unknown' ) {
+                        emprompt.show("服务器断开连接,可能是因为在别处登录");
+                    } else {
+                        emprompt.show("服务器断开连接");
+                    }
+                } else if (e.type === EASEMOB_IM_CONNCTION_SERVER_ERROR) {
+                    if (e.msg.toLowerCase().indexOf("user removed") != -1) {
+                        emprompt.show("用户已经在管理后台删除");
+                    }
+                } else {
+                    emprompt.show(e.msg);
+                }
+            }
+            conn.stopHeartBeat(conn);
+        };
+
+
+        avalon.scan();
+    });
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
 
     var swfupload = null;
     var flashFilename = '';
@@ -144,19 +451,6 @@ Easemob.im.config = {
             isLogin : false
         };
     };
-    var showLoginUI = function() {
-        $('#loginmodal').modal('show');
-        $('#username').focus();
-    };
-    var hiddenLoginUI = function() {
-        $('#loginmodal').modal('hide');
-    };
-    var showWaitLoginedUI = function() {
-        $('#waitLoginmodal').modal('show');
-    };
-    var hiddenWaitLoginedUI = function() {
-        $('#waitLoginmodal').modal('hide');
-    };
     var showChatUI = function() {
         $('#content').css({
             "display" : "block"
@@ -211,70 +505,12 @@ Easemob.im.config = {
             swfupload = uploadShim('fileInput');
         }
 
-        conn = new Easemob.im.Connection();
-        //初始化连接
-        conn.init({
-            https : Easemob.im.config.https,
-            wss: Easemob.im.config.wss,
-            url: Easemob.im.config.xmppURL,
-            //当连接成功时的回调方法
-            onOpened : function() {
-                handleOpen(conn);
-            },
-            //当连接关闭时的回调方法
-            onClosed : function() {
-                handleClosed();
-            },
-            //收到文本消息时的回调方法
-            onTextMessage : function(message) {
-                handleTextMessage(message);
-            },
-            //收到表情消息时的回调方法
-            onEmotionMessage : function(message) {
-                handleEmotion(message);
-            },
-            //收到图片消息时的回调方法
-            onPictureMessage : function(message) {
-                handlePictureMessage(message);
-            },
-            //收到音频消息的回调方法
-            onAudioMessage : function(message) {
-                handleAudioMessage(message);
-            },
-            //收到位置消息的回调方法
-            onLocationMessage : function(message) {
-                handleLocationMessage(message);
-            },
-            //收到文件消息的回调方法
-            onFileMessage : function(message) {
-                handleFileMessage(message);
-            },
-            //收到视频消息的回调方法
-            onVideoMessage : function(message) {
-                handleVideoMessage(message);
-            },
-            //收到联系人订阅请求的回调方法
-            onPresence : function(message) {
-                handlePresence(message);
-            },
-            //收到联系人信息的回调方法
-            onRoster : function(message) {
-                handleRoster(message);
-            },
-            //收到群组邀请时的回调方法
-            onInviteMessage : function(message) {
-                handleInviteMessage(message);
-            },
-            //异常时的回调方法
-            onError : function(message) {
-                handleError(message);
-            }
-        });
+        
         var loginInfo = getLoginInfo();
         if (loginInfo.isLogin) {
             showWaitLoginedUI();
         } else {
-            showLoginUI();
+            //showLoginUI();
         }
         //发送文件的模态窗口
         $('#fileModal').on('hidden.bs.modal', function(e) {
@@ -333,57 +569,7 @@ Easemob.im.config = {
             });
         });
     });
-    //处理连接时函数,主要是登录成功后对页面元素做处理
-    var handleOpen = function(conn) {
-        //从连接中获取到当前的登录人注册帐号名
-        curUserId = conn.context.userId;
-        //获取当前登录人的联系人列表
-        conn.getRoster({
-            success : function(roster) {
-                // 页面处理
-                hiddenWaitLoginedUI();
-                showChatUI();
-                var curroster;
-                for ( var i in roster) {
-                    var ros = roster[i];
-                    //both为双方互为好友，要显示的联系人,from我是对方的单向好友
-                    if (ros.subscription == 'both'
-                            || ros.subscription == 'from') {
-                        bothRoster.push(ros);
-                    } else if (ros.subscription == 'to') {
-                        //to表明了联系人是我的单向好友
-                        toRoster.push(ros);
-                    }
-                }
-                if (bothRoster.length > 0) {
-                    curroster = bothRoster[0];
-                    buildContactDiv("contractlist", bothRoster);//联系人列表页面处理
-                    if (curroster)
-                        setCurrentContact(curroster.name);//页面处理将第一个联系人作为当前聊天div
-                }
-                //获取当前登录人的群组列表
-                conn.listRooms({
-                    success : function(rooms) {
-                        if (rooms && rooms.length > 0) {
-                            buildListRoomDiv("contracgrouplist", rooms);//群组列表页面处理
-                            if (curChatUserId == null) {
-                                setCurrentContact(groupFlagMark
-                                        + rooms[0].roomId);
-                                $('#accordion2').click();
-                            }
-                        }
-                        conn.setPresence();//设置用户上线状态，必须调用
-                    },
-                    error : function(e) {
-                    }
-                });
-            }
-        });
-        //启动心跳
-        if (conn.isOpened()) {
-            conn.heartBeat(conn);
-        }
-    };
+    
     //连接中断时的处理，主要是对页面进行处理
     var handleClosed = function() {
         curUserId = null;
@@ -397,7 +583,7 @@ Easemob.im.config = {
         }
         clearContactUI("contactlistUL", "contactgrouplistUL",
                 "momogrouplistUL", msgCardDivId);
-        showLoginUI();
+        //showLoginUI();
         groupQuering = false;
         textSending = false;
     };
@@ -499,31 +685,7 @@ Easemob.im.config = {
             }
         }
     };
-    //异常情况下的处理方法
-    var handleError = function(e) {
-        e && e.upload && $('#fileModal').modal('hide');
-        if (curUserId == null) {
-            hiddenWaitLoginedUI();
-            alert(e.msg + ",请重新登录");
-            showLoginUI();
-        } else {
-            var msg = e.msg;
-            if (e.type == EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR) {
-                if (msg == "" || msg == 'unknown' ) {
-                    alert("服务器断开连接,可能是因为在别处登录");
-                } else {
-                    alert("服务器断开连接");
-                }
-            } else if (e.type === EASEMOB_IM_CONNCTION_SERVER_ERROR) {
-                if (msg.toLowerCase().indexOf("user removed") != -1) {
-                    alert("用户已经在管理后台删除");
-                }
-            } else {
-                alert(msg);
-            }
-        }
-        conn.stopHeartBeat(conn);
-    };
+    
     //判断要操作的联系人和当前联系人列表的关系
     var contains = function(roster, contact) {
         var i = roster.length;
@@ -547,45 +709,7 @@ Easemob.im.config = {
             this.splice(index, 1);
         }
     };
-    //登录系统时的操作方法
-    var login = function() {
-        if ($("#usetoken").is(":checked")) {
-            var user = $("#username").val();
-            var token = $("#token").val();
-            if (user == '' || token == '') {
-                alert("请输入用户名和令牌");
-                return;
-            }
-            hiddenLoginUI();
-            showWaitLoginedUI();
-            //根据用户名令牌登录系统
-            conn.open({
-                apiUrl : Easemob.im.config.apiURL,
-                user : user,
-                accessToken : token,    
-                //连接时提供appkey
-                appKey : Easemob.im.config.appkey
-            });
-        } else {
-            var user = $("#username").val();
-            var pass = $("#password").val();
-            if (user == '' || pass == '') {
-                alert("请输入用户名和密码");
-                return;
-            }
-            hiddenLoginUI();
-            showWaitLoginedUI();
-            //根据用户名密码登录系统
-            conn.open({
-                apiUrl : Easemob.im.config.apiURL,
-                user : user,
-                pwd : pass,
-                //连接时提供appkey
-                appKey : Easemob.im.config.appkey
-            });         
-        }
-        return false;
-    };
+    
     //注册新用户操作方法
     var regist = function() {
         var user = $("#regist_username").val();
@@ -595,27 +719,7 @@ Easemob.im.config = {
             alert("用户名/密码/昵称 不能为空");
             return;
         }
-        var options = {
-            username : user,
-            password : pass,
-            nickname : nickname,
-            appKey : Easemob.im.config.appkey,
-            success : function(result) {
-                alert("注册成功!");
-                $('#loginmodal').modal('show');
-                $('#regist-div-modal').modal('hide');
-            },
-            error : function(e) {
-                alert(e.error);
-            },
-            apiUrl : Easemob.im.config.apiURL
-        };
-        Easemob.im.Helper.registerUser(options);
-    };
-    //注册页面返回登录页面操作
-    var showlogin = function() {
-        $('#loginmodal').modal('show');
-        $('#regist-div-modal').modal('hide');
+        
     };
     var logout = function() {
         conn.stopHeartBeat(conn);

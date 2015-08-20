@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="css/webim.css">
     <script src="js/sdk/strophe.js"></script>
     <script src="js/sdk/easemob.im-1.0.7.js"></script>
-    <script src="js/avalon.min.js"></script>
+    <script src="js/lib/avalon.min.js"></script>
+    <script src="js/lib/jquery.min.js"></script>
     <script src="js/easemob.im.js"></script>
     <!--[if lte IE 9]>
     <script src="js/sdk/swfupload/swfupload.js"></script>
@@ -15,194 +16,200 @@
     <![endif]-->
 </head>
 <body>
+    
+    <div ms-controller='signin' ms-include='emimSignin' ms-visible='display'></div><!-- 登录界面 -->
+    <div ms-controller='signup' ms-include='emimSignup' ms-visible='display'></div><!-- 注册界面 -->
+    <div ms-controller='chat' ms-visible='display' ms-include='emimChat' class="content" id="content"></div><!-- 聊天主界面 -->
+    <div ms-controller='loading' ms-visible='display'><img src="img/waitting.gif"></div><!-- loading -->
+    <div ms-controller='prompt' class='emim-prompt' ms-css-top='t'>{{content}}</div><!-- prompt -->
+    <footer>© 2015 easemob</footer><!-- footer -->
+
     <!-- 登录界面 -->
-    <div id="loginmodal" class="emim-sign-bg emim-signin emim-hide">
-        <h3>Sign In</h3>
-        <input type="text" name="username" placeholder="ID" id="username" class="emim-auto emim-top20">
-        <input type="password" name="password" placeholder="Password or Token" id="password" class="emim-auto emim-top20">
-        <button class="emim-auto emim-top50 emim-themebg" onclick="login()">Sign in</button>
-        <button class="emim-auto emim-signup-btn" onclick="showRegist()">Sign up</button>
+    <script id='emimSignin' type='avalon'>
+    <div class="emim-sign-bg emim-auto emim-mt50">
+        <h3 class='emim-w100 emim-center'>Sign In</h3>
+        <input type="text" placeholder="Username" class="emim-db emim-auto emim-mt20" ms-duplex='username'>
+        <input type="password" ms-attr-placeholder="port" class="emim-db emim-auto emim-mt20" ms-duplex='password'>
+        <i ms-click='transfer'>{{content}}</i>
+        <button class="emim-db emim-auto emim-mt50 emim-themebg emim-center" ms-click="signin">Sign in</button>
+        <button class="emim-db emim-auto emim-sign-btn emim-center emim-mt10" ms-click="showSignup">Sign up</button>
     </div>
-    <!-- 登录界面end -->
+    </script>
 
     <!-- 注册界面 -->
-    <div id="regist-div-modal" class="emim-sign-bg emim-signin">
-        <h3>Sign Up</h3>
-        <input type="text" placeholder="ID" id="regist_username" class="emim-auto emim-top20">
-        <input type="password" placeholder="Password" id="regist_password" class="emim-auto emim-top20">
-        <input type="text" placeholder="Nickname" id="regist_nickname" class="emim-auto emim-top20">
-        <button id="confirm-regist-confirmButton" class="emim-auto emim-top50 emim-themebg" onclick="regist()">Sign Up</button>
-        <button id="confirm-regist-cancelButton" class="emim-auto" onclick="showlogin()">Back</button>
+    <script id='emimSignup' type='tpl'>
+    <div class="emim-sign-bg emim-auto emim-mt50">
+        <h3 class='emim-w100 emim-center'>Sign Up</h3>
+        <input type="text" placeholder="Username" class="emim-db emim-auto emim-mt20" ms-duplex='username'>
+        <input type="password" placeholder="Password" class="emim-db emim-auto emim-mt20" ms-duplex='password'>
+        <input type="text" placeholder="Nickname" class="emim-db emim-auto emim-mt20" ms-duplex='nickname'>
+        <button class="emim-db emim-auto emim-center emim-mt50 emim-themebg" ms-click="signup">Sign Up</button>
+        <div class="emim-signup-back" ms-click="back"></div>
     </div>
-    <!-- 注册界面end -->
+    </script>
 
-    <!-- loading -->
-    <div id="waitLoginmodal" class="emim-hide">
-        <img src="img/waitting.gif">正在努力加载中...
-    </div>
-    <!-- loading end -->
-
-    <div class="content emim-hide" id="content">
-        <div class="leftcontact" id="leftcontact">
-            <div id="headerimg" class="leftheader">
-                <span><img src="img/header.png" alt="logo"></span>
-                <span id="login_user" class="login_user_title"></span>
-                <div class="em-list">
-                    <button class="dropdown-toggle" data-toggle="dropdown"></button>
-                    <ul class="dropdown-menu">
-                        <li><a href="javascript:;" onclick="showAddFriend()">添加好友</a></li>
-                        <li><a href="javascript:;" onclick="showDelFriend()">删除好友</a></li>
-                        <li class="divider"></li>
-                        <li><a href="javascript:;" onclick="logout();return false;">退出</a></li>
-                    </ul>
-                </div>
+    <!-- 聊天主界面 -->
+    <script id='emimChat' type='tpl'>
+    <div class="leftcontact" id="leftcontact">
+        <div id="headerimg" class="leftheader">
+            <span><img src="img/header.png" alt="logo"></span>
+            <span id="login_user" class="login_user_title"></span>
+            <div class="em-list">
+                <button class="dropdown-toggle" data-toggle="dropdown"></button>
+                <ul class="dropdown-menu">
+                    <li><a href="javascript:;" onclick="showAddFriend()">添加好友</a></li>
+                    <li><a href="javascript:;" onclick="showDelFriend()">删除好友</a></li>
+                    <li class="divider"></li>
+                    <li><a href="javascript:;" onclick="logout();return false;">退出</a></li>
+                </ul>
             </div>
-            
-            <div id="contractlist11">
-                <div class="accordion" id="accordionDiv">
-                    <div class="accordion-heading">
-                        <a id="accordion1" class="" href="#collapseOne">我的好友</a>
-                        <a id="accordion2" class="" href="#collapseTwo">我的群组</a>
-                        <a id="accordion3" class="" href="#collapseThree">陌生人</a>
+        </div>
+        
+        <div id="contractlist11">
+            <div class="accordion" id="accordionDiv">
+                <div class="accordion-heading">
+                    <a id="accordion1" class="" href="#collapseOne">我的好友</a>
+                    <a id="accordion2" class="" href="#collapseTwo">我的群组</a>
+                    <a id="accordion3" class="" href="#collapseThree">陌生人</a>
+                </div>
+                <div class="accordion-group tab-content">
+                    <div id="collapseOne" class="accordion-body fade in active tab-pane">
+                        <div class="accordion-inner" id="contractlist">
+                            <ul id="contactlistUL" class="chat03_content_ul"></ul>
+                        </div>
                     </div>
-                    <div class="accordion-group tab-content">
-                        <div id="collapseOne" class="accordion-body fade in active tab-pane">
-                            <div class="accordion-inner" id="contractlist">
-                                <ul id="contactlistUL" class="chat03_content_ul"></ul>
-                            </div>
+                    <div id="collapseTwo" class="accordion-body fade tab-pane">
+                        <div class="accordion-inner" id="contracgrouplist">
+                            <ul id="contactgrouplistUL" class="chat03_content_ul"></ul>
                         </div>
-                        <div id="collapseTwo" class="accordion-body fade tab-pane">
-                            <div class="accordion-inner" id="contracgrouplist">
-                                <ul id="contactgrouplistUL" class="chat03_content_ul"></ul>
-                            </div>
-                        </div>
-                        <div id="collapseThree" class="accordion-body fade tab-pane">
-                            <div class="accordion-inner" id="momogrouplist">
-                                <ul id="momogrouplistUL" class="chat03_content_ul"></ul>
-                            </div>
+                    </div>
+                    <div id="collapseThree" class="accordion-body fade tab-pane">
+                        <div class="accordion-inner" id="momogrouplist">
+                            <ul id="momogrouplistUL" class="chat03_content_ul"></ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="rightTop"></div>
-        <!-- 聊天页面 -->
-        <div class="chatRight">
-            <div id="chat01">
-                <div class="chat01_title">
-                    <ul class="talkTo">
-                        <li id="talkTo"></li>
-                        <li id="recycle" onclick="clearCurrentChat();" title="清屏">×</li>
-                        <li id="roomInfo" style="float: right;">
-                            <img id="roomMemberImg" src="img/head/find_more_friend_addfriend_icon.png" onclick="showRoomMember();" title="群组成员">
-                        </li>
-                    </ul>
-                </div>
-                <div id="null-nouser" class="chat01_content"></div>
+    </div>
+    <div id="rightTop"></div>
+    <!-- 聊天页面 -->
+    <div class="chatRight">
+        <div id="chat01">
+            <div class="chat01_title">
+                <ul class="talkTo">
+                    <li id="talkTo"></li>
+                    <li id="recycle" onclick="clearCurrentChat();" title="清屏">×</li>
+                    <li id="roomInfo" style="float: right;">
+                        <img id="roomMemberImg" src="img/head/find_more_friend_addfriend_icon.png" onclick="showRoomMember();" title="群组成员">
+                    </li>
+                </ul>
             </div>
+            <div id="null-nouser" class="chat01_content"></div>
+        </div>
 
-            <div class="chat02">
-                <div class="chat02_title">
-                    <a class="chat02_title_btn ctb01" onclick="showEmotionDialog()" title="选择表情"></a>
-                    <a class="chat02_title_btn ctb03" title="选择图片" onclick="showSendPic()" href="#"> </a>
-                    <a class="chat02_title_btn ctb02" onclick="showSendAudio()" href="#" title="选择语音">
-                        <span></span>
-                    </a>
-                    <label id="chat02_title_t"></label>
-                    <div id="wl_faces_box" class="wl_faces_box">
-                        <div class="wl_faces_content">
-                            <div id="wl_faces_main" class="wl_faces_main">
-                                <ul id="emotionUL">
-                                </ul>
-                            </div>
+        <div class="chat02">
+            <div class="chat02_title">
+                <a class="chat02_title_btn ctb01" onclick="showEmotionDialog()" title="选择表情"></a>
+                <a class="chat02_title_btn ctb03" title="选择图片" onclick="showSendPic()" href="#"> </a>
+                <a class="chat02_title_btn ctb02" onclick="showSendAudio()" href="#" title="选择语音">
+                    <span></span>
+                </a>
+                <label id="chat02_title_t"></label>
+                <div id="wl_faces_box" class="wl_faces_box">
+                    <div class="wl_faces_content">
+                        <div id="wl_faces_main" class="wl_faces_main">
+                            <ul id="emotionUL">
+                            </ul>
                         </div>
                     </div>
                 </div>
-                <div id="input_content" class="chat02_content">
-                    <textarea id="talkInputId"></textarea>
-                </div>
-                <div class="chat02_bar"><button onclick="sendText()">发送</button></div>
             </div>
-            <div id="fileModal" class="">
-                <div class="modal-header">
-                    <button type="button" class="">×</button>
-                    <h3>文件选择框</h3>
-                </div>
-                <div class="modal-body">
-                    <input type="file" id="fileInput">
-                    <input type="hidden" id="sendfiletype">
-                    <div id="send-file-warning"></div>
-                </div>
-                <div class="modal-footer">
-                    <button id="fileSend" class="" onclick="sendFile()">发送</button>
-                    <button id="cancelfileSend" class="btn" data-dismiss="modal">取消</button>
-                </div>
+            <div id="input_content" class="chat02_content">
+                <textarea id="talkInputId"></textarea>
             </div>
+            <div class="chat02_bar"><button onclick="sendText()">发送</button></div>
         </div>
-
-        <div id="addFridentModal" class="">
+        <div id="fileModal" class="">
             <div class="modal-header">
-                <button type="button" class="close">×</button>
-                <h3>添加好友</h3>
+                <button type="button" class="">×</button>
+                <h3>文件选择框</h3>
             </div>
             <div class="modal-body">
-                <input id="addfridentId" onfocus="clearInputValue(&quot;addfridentId&quot;)">
-                <div id="add-frident-warning"></div>
+                <input type="file" id="fileInput">
+                <input type="hidden" id="sendfiletype">
+                <div id="send-file-warning"></div>
             </div>
             <div class="modal-footer">
-                <button id="addFridend" class="" onclick="startAddFriend()">添加</button>
-                <button id="cancelAddFridend" class="btn">取消</button>
+                <button id="fileSend" class="" onclick="sendFile()">发送</button>
+                <button id="cancelfileSend" class="btn" data-dismiss="modal">取消</button>
             </div>
         </div>
+    </div>
 
-        <div id="delFridentModal" class="">
-            <div class="modal-header">
-                <button type="button" class="close">×</button>
-                <h3>删除好友</h3>
-            </div>
-            <div class="modal-body">
-                <input id="delfridentId" onfocus="clearInputValue(&quot;delfridentId&quot;)">
-                <div id="del-frident-warning"></div>
-            </div>
-            <div class="modal-footer">
-                <button id="delFridend" class="" onclick="directDelFriend()">删除</button>
-                <button id="canceldelFridend" class="">取消</button>
-            </div>
-        </div>
-
-        <!-- 一般消息通知 -->
-        <div id="notice-block-div" class="modal hide">
+    <div id="addFridentModal" class="">
+        <div class="modal-header">
             <button type="button" class="close">×</button>
-            <div class="modal-body">
-                <h4>Warning!</h4>
-                <div id="notice-block-body"></div>
-            </div>
+            <h3>添加好友</h3>
         </div>
-
-        <!-- 确认消息通知 -->
-        <div id="confirm-block-div-modal" class="">
-            <div class="modal-header">
-                <h3>订阅通知</h3>
-            </div>
-            <div class="modal-body">
-                <div id="confirm-block-footer-body"></div>
-            </div>
-            <div class="modal-footer">
-                <button id="confirm-block-footer-confirmButton" class="">同意</button>
-                <button id="confirm-block-footer-cancelButton" class="">拒绝</button>
-            </div>
+        <div class="modal-body">
+            <input id="addfridentId" onfocus="clearInputValue(&quot;addfridentId&quot;)">
+            <div id="add-frident-warning"></div>
         </div>
-
-        <!-- 群组成员操作界面 -->
-        <div id="option-room-div-modal" class="">
-            <button type="button" class="close">×</button>
-            <div class="modal-header">
-                <h3>群组成员</h3>
-            </div>
-            <div class="modal-body">
-                <div id="room-member-list"></div>
-            </div>
+        <div class="modal-footer">
+            <button id="addFridend" class="" onclick="startAddFriend()">添加</button>
+            <button id="cancelAddFridend" class="btn">取消</button>
         </div>
     </div>
+
+    <div id="delFridentModal" class="">
+        <div class="modal-header">
+            <button type="button" class="close">×</button>
+            <h3>删除好友</h3>
+        </div>
+        <div class="modal-body">
+            <input id="delfridentId" onfocus="clearInputValue(&quot;delfridentId&quot;)">
+            <div id="del-frident-warning"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="delFridend" class="" onclick="directDelFriend()">删除</button>
+            <button id="canceldelFridend" class="">取消</button>
+        </div>
+    </div>
+
+    <!-- 一般消息通知 -->
+    <div id="notice-block-div" class="modal hide">
+        <button type="button" class="close">×</button>
+        <div class="modal-body">
+            <h4>Warning!</h4>
+            <div id="notice-block-body"></div>
+        </div>
+    </div>
+
+    <!-- 确认消息通知 -->
+    <div id="confirm-block-div-modal" class="">
+        <div class="modal-header">
+            <h3>订阅通知</h3>
+        </div>
+        <div class="modal-body">
+            <div id="confirm-block-footer-body"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-block-footer-confirmButton" class="">同意</button>
+            <button id="confirm-block-footer-cancelButton" class="">拒绝</button>
+        </div>
+    </div>
+
+    <!-- 群组成员操作界面 -->
+    <div id="option-room-div-modal" class="">
+        <button type="button" class="close">×</button>
+        <div class="modal-header">
+            <h3>群组成员</h3>
+        </div>
+        <div class="modal-body">
+            <div id="room-member-list"></div>
+        </div>
+    </div>
+    </script>
 </body>
 </html>
