@@ -49,12 +49,19 @@ button {
 input {
     padding: 0 10px;
 }
-input, textarea, button {
+input, textarea, button, img {
+    border: none;
     outline: none;
 }
 /*
     common
 */
+.emim-fl {
+    float: left;
+}
+.emim-fr {
+    float: right;
+}
 .emim-auto {
     margin: auto;
 }
@@ -115,6 +122,16 @@ input, textarea, button {
     font-size: 16px;
     color: #fff;
     transition: top .2s;
+}
+.emim-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 2px;
+}
+.emim-dropdown {
+    font-family: IM;
+    font-size: 35px;
+    cursor: pointer;
 }
 /*
     footer
@@ -190,9 +207,109 @@ footer {
     margin-top: 12px;
 }
 /*
+    tab
+*/
+.emim-friend-tab,
+.emim-group-tab,
+.emim-stranger-tab {
+    display: inline-block;
+    font-family: IM;
+    font-size: 35px;
+    cursor: pointer;
+    width: 32.3%;
+    text-align: center;
+    line-height: 56px;
+}
+/*
     main
 */
+.emim-profile-dropdown {
+    float: right;
+    margin: 12px 10px;
+}
+.emim-profile-username {
+    font-size: 16px;
+    color: #545454;
+}
+.emim-profile-avatar {
+    margin: 10px;
+    vertical-align: middle;
+}
+/*
+    contact
+*/
+.emim-contact {
+    cursor: pointer;
+}
+.emim-contact-avatar {
+    vertical-align: middle;
+    margin: 10px;   
+}
+.emim-contact-username {
+    position: relative;
+    display: inline-block;
+    top: -8px;
+    width: 190px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #757576;
+    font-size: 13px;
+}
+.emim-contact-msg {
+    float: left;
+    margin: -28px 0 0 66px;
+    width: 190px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #AFAFAF;
+    font-size: 12px;
+}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.emim-wrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+	min-width: 600px;
+	max-width: 1080px;
+	height: 86%;
+    border-radius: 2px;
+}
+.emim-chatLeft {
+	position: relative;
+    background-color: #F5F5F5;
+	width: 269px;
+    border-right: 1px solid #E1E1E1;
+	height: 100%;
+}
+.emim-chatRight {
+	position: relative;
+    background-color: #FFFFFF;
+	height: 100%;
+	margin-left: 270px;
+}
 
 
 
@@ -207,87 +324,6 @@ footer {
 
 /** custom login button **/
 
-.flatbtn-blu {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	display: inline-block;
-	outline: 0;
-	border: 0;
-	color: #edf4f9;
-	text-decoration: none;
-	background-color: #4f94cf;
-	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-	font-size: 1.4em;
-	font-weight: bold;
-	padding: 12px 26px 12px 26px;
-	line-height: normal;
-	text-align: center;
-	vertical-align: middle;
-	cursor: pointer;
-	text-transform: uppercase;
-	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-}
-
-.flatbtn-blu:hover {
-	color: #E8E8E9;
-	background-color: #519dde;
-}
-
-.flatbtn-blu:active {
-	-webkit-box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.1);
-	-moz-box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.1);
-	box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.1);
-}
-
-#loginmodal {
-	box-sizing: border-box;
-	padding: 15px 20px 0 50px;
-	background: #f3f6fa;
-}
-
-#loginform label {
-	display: block;
-	font-size: 1.1em;
-	font-weight: bold;
-	color: #7c8291;
-	margin-bottom: 3px;
-}
-
-* {
-	margin: 0;
-	padding: 0;
-	border: none;
-	font-size: 12px;
-	text-align: left;
-}
-
-ul {
-	list-style: none;
-}
-
-a {
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-	color: #f60;
-}
-
-.content {
-	min-width: 600px;
-	max-width: 1000px;
-	height: 100%;
-	margin: 0 auto;
-	text-align: center;
-}
 
 .content_login {
 	width: 1000px;
@@ -298,12 +334,7 @@ a:hover {
 	text-align: center;
 }
 
-.leftcontact {
-	float: left;
-	width: 270px;
-	height: 100%;
-	position: relative;
-}
+
 .em-list {
     position: absolute;
     top: 28px;
@@ -365,10 +396,7 @@ a:hover {
     border: none;
 }
 .chatRight {
-	height: 100%;
-	margin-left: 270px;
-	position: relative;
-    background-color: #eee;
+	
 }
 #roomMemberImg {
     position: absolute;

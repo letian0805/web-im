@@ -1,33 +1,33 @@
-;(function(window, undefined){
+/*
+    Config here
+*/
+Easemob.im.config = {
     /*
-        Config here
+        The global value set for xmpp server
+        ws://im-api.easemob.com/ws/
+        ws://im-api.sandbox.easemob.com/ws/
+        http://im-api.easemob.com/http-bind/
+        http://im-api.sandbox.easemob.com/http-bind/
     */
-    Easemob.im.config = {
-        /*
-            The global value set for xmpp server
-            ws://im-api.easemob.com/ws/
-            ws://im-api.sandbox.easemob.com/ws/
-            http://im-api.easemob.com/http-bind/
-            http://im-api.sandbox.easemob.com/http-bind/
-        */
-        xmppURL: 'ws://im-api.easemob.com/ws/',
-        /*
-            The global value set for Easemob backend REST API
-            http://a1.easemob.com
-            http://a1.sdb.easemob.com
-        */
-        apiURL: '',
-        /*
-            连接时提供appkey
-        */
-        appkey: "easemob-demo#chatdemoui",
-        https : false,
-        wss: false
-    }
+    xmppURL: 'ws://im-api.easemob.com/ws/',
+    /*
+        The global value set for Easemob backend REST API
+        http://a1.easemob.com
+        http://a1.sdb.easemob.com
+    */
+    apiURL: '',
+    /*
+        连接时提供appkey
+    */
+    appkey: "easemob-demo#chatdemoui",
+    https : false,
+    wss: false
+}
 
     /**************************************************************************
     ---                             demo相关代码                            ---
     **************************************************************************/
+;(function(window, undefined){
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
     var curUserId = null;
@@ -140,7 +140,7 @@
             登录
         */
         var signin = avalon.define({
-            $id: "signin"
+            $id: 'signin'
             , username: ''
             , password: ''
             , content: 'j'
@@ -151,6 +151,9 @@
             }
             , hide: function() {
                 signin.display = false;
+            }
+            , focus: function() {
+                
             }
             , transfer: function() {
                 switch(signin.content) {
@@ -163,7 +166,9 @@
                         signin.port = 'Password';
                 }
             }
-            , signin: function() {
+            , signin: function(e) {
+                var evt = e || window.event;
+                if(evt.keyCode != 13) return false;
                 if (!signin.username) {
                     emprompt.show('请输入用户名');
                     return;
@@ -194,7 +199,6 @@
             }
         });
 
-
         /*
             注册
         */
@@ -210,7 +214,9 @@
             , hide: function() {
                 signup.display = false;
             }
-            , signup: function() {
+            , signup: function(e) {
+                var evt = e || window.event;
+                if(evt.keyCode != 13) return false;
                 if (!signup.username) {
                     emprompt.show('请输入用户名');
                     return;
@@ -262,14 +268,118 @@
             }
         });
 
+        /*
+            dialog
+        */
+        var dialog = avalon.define({
+            $id: 'dialog'
+            , title: ''
+            , content: ''
+            , display: false
+            , show: function() {
+                dialog.display = true;
+            }
+            , hide: function() {
+                dialog.display = false;
+            }
+            , cacel: function() {
+                dialog.hide();
+            }
+            , ok: function() {
+                dialog.hide();
+            }
+        });
 
+        /*
+            profile
+        */
+        var profile = avalon.define({
+            $id: 'profile'
+            , username: ''
+            , src: 'img/header.png'
+            , display: false
+            , dialog: function(fn) {
+                
+                switch(fn) {
+                    case 'add':
+
+                        break;
+                    case 'del':
+
+                        break;
+                }
+            }
+            , logout: function() {
+                conn.stopHeartBeat(conn);
+                conn.close();
+            }
+            , toggle: function() {
+                profile.display = !profile.display;
+            }
+        });
+        
+        /*
+            tab
+        */
+        var tab = avalon.define({
+            $id: 'tab'
+            , toggle: function() {
+                tabList.show(this.getAttribute('tab'));
+            }
+        });
+
+        /*
+            list wrapper
+        */
+        var tabList = avalon.define({
+            $id: 'tabList'
+            , friend: []
+            , group: []
+            , stranger: []
+            , friendDisplay: true
+            , groupDisplay: false
+            , strangerDisplay: false
+            , show: function(tab) {
+                switch(tab) {
+                    case 'group':
+                        tabList.friendDisplay = false;
+                        tabList.groupDisplay = true;
+                        tabList.strangerDisplay = false;
+                        break;
+                    case 'stranger':
+                        tabList.friendDisplay = false;
+                        tabList.groupDisplay = false;
+                        tabList.strangerDisplay = true;
+                        break;
+                    default:
+                        tabList.friendDisplay = true;
+                        tabList.groupDisplay = false;
+                        tabList.strangerDisplay = false;
+                        break;
+                }
+            }
+        });
+        
+        /*
+            contact
+        */
+        var contact = avalon.define({
+            $id: 'contact'
+            , src: 'img/header.png'
+            , display: false
+            , username: ''
+            , select: function() {
+                  
+            }   
+        });
+        
         /*
             处理连接时函数,主要是登录成功后对页面元素做处理
         */
         var handleOpen = function(conn) {
             
             curUserId = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
-
+            profile.username = curUserId;
             /*
                 获取当前登录人的联系人列表
             */
@@ -283,7 +393,9 @@
                         var ros = roster[i];
                         //both为双方互为好友，要显示的联系人,from我是对方的单向好友
                         if (ros.subscription == 'both' || ros.subscription == 'from') {
-                            bothRoster.push(ros);
+                            //bothRoster.push(ros);
+                            ros.src = ros.src ? ros.src : 'img/header.png';
+                            tabList.friend.push(ros);
                         } else if (ros.subscription == 'to') {
                             toRoster.push(ros);//to表明了联系人是我的单向好友
                         }
@@ -721,10 +833,7 @@
         }
         
     };
-    var logout = function() {
-        conn.stopHeartBeat(conn);
-        conn.close();
-    };
+    
     //设置当前显示的聊天窗口div，如果有联系人则默认选中联系人中的第一个联系人，如没有联系人则当前div为null-nouser
     var setCurrentContact = function(defaultUserId) {
         showContactChatDiv(defaultUserId);
@@ -1769,18 +1878,4 @@
                 + date.getSeconds();
         return time;
     }
-    var setListHeight = function() {
-        var height = document.body.offsetHeight;
-        var list = document.getElementById('contractlist11');
-        var list1 = document.getElementById('collapseOne');
-        var list2 = document.getElementById('collapseTwo');
-        var list3 = document.getElementById('collapseThree');
-
-        list.style.height = height - 60 + 'px';
-        list1.style.height = height - 100 + 'px';
-        list2.style.height = height - 100 + 'px';
-        list3.style.height = height - 100 + 'px';
-    }
-    window.onload = setListHeight;
-    window.onresize = setListHeight;
 }(window, undefined));
