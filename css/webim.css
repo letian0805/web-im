@@ -39,8 +39,9 @@ a:hover {
 a:active {
     
 }
-ul {
+ul, li {
     list-style: none;
+    outline: none;
 }
 button {
     cursor: pointer;

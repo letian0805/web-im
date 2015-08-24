@@ -337,6 +337,11 @@ Easemob.im.config = {
         */
         var tab = avalon.define({
             $id: 'tab'
+            , color: '#5B98EB'
+            , cur: 'emim-cur'
+            , friend: '#5B98EB'
+            , group: ''
+            , stranger: ''
             , toggle: function() {
                 tabList.show(this.getAttribute('tab'));
             }
