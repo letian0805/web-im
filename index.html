@@ -58,7 +58,7 @@
     <div class='emim-chatRight'>
         <div class='emim-current-header' ms-controller='chatHeader' ms-include='emimChatHeader'>
             <span class='emim-chat-to'>{{to}}</span>
-            <span class='emim-chat-clear'>h</span>
+            <span class='emim-font emim-font-hover emim-chat-clear'>h</span>
         </div>
         <div class='emim-chat-wrapper' ms-controller='chatWrapper'></div>
         <div class='emim-chat-send' ms-include='emimSendWrapper'></div>
@@ -69,7 +69,7 @@
     <script id='emimProfile' type='tpl'>
     <img class='emim-avatar emim-profile-avatar' ms-attr-src='src' />
     <span class='emim-profile-username'>{{username}}</span>
-    <span class='emim-dropdown emim-profile-dropdown' ms-click='toggle'>g</span>
+    <span class='emim-font emim-font-hover emim-profile-dropdown' ms-click='toggle'>g</span>
     <ul class='emim-dropdown-menu' ms-visible='display'>
         <li ms-click='dialog'>添加好友</li>
         <li ms-click='dialog'>删除好友</li>
@@ -80,18 +80,24 @@
     <!-- 列表tab -->
     <script id='emimListTab' type='tpl'>
     <ol ms-controller='tab'>
-        <li class='emim-friend-tab' tab='friend' ms-click='toggle'>a</li>
-        <li class='emim-group-tab' tab='group' ms-click='toggle'>b</li>
-        <li class='emim-stranger-tab' tab='stranger' ms-click='toggle'>c</li>
+        <li class='emim-font emim-font-hover emim-friend-tab' tab='friend' ms-click='toggle'>a</li>
+        <li class='emim-font emim-font-hover emim-group-tab' tab='group' ms-click='toggle'>b</li>
+        <li class='emim-font emim-font-hover emim-stranger-tab' tab='stranger' ms-click='toggle'>c</li>
     </ol>
     </script>
 
     <!-- 联系人列表 -->
     <script id='emimList' type='tpl'>
     <div ms-controller='tabList'>
-        <div ms-visible='friendDisplay' ms-repeat-item='friend' ms-include='emimContact'></div>
-        <div ms-visible='groupDisplay' ms-repeat-item='group' ms-include='emimContact'></div>
-        <div ms-visible='strangerDisplay' ms-repeat-item='stranger' ms-include='emimContact'></div>
+        <div ms-visible='friendDisplay'>
+            <div ms-repeat-item='friend' ms-include='emimContact'></div>
+        </div>
+        <div ms-visible='groupDisplay'>
+            <div ms-repeat-item='group' ms-include='emimContact'></div>
+        </div>
+        <div ms-visible='strangerDisplay'>
+            <div ms-repeat-item='stranger' ms-include='emimContact'></div>
+        </div>
     </div>
     </script>
 
@@ -108,9 +114,9 @@
     <!-- 消息发送区 -->
     <script id='emimSendWrapper' type='tpl'>
     <div class='chat02_title'>
-        <span class='' onclick='showEmotionDialog()' title='选择表情'></span>
-        <span class='' onclick='showSendPic()' title='选择图片'></span>
-        <span class='' onclick='showSendAudio()' title='选择语音'></span>
+        <span class='emim-font emim-font-hover' ms-onclick='showFace' title='选择表情'>d</span>
+        <span class='emim-font emim-font-hover' fn='img' ms-onclick='sendfile' title='选择图片'>e</span>
+        <span class='emim-font emim-font-hover' fn='audio' ms-onclick='sendfile' title='选择语音'>f</span>
     </div>
     <ul id="emotionUL"></ul>
     <textarea id="talkInputId"></textarea>
@@ -138,7 +144,8 @@
     </div>
     </script>
 
-
+    <!--layer-->
+    <div class='emim-layer' ms-visible='display' ms-controller='layer'></div>
     <!--
     <div id="addFridentModal" class="">
         <div class="modal-header">

@@ -128,10 +128,23 @@ input, textarea, button, img {
     height: 42px;
     border-radius: 2px;
 }
-.emim-dropdown {
+.emim-layer {
+    z-index: 10000;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .8);
+}
+.emim-font {
     font-family: IM;
     font-size: 35px;
     cursor: pointer;
+}
+.emim-cur,
+.emim-font-hover:hover {
+    color: #5B98EB;
 }
 /*
     footer
@@ -213,9 +226,6 @@ footer {
 .emim-group-tab,
 .emim-stranger-tab {
     display: inline-block;
-    font-family: IM;
-    font-size: 35px;
-    cursor: pointer;
     width: 32.3%;
     text-align: center;
     line-height: 56px;

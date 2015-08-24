@@ -5,15 +5,15 @@ Easemob.im.config = {
     /*
         The global value set for xmpp server
         ws://im-api.easemob.com/ws/
-        ws://im-api.sandbox.easemob.com/ws/
+        wss://im-api.easemob.com/ws/
         http://im-api.easemob.com/http-bind/
-        http://im-api.sandbox.easemob.com/http-bind/
+        https://im-api.easemob.com/http-bind/
     */
     xmppURL: 'ws://im-api.easemob.com/ws/',
     /*
         The global value set for Easemob backend REST API
         http://a1.easemob.com
-        http://a1.sdb.easemob.com
+        https://a1.easemob.com
     */
     apiURL: '',
     /*
@@ -24,9 +24,9 @@ Easemob.im.config = {
     wss: false
 }
 
-    /**************************************************************************
-    ---                             demo相关代码                            ---
-    **************************************************************************/
+/**************************************************************************
+---                             demo相关代码                            ---
+**************************************************************************/
 ;(function(window, undefined){
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
@@ -99,7 +99,22 @@ Easemob.im.config = {
                 handleError(message);
             }
         });
+        
 
+
+        /*
+            layer
+        */
+        var layer = avalon.define({
+            $id: 'layer'
+            , display: false
+            , show: function() {
+                loading.display = true;
+            }
+            , hide: function() {
+                loading.display = false;
+            }
+        });
         
         /*
             loading
@@ -109,9 +124,11 @@ Easemob.im.config = {
             , display: false
             , show: function() {
                 loading.display = true;
+                layer.display = true;
             }
             , hide: function() {
                 loading.display = false;
+                layer.display = false;
             }
         });
 
@@ -152,9 +169,6 @@ Easemob.im.config = {
             , hide: function() {
                 signin.display = false;
             }
-            , focus: function() {
-                
-            }
             , transfer: function() {
                 switch(signin.content) {
                     case 'j':
@@ -168,7 +182,7 @@ Easemob.im.config = {
             }
             , signin: function(e) {
                 var evt = e || window.event;
-                if(evt.keyCode != 13) return false;
+                if(evt.keyCode != 0 && evt.keyCode != 13) return false;
                 if (!signin.username) {
                     emprompt.show('请输入用户名');
                     return;
