@@ -80,9 +80,9 @@
     <!-- 列表tab -->
     <script id='emimListTab' type='tpl'>
     <ol ms-controller='tab'>
-        <li class='emim-font emim-font-hover emim-friend-tab' ms-active='cur' tab='friend' ms-click='toggle'>a</li>
-        <li class='emim-font emim-font-hover emim-group-tab' ms-active='cur' tab='group' ms-click='toggle'>b</li>
-        <li class='emim-font emim-font-hover emim-stranger-tab' ms-active='cur' tab='stranger' ms-click='toggle'>c</li>
+        <li class='emim-font emim-font-hover emim-friend-tab' ms-class='selected:cur=="friend"' ms-click='toggle("friend")'>a</li>
+        <li class='emim-font emim-font-hover emim-group-tab' ms-class='selected:cur=="group"' ms-click='toggle("group")'>b</li>
+        <li class='emim-font emim-font-hover emim-stranger-tab' ms-class='selected:cur=="stranger"' ms-click='toggle("stranger")'>c</li>
     </ol>
     </script>
 
@@ -103,7 +103,7 @@
 
     <!-- 联系人 -->
     <script id='emimContact' type='tpl'>
-    <div class='emim-contact' ms-controller='contact' ms-click='select'>
+    <div class='emim-contact' ms-controller='contact' ms-click='select($index)'>
         <img class='emim-avatar emim-contact-avatar' ms-attr-src='item.src' />
         <span class='emim-contact-username'>{{item.name}}</span>
         <span class='emim-contact-msg'>{{item.msg}}</span>

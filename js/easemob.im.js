@@ -19,7 +19,7 @@ Easemob.im.config = {
     /*
         连接时提供appkey
     */
-    appkey: "easemob-demo#chatdemoui",
+    appkey: "zerrou-demo#cynick",
     https : false,
     wss: false
 }
@@ -342,7 +342,8 @@ Easemob.im.config = {
             , friend: '#5B98EB'
             , group: ''
             , stranger: ''
-            , toggle: function() {
+            , toggle: function(idx) {
+                console.log(idx);
                 tabList.show(this.getAttribute('tab'));
             }
         });
@@ -387,8 +388,8 @@ Easemob.im.config = {
             , src: 'img/header.png'
             , display: false
             , username: ''
-            , select: function() {
-                  
+            , select: function(idx) {
+                  console.log(idx);
             }   
         });
         
