@@ -80,9 +80,9 @@
     <!-- 列表tab -->
     <script id='emimListTab' type='tpl'>
     <ol ms-controller='tab'>
-        <li class='emim-font emim-font-hover emim-friend-tab' ms-class='selected:cur=="friend"' ms-click='toggle("friend")'>a</li>
-        <li class='emim-font emim-font-hover emim-group-tab' ms-class='selected:cur=="group"' ms-click='toggle("group")'>b</li>
-        <li class='emim-font emim-font-hover emim-stranger-tab' ms-class='selected:cur=="stranger"' ms-click='toggle("stranger")'>c</li>
+        <li class='emim-font emim-font-hover emim-friend-tab' ms-class='emim-cur:(cur%1==0)' ms-click='toggle(1)'>a</li>
+        <li class='emim-font emim-font-hover emim-group-tab' ms-class='emim-cur:(cur%2==0)' ms-click='toggle(2)'>b</li>
+        <li class='emim-font emim-font-hover emim-stranger-tab' ms-class='emim-cur:(cur%3==0)' ms-click='toggle(3)'>c</li>
     </ol>
     </script>
 

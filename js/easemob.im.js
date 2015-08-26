@@ -19,7 +19,7 @@ Easemob.im.config = {
     /*
         连接时提供appkey
     */
-    appkey: "zerrou-demo#cynick",
+    appkey: "easemob-demo#chatdemoui",
     https : false,
     wss: false
 }
@@ -337,14 +337,9 @@ Easemob.im.config = {
         */
         var tab = avalon.define({
             $id: 'tab'
-            , color: '#5B98EB'
-            , cur: 'emim-cur'
-            , friend: '#5B98EB'
-            , group: ''
-            , stranger: ''
             , toggle: function(idx) {
-                console.log(idx);
-                tabList.show(this.getAttribute('tab'));
+                tab.cur = idx;
+                tabList.show(idx);
             }
         });
 
