@@ -15,7 +15,7 @@ Easemob.im.config = {
         http://a1.easemob.com
         https://a1.easemob.com
     */
-    apiURL: '',
+    apiURL: 'https://a1.easemob.com',
     /*
         连接时提供appkey
     */
@@ -269,13 +269,24 @@ Easemob.im.config = {
  
        
         /*
+            contact wrapper
+        */
+        var emimList = avalon.define({
+            $id: 'emimContactWrapper'
+        });
+
+
+        /*
             聊天主窗口
         */
         var chat = avalon.define({
             $id: 'chat'
-            , display: false 
+            , display: false
+            , height: 0
             , show: function() {
                 chat.display = true;
+                var chatDom = document.getElementById('emimWrapper');
+                chat.height = chatDom.getBoundingClientRect().height;
             }
             , hide: function() {
                 chat.display = false;
@@ -326,6 +337,8 @@ Easemob.im.config = {
             , logout: function() {
                 conn.stopHeartBeat(conn);
                 conn.close();
+                chat.hide();
+                signin.show();
             }
             , toggle: function() {
                 profile.display = !profile.display;
@@ -335,10 +348,11 @@ Easemob.im.config = {
         /*
             tab
         */
-        var tab = avalon.define({
-            $id: 'tab'
+        var contactTab = avalon.define({
+            $id: 'contactTab'
+            , cur: 'friend'
             , toggle: function(idx) {
-                tab.cur = idx;
+                contactTab.cur = idx;
                 tabList.show(idx);
             }
         });
@@ -351,27 +365,9 @@ Easemob.im.config = {
             , friend: []
             , group: []
             , stranger: []
-            , friendDisplay: true
-            , groupDisplay: false
-            , strangerDisplay: false
+            , cur: 'friend'
             , show: function(tab) {
-                switch(tab) {
-                    case 'group':
-                        tabList.friendDisplay = false;
-                        tabList.groupDisplay = true;
-                        tabList.strangerDisplay = false;
-                        break;
-                    case 'stranger':
-                        tabList.friendDisplay = false;
-                        tabList.groupDisplay = false;
-                        tabList.strangerDisplay = true;
-                        break;
-                    default:
-                        tabList.friendDisplay = true;
-                        tabList.groupDisplay = false;
-                        tabList.strangerDisplay = false;
-                        break;
-                }
+                tabList.cur = tab;
             }
         });
         
@@ -383,18 +379,47 @@ Easemob.im.config = {
             , src: 'img/header.png'
             , display: false
             , username: ''
-            , select: function(idx) {
-                  console.log(idx);
+            , count: 10
+            , cur: 0
+            , msg: ''
+            , select: function() {
+                var id = this.getAttribute('id');
+                contact.cur = id;
+                chatHeader.to = id;
+                chatWrapper.toggle(id);
             }   
         });
         
+        /*
+            chat header
+        */
+        var chatHeader = avalon.define({
+            $id: 'chatHeader'
+            , to: ''
+        });
+
+        /*
+            chat wrapper
+        */
+        var chatWrapper = avalon.define({
+            $id: 'chatWrapper'
+            , friend: []
+            , group: []
+            , stranger: []
+            , cur: 0
+            , toggle: function(idx) {
+                chatWrapper.cur = idx;
+            }
+        });
+
+
         /*
             处理连接时函数,主要是登录成功后对页面元素做处理
         */
         var handleOpen = function(conn) {
             
-            curUserId = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
-            profile.username = curUserId;
+            //curUserId = ;
+            profile.username = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
             /*
                 获取当前登录人的联系人列表
             */
@@ -404,6 +429,8 @@ Easemob.im.config = {
                     signin.hide();
                     chat.show();
                     var curroster;
+                    tabList.friend = [];
+                    chatWrapper.friend = [];
                     for ( var i in roster) {
                         var ros = roster[i];
                         //both为双方互为好友，要显示的联系人,from我是对方的单向好友
@@ -411,6 +438,7 @@ Easemob.im.config = {
                             //bothRoster.push(ros);
                             ros.src = ros.src ? ros.src : 'img/header.png';
                             tabList.friend.push(ros);
+                            chatWrapper.friend.push(ros);
                         } else if (ros.subscription == 'to') {
                             toRoster.push(ros);//to表明了联系人是我的单向好友
                         }
@@ -480,7 +508,7 @@ Easemob.im.config = {
     });
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-
+    /*
     var swfupload = null;
     var flashFilename = '';
     var audioDom = [];
@@ -1892,5 +1920,5 @@ Easemob.im.config = {
         var time = date.getHours() + ":" + date.getMinutes() + ":"
                 + date.getSeconds();
         return time;
-    }
+    }*/
 }(window, undefined));

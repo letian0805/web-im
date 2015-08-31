@@ -19,14 +19,14 @@
     
     <div ms-controller='signin' ms-include='emimSignin' ms-visible='display'></div><!-- 登录界面 -->
     <div ms-controller='signup' ms-include='emimSignup' ms-visible='display'></div><!-- 注册界面 -->
-    <div ms-controller='chat' ms-visible='display' ms-include='emimChat' class='emim-wrapper emim-auto'></div><!-- 聊天主界面 -->
-    <div ms-controller='loading' ms-visible='display'><img src="img/waitting.gif"></div><!-- loading -->
-    <div ms-controller='prompt' class='emim-prompt' ms-css-top='t'>{{content}}</div><!-- prompt -->
-    <footer>© 2015 easemob</footer><!-- footer -->
+    <div id='emimWrapper' ms-controller='chat' ms-visible='display' ms-include='emimChat' class='emim-wrapper emim-auto'></div><!-- 聊天主界面 -->
+    <div ms-controller='loading' ms-visible='display'></div><!-- loading -->
+    <div ms-controller='prompt' class='emim-w100 emim-prompt' ms-css-top='t'>{{content}}</div><!-- prompt -->
+    <footer class='emim-w100'>© 2015 easemob</footer><!-- footer -->
 
     <!-- 登录界面 -->
     <script id='emimSignin' type='avalon'>
-    <div class='emim-sign-bg emim-auto emim-mt50'>
+    <div class='emim-prl emim-sign-bg emim-auto emim-mt50'>
         <h3 class='emim-w100 emim-center'>Sign In</h3>
         <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin'>
         <input type='password' ms-attr-placeholder='port' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin'>
@@ -50,18 +50,23 @@
 
     <!-- 聊天主界面 -->
     <script id='emimChat' type='tpl'>
-    <div class='emim-chatLeft emim-fl'>
+    <div class='emim-h100 emim-prl emim-chatLeft emim-fl'>
         <div class='emim-profile' ms-controller='profile' ms-include='emimProfile'></div>
         <div class='emim-list-tab' ms-include='emimListTab'></div>
-        <div class='emim-list' ms-include='emimList'></div>
+        <div class='emim-list' ms-controller='emimContactWrapper' ms-css-height='height-118' ms-include='emimList'></div>
     </div>
-    <div class='emim-chatRight'>
-        <div class='emim-current-header' ms-controller='chatHeader' ms-include='emimChatHeader'>
+    <div class='emim-h100 emim-prl emim-chatRight'>
+        <div class='emim-center emim-current-header' ms-controller='chatHeader'>
             <span class='emim-chat-to'>{{to}}</span>
-            <span class='emim-font emim-font-hover emim-chat-clear'>h</span>
+            <span class='emim-font emim-pab emim-font-hover emim-chat-clear'>h</span>
         </div>
-        <div class='emim-chat-wrapper' ms-controller='chatWrapper'></div>
-        <div class='emim-chat-send' ms-include='emimSendWrapper'></div>
+        <hr class='emim-auto emim-current-header-border'/>
+        <div class='emim-chat-wrapper' ms-controller='chatWrapper' ms-css-height='height-228'>
+            <div class='emim-h100 emim-chat-content' ms-repeat-item='friend' ms-attr-id='item.name' ms-class='emim-hide:cur!=item.name'></div>
+            <div class='emim-h100' ms-repeat-item='group'></div>
+            <div class='emim-h100' ms-repeat-item='stranger'></div>
+        </div>
+        <div class='emim-pab emim-w100 emim-chat-send' ms-include='emimSendWrapper'></div>
     </div>
     </script>
 
@@ -79,23 +84,23 @@
 
     <!-- 列表tab -->
     <script id='emimListTab' type='tpl'>
-    <ol ms-controller='tab'>
-        <li class='emim-font emim-font-hover emim-friend-tab' ms-class='emim-cur:(cur%1==0)' ms-click='toggle(1)'>a</li>
-        <li class='emim-font emim-font-hover emim-group-tab' ms-class='emim-cur:(cur%2==0)' ms-click='toggle(2)'>b</li>
-        <li class='emim-font emim-font-hover emim-stranger-tab' ms-class='emim-cur:(cur%3==0)' ms-click='toggle(3)'>c</li>
+    <ol ms-controller='contactTab'>
+        <li class='emim-font emim-font-hover emim-friend-tab' ms-class='emim-cur: cur=="friend"' ms-click='toggle("friend")'>a</li>
+        <li class='emim-font emim-font-hover emim-group-tab' ms-class='emim-cur: cur=="group"' ms-click='toggle("group")'>b</li>
+        <li class='emim-font emim-font-hover emim-stranger-tab' ms-class='emim-cur: cur=="stranger"' ms-click='toggle("stranger")'>c</li>       
     </ol>
     </script>
 
     <!-- 联系人列表 -->
     <script id='emimList' type='tpl'>
     <div ms-controller='tabList'>
-        <div ms-visible='friendDisplay'>
+        <div ms-class='emim-hide: cur!="friend"'>
             <div ms-repeat-item='friend' ms-include='emimContact'></div>
         </div>
-        <div ms-visible='groupDisplay'>
+        <div ms-class='emim-hide: cur!="group"'>
             <div ms-repeat-item='group' ms-include='emimContact'></div>
         </div>
-        <div ms-visible='strangerDisplay'>
+        <div ms-class='emim-hide: cur!="stranger"'>
             <div ms-repeat-item='stranger' ms-include='emimContact'></div>
         </div>
     </div>
@@ -103,11 +108,11 @@
 
     <!-- 联系人 -->
     <script id='emimContact' type='tpl'>
-    <div class='emim-contact' ms-controller='contact' ms-click='select($index)'>
+    <div ms-attr-id='item.name' class='emim-prl emim-contact' ms-controller='contact' ms-click='select' ms-class='emim-contact-cur:cur==item.name'>
         <img class='emim-avatar emim-contact-avatar' ms-attr-src='item.src' />
-        <span class='emim-contact-username'>{{item.name}}</span>
-        <span class='emim-contact-msg'>{{item.msg}}</span>
-        <span class='emim-contact-count' ms-isvisible='display'></span>
+        <span class='emim-prl emim-contact-username'>{{item.name}}</span>
+        <span class='emim-contact-msg'>{{msg}}</span>
+        <span class='emim-contact-count' ms-if='count>0'>{{count}}</span>
     </div>
     </script>
 
@@ -119,8 +124,8 @@
         <span class='emim-font emim-font-hover' fn='audio' ms-onclick='sendfile' title='选择语音'>f</span>
     </div>
     <ul id="emotionUL"></ul>
-    <textarea id="talkInputId"></textarea>
-    <button onclick="sendText()">发送</button>
+    <textarea class='emim-w100 emim-chat-textarea' id="talkInputId" spellcheck='false'></textarea>
+    <button class='emim-themebg emim-pab emim-send-button' onclick="sendText()">Send</button>
     </script>
 
     <!-- Dialog -->
@@ -145,7 +150,7 @@
     </script>
 
     <!--layer-->
-    <div class='emim-layer' ms-visible='display' ms-controller='layer'></div>
+    <div class='emim-w100 emim-h100 emim-layer' ms-visible='display' ms-controller='layer'></div>
     <!--
     <div id="addFridentModal" class="">
         <div class="modal-header">
