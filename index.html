@@ -118,14 +118,16 @@
 
     <!-- 消息发送区 -->
     <script id='emimSendWrapper' type='tpl'>
-    <div class='chat02_title'>
-        <span class='emim-font emim-font-hover' ms-onclick='showFace' title='选择表情'>d</span>
-        <span class='emim-font emim-font-hover' fn='img' ms-onclick='sendfile' title='选择图片'>e</span>
-        <span class='emim-font emim-font-hover' fn='audio' ms-onclick='sendfile' title='选择语音'>f</span>
+    <div ms-controller='send'>
+        <div class='chat02_title'>
+            <span class='emim-font emim-font-hover' ms-onclick='showFace' title='选择表情'>d</span>
+            <span class='emim-font emim-font-hover' fn='img' ms-onclick='sendfile' title='选择图片'>e</span>
+            <span class='emim-font emim-font-hover' fn='audio' ms-onclick='sendfile' title='选择语音'>f</span>
+        </div>
+        <ul id="emotionUL"></ul>
+        <textarea class='emim-w100 emim-chat-textarea' spellcheck='false' ms-duplex='text'></textarea>
+        <button class='emim-themebg emim-pab emim-send-button' ms-click="sendText">Send</button>
     </div>
-    <ul id="emotionUL"></ul>
-    <textarea class='emim-w100 emim-chat-textarea' id="talkInputId" spellcheck='false'></textarea>
-    <button class='emim-themebg emim-pab emim-send-button' onclick="sendText()">Send</button>
     </script>
 
     <!-- Dialog -->

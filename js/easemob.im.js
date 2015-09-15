@@ -45,8 +45,21 @@ Easemob.im.config = {
     var textSending = false;
     var time = 0;
 
-    
-    
+    /*
+        文本消息，包括表情，文字
+    */
+    var textMessage = function(msg) {
+        return '<div class="">' + msg + '</div>';
+    }    
+
+    /*
+        文件消息，其中图片和语音对应展示，其他类型显示下载容器
+    */
+    var fileMessage = function() {
+        
+    }
+
+
     avalon.ready(function() {
 
         var conn = new Easemob.im.Connection();
@@ -390,12 +403,14 @@ Easemob.im.config = {
             }   
         });
         
+
         /*
             chat header
         */
         var chatHeader = avalon.define({
             $id: 'chatHeader'
             , to: ''
+            , isGroup: false
         });
 
         /*
@@ -412,7 +427,30 @@ Easemob.im.config = {
             }
         });
 
-
+        /*
+            发送区域
+        */
+        var send = avalon.define({
+            $id: 'send'
+            , text: ''
+            , send: function() {
+                var to = chatHeader.to;
+                if (!to) {
+                    return;
+                }
+                var options = {
+                    to : to,
+                    msg : send.text,
+                    type : "chat"
+                };
+                // 群组消息和个人消息的判断分支
+                chatHeader.isGroup && (options.type = 'groupchat');
+                conn.sendTextMessage(options);
+                //当前登录人发送的信息在聊天窗口中原样显示
+                appendMsg(to, textMessage(send.text.replace(/\n/g, '<br>')));
+                send.text = '';   
+            }
+        });
         /*
             处理连接时函数,主要是登录成功后对页面元素做处理
         */
@@ -457,16 +495,14 @@ Easemob.im.config = {
                     conn.listRooms({
                         success : function(rooms) {
                             if (rooms && rooms.length > 0) {
-                                //buildListRoomDiv("contracgrouplist", rooms);//群组列表页面处理
                                 if (curChatUserId == null) {
-                                    //setCurrentContact(groupFlagMark + rooms[0].roomId);
-                                    //$('#accordion2').click();
+                                    chatHeader.isGroup = true;
+                                    //rooms[0].roomId
                                 }
                             }
                             conn.setPresence();//设置用户上线状态，必须调用
                         },
-                        error : function(e) {
-                        }
+                        error : function(e) {}
                     });
                 }
             });

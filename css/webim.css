@@ -362,7 +362,7 @@ footer {
     top: 0;
     bottom: 0;
 	min-width: 600px;
-	max-width: 1080px;
+	max-width: 960px;
 	height: 86%;
     border-radius: 2px;
 }
