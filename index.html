@@ -95,24 +95,30 @@
     <script id='emimList' type='tpl'>
     <div ms-controller='tabList'>
         <div ms-class='emim-hide: cur!="friend"'>
-            <div ms-repeat-item='friend' ms-include='emimContact'></div>
+            <div ms-repeat-item='friend'>
+                <div ms-attr-id='{{item.name + "Contact"}}' ms-include='emimContact'></div>
+            </div>
         </div>
         <div ms-class='emim-hide: cur!="group"'>
-            <div ms-repeat-item='group' ms-include='emimContact'></div>
+            <div ms-repeat-item='group'>
+                <div ms-attr-id='{{item.roomId + "Contact"}}' ms-include='emimContact'></div>
+            </div>
         </div>
         <div ms-class='emim-hide: cur!="stranger"'>
-            <div ms-repeat-item='stranger' ms-include='emimContact'></div>
+            <div ms-repeat-item='stranger'>
+                <div ms-attr-id='{{item.name + "Contact"}}' ms-include='emimContact'></div>
+            </div>
         </div>
     </div>
     </script>
 
     <!-- 联系人 -->
     <script id='emimContact' type='tpl'>
-    <div ms-attr-id='item.name' class='emim-prl emim-contact' ms-controller='contact' ms-click='select' ms-class='emim-contact-cur:cur==item.name'>
-        <img class='emim-avatar emim-contact-avatar' ms-attr-src='item.src' />
+    <div class='emim-prl emim-contact' ms-attr-name='item.name' ms-controller='contact' ms-click='select' ms-class='emim-contact-cur:cur==item.id + "Contact"'>
+        <img class='emim-avatar emim-contact-avatar' ms-attr-src='{{item.src || "img/header.png"}}' />
         <span class='emim-prl emim-contact-username'>{{item.name}}</span>
         <span class='emim-contact-msg'>{{msg}}</span>
-        <span class='emim-contact-count' ms-if='count>0'>{{count}}</span>
+        <span class='emim-contact-count' ms-if='cur!=item.id + "Contact" && count[item.name]>0'>{{count[item.name]}}</span>
     </div>
     </script>
 
@@ -125,8 +131,10 @@
             <span class='emim-font emim-font-hover' fn='audio' ms-onclick='sendfile' title='选择语音'>f</span>
         </div>
         <ul id="emotionUL"></ul>
-        <textarea class='emim-w100 emim-chat-textarea' spellcheck='false' ms-duplex='text'></textarea>
-        <button class='emim-themebg emim-pab emim-send-button' ms-click="sendText">Send</button>
+        <div class='emim-w95 emim-auto'>
+            <textarea class='emim-w100 emim-chat-textarea' spellcheck='false' ms-duplex='text'></textarea>
+        </div>
+        <button class='emim-themebg emim-pab emim-send-button' ms-click="send">Send</button>
     </div>
     </script>
 

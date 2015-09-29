@@ -103,6 +103,15 @@ input, textarea, button, img {
 .emim-w100 {
     width: 100%;
 }
+.emim-w96 {
+    width: 96%;
+}
+.emim-w95 {
+    width: 95%;
+}
+.emim-w90 {
+    width: 90%;
+}
 .emim-h100 {
     height: 100%;
 }
@@ -325,8 +334,6 @@ footer {
     bottom: 0;
 }
 .emim-chat-textarea {
-    padding: 10px;
-    box-sizing: border-box;
     height: 85px;
     resize: none;
     font-size: 16px;

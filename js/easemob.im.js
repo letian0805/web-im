@@ -24,97 +24,82 @@ Easemob.im.config = {
     wss: false
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**************************************************************************
 ---                             demo相关代码                            ---
 **************************************************************************/
 ;(function(window, undefined){
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
-    var curUserId = null;
-    var curChatUserId = null;
-    var curRoomId = null;
-    var msgCardDivId = "chat01";
-    var talkToDivId = "talkTo";
-    var talkInputId = "talkInputId";
-    var fileInputId = "fileInput";
-    var bothRoster = [];
-    var toRoster = [];
-    var maxWidth = 200;
-    var groupFlagMark = "group--";
-    var groupQuering = false;
-    var textSending = false;
-    var time = 0;
+    
+
 
     /*
-        文本消息，包括表情，文字
+        common
     */
-    var textMessage = function(msg) {
-        return '<div class="">' + msg + '</div>';
-    }    
+    Easemob.im.utils = { 
+        getAttr: function(dom, attr) {
+            return dom.getAttribute(attr);
+        }
+        , setAttr(dom, attr, value) {
+            return dom.setAttribute(attr, value);
+        }
 
-    /*
-        文件消息，其中图片和语音对应展示，其他类型显示下载容器
-    */
-    var fileMessage = function() {
-        
+        /*
+            消息上屏
+        */
+        , appendMsg: function(to, html) {
+            var curWrapper = document.getElementById(to);
+
+            var div = document.createElement('div');
+            div.innerHTML = html;
+            curWrapper.appendChild(div);
+            div = null;
+        }
+
+        /*
+            文本消息，包括表情，文字
+        */
+        , textMessage: function(msg) {
+            return '<div class="emim-textmsg">' + msg + '</div>';
+        }    
+
+        /*
+            文件消息，其中图片和语音对应展示，其他类型显示下载容器
+        */
+        , fileMessage: function() {
+            
+        }
     }
+
+
+    
 
 
     avalon.ready(function() {
 
-        var conn = new Easemob.im.Connection();
-
-
-        /*
-            初始化连接
-        */
-        conn.init({
-            https : Easemob.im.config.https,
-            wss: Easemob.im.config.wss,
-            url: Easemob.im.config.xmppURL,
-            onOpened : function() {//当连接成功时的回调方法
-                handleOpen(conn);
-            },
-            onClosed : function() {//当连接关闭时的回调方法
-                handleClosed();
-            },
-            onTextMessage : function(message) {//收到文本消息时的回调方法
-                handleTextMessage(message);
-            },
-            onEmotionMessage : function(message) {//收到表情消息时的回调方法
-                handleEmotion(message);
-            },
-            onPictureMessage : function(message) {//收到图片消息时的回调方法
-                handlePictureMessage(message);
-            },
-            onAudioMessage : function(message) {//收到音频消息的回调方法
-                handleAudioMessage(message);
-            },
-            onLocationMessage : function(message) {//收到位置消息的回调方法
-                handleLocationMessage(message);
-            },
-            onFileMessage : function(message) {//收到文件消息的回调方法
-                handleFileMessage(message);
-            },
-            onVideoMessage : function(message) {//收到视频消息的回调方法
-                handleVideoMessage(message);
-            },
-            onPresence : function(message) {//收到联系人订阅请求的回调方法
-                handlePresence(message);
-            },
-            onRoster : function(message) {//收到联系人信息的回调方法
-                handleRoster(message);
-            },
-            onInviteMessage : function(message) {//收到群组邀请时的回调方法
-                handleInviteMessage(message);
-            },
-            onError : function(message) {//异常时的回调方法
-                handleError(message);
-            }
-        });
         
-
-
+        /**************************************************************************
+        ---                               MODULES                               ---
+        **************************************************************************/
         /*
             layer
         */
@@ -226,6 +211,7 @@ Easemob.im.config = {
             }
         });
 
+
         /*
             注册
         */
@@ -306,6 +292,7 @@ Easemob.im.config = {
             }
         });
 
+
         /*
             dialog
         */
@@ -327,6 +314,7 @@ Easemob.im.config = {
                 dialog.hide();
             }
         });
+
 
         /*
             profile
@@ -357,7 +345,8 @@ Easemob.im.config = {
                 profile.display = !profile.display;
             }
         });
-        
+ 
+       
         /*
             tab
         */
@@ -369,6 +358,7 @@ Easemob.im.config = {
                 tabList.show(idx);
             }
         });
+
 
         /*
             list wrapper
@@ -383,23 +373,23 @@ Easemob.im.config = {
                 tabList.cur = tab;
             }
         });
-        
+
+
         /*
             contact
         */
         var contact = avalon.define({
             $id: 'contact'
-            , src: 'img/header.png'
             , display: false
             , username: ''
-            , count: 10
+            , count: {}
             , cur: 0
             , msg: ''
             , select: function() {
-                var id = this.getAttribute('id');
-                contact.cur = id;
-                chatHeader.to = id;
-                chatWrapper.toggle(id);
+                contact.cur = Easemob.im.utils.getAttr(this.parentNode, 'id');
+                chatHeader.to = Easemob.im.utils.getAttr(this, 'name');
+                chatWrapper.toggle(contact.cur.slice(0, -7));
+                contact.count[contact.cur.slice(0, -7)] = 0;
             }   
         });
         
@@ -447,27 +437,91 @@ Easemob.im.config = {
                 chatHeader.isGroup && (options.type = 'groupchat');
                 conn.sendTextMessage(options);
                 //当前登录人发送的信息在聊天窗口中原样显示
-                appendMsg(to, textMessage(send.text.replace(/\n/g, '<br>')));
+                Easemob.im.utils.appendMsg(to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')));
                 send.text = '';   
             }
         });
+
+        
+
+
+        avalon.scan();
+
+
+        /**************************************************************************
+        ---                              SDK INVOKE                             ---
+        **************************************************************************/
+        
+        var conn = new Easemob.im.Connection();
+
+
+        /*
+            初始化连接
+        */
+        conn.init({
+            https : Easemob.im.config.https,
+            wss: Easemob.im.config.wss,
+            url: Easemob.im.config.xmppURL,
+            onOpened : function() {//当连接成功时的回调方法
+                handleOpen(conn);
+            },
+            onClosed : function() {//当连接关闭时的回调方法
+                handleClosed();
+            },
+            onTextMessage : function(message) {//收到文本消息时的回调方法
+                handleTextMessage(message);
+            },
+            onEmotionMessage : function(message) {//收到表情消息时的回调方法
+                handleEmotion(message);
+            },
+            onPictureMessage : function(message) {//收到图片消息时的回调方法
+                handlePictureMessage(message);
+            },
+            onAudioMessage : function(message) {//收到音频消息的回调方法
+                handleAudioMessage(message);
+            },
+            onLocationMessage : function(message) {//收到位置消息的回调方法
+                handleLocationMessage(message);
+            },
+            onFileMessage : function(message) {//收到文件消息的回调方法
+                handleFileMessage(message);
+            },
+            onVideoMessage : function(message) {//收到视频消息的回调方法
+                handleVideoMessage(message);
+            },
+            onPresence : function(message) {//收到联系人订阅请求的回调方法
+                handlePresence(message);
+            },
+            onRoster : function(message) {//收到联系人信息的回调方法
+                handleRoster(message);
+            },
+            onInviteMessage : function(message) {//收到群组邀请时的回调方法
+                handleInviteMessage(message);
+            },
+            onError : function(message) {//异常时的回调方法
+                handleError(message);
+            }
+        });
+        
         /*
             处理连接时函数,主要是登录成功后对页面元素做处理
         */
         var handleOpen = function(conn) {
             
-            //curUserId = ;
             profile.username = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
-            /*
-                获取当前登录人的联系人列表
-            */
+
+            //获取当前登录人的联系人列表
             conn.getRoster({
                 success : function(roster) {
                     loading.hide();
                     signin.hide();
                     chat.show();
+
                     var curroster;
                     tabList.friend = [];
+                    tabList.group = [];
+                    tabList.stranger = [];
+
                     chatWrapper.friend = [];
                     for ( var i in roster) {
                         var ros = roster[i];
@@ -481,25 +535,22 @@ Easemob.im.config = {
                             toRoster.push(ros);//to表明了联系人是我的单向好友
                         }
                     }
-                    if (bothRoster.length > 0) {
+                    /*if (bothRoster.length > 0) {
                         curroster = bothRoster[0];
                         //buildContactDiv("contractlist", bothRoster);//联系人列表页面处理
                         if (curroster) {
                             //setCurrentContact(curroster.name);//页面处理将第一个联系人作为当前聊天div
                         }
-                    }
+                    }*/
 
                     /*
                         获取当前登录人的群组列表
                     */
                     conn.listRooms({
                         success : function(rooms) {
-                            if (rooms && rooms.length > 0) {
-                                if (curChatUserId == null) {
-                                    chatHeader.isGroup = true;
-                                    //rooms[0].roomId
-                                }
-                            }
+                            avalon.each(rooms, function(k, v) {
+                                tabList.group.push(v);
+                            });
                             conn.setPresence();//设置用户上线状态，必须调用
                         },
                         error : function(e) {}
@@ -517,7 +568,7 @@ Easemob.im.config = {
             异常情况下的处理方法
         */
         var handleError = function(e) {
-            if (curUserId == null) {
+            if (!chatHeader.to) {
                 loading.hide();
                 signin.show();
                 emprompt.show(e.msg + ",请重新登录");
@@ -540,7 +591,7 @@ Easemob.im.config = {
         };
 
 
-        avalon.scan();
+
     });
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     
