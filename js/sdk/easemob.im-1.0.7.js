@@ -3,6 +3,8 @@
  * v1.0.7
  */
 
+
+
 ;(function(window, undefined) {
 
     if(typeof Strophe == 'undefined'){
@@ -315,7 +317,7 @@
                     }
                     if(dataType=='json'){
                         try{
-                            var json = $.parseJSON(xhr.responseText);
+                            var json = parseJSON(xhr.responseText);
                             suc(json,xhr);
                         } catch(e){
                             error(xhr.responseText,xhr,"错误的数据,无法转换为json");
@@ -335,7 +337,7 @@
                 } else {
                     if(dataType=='json'){
                         try{
-                            var json = $.parseJSON(xhr.responseText);
+                            var json = parseJSON(xhr.responseText);
                             error(json,xhr,"服务器返回错误信息");
                         } catch(e){
                             error(xhr.responseText,xhr,"服务器返回错误信息");
@@ -502,6 +504,46 @@
         return 0;
     }());
 
+    var trim = function(str) {
+
+        str = typeof str === 'string' ? str : '';
+
+        return str.trim
+            ? str.trim()
+            : str.replace(/^\s|\s$/g, '');
+    }
+
+    var parseJSON  = function(data) {
+
+        if (window.JSON && window.JSON.parse) {
+            return window.JSON.parse(data + "");
+        }
+
+        var requireNonComma,
+            depth = null,
+            str = trim(data + "");
+
+        return str && !trim(
+            str.replace(/(,)|(\[|{)|(}|])|"(?:[^"\\\r\n]|\\["\\\/bfnrt]|\\u[\da-fA-F]{4})*"\s*:?|true|false|null|-?(?!0\d)\d+(?:\.\d+|)(?:[eE][+-]?\d+|)/g
+            , function( token, comma, open, close ) {
+
+                if ( requireNonComma && comma ) {
+                    depth = 0;
+                }
+
+                if ( depth === 0 ) {
+                    return token;
+                }
+
+                requireNonComma = open || comma;
+                depth += !close - !open;
+                return "";
+            })
+        )
+        ? (Function("return " + str))()
+        : (Function("Invalid JSON: " + data))();
+    }
+
     var hasFormData = (typeof FormData != 'undefined');
     var isCanUploadFileAsync = hasSetRequestHeader && hasFormData;
     var isCanUploadFile = isCanUploadFileAsync || hasFlash;
@@ -593,7 +635,7 @@
             xhr.addEventListener("abort", options.onFileUploadCanceled, false);
             xhr.addEventListener("load", function(e) {
                 try{
-                    var json = $.parseJSON(xhr.responseText);
+                    var json = parseJSON(xhr.responseText);
                     options.onFileUploadComplete(json);
                 } catch(e){
                     options.onFileUploadError({
@@ -611,7 +653,7 @@
                 if( xhr.readyState === 4){
                     if (ajax.status == 200) {
                         try{
-                            var json = $.parseJSON(xhr.responseText);
+                            var json = parseJSON(xhr.responseText);
                             options.onFileUploadComplete(json);
                         } catch(e){
                             options.onFileUploadError({
@@ -2257,9 +2299,13 @@
 
     Easemob.im.Helper = Easemob.im.Helper || {};
 
+    
+
     // method
     Easemob.im.Helper.getFileUrl = getFileUrlFn;
     Easemob.im.Helper.upload = uploadFn;
+    Easemob.im.Helper.trim = trim;
+    Easemob.im.Helper.parseJSON = parseJSON;
     Easemob.im.Helper.download = downloadFn;
     Easemob.im.Helper.getFileSize = getFileSizeFn;
     Easemob.im.Helper.xhr = doAjaxRequest;

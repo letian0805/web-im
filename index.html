@@ -2,31 +2,39 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>环信WebIM</title>
     <link rel="stylesheet" href="css/webim.css">
+
+    <!--sdk所需的js文件-->
     <script src="js/sdk/strophe.js"></script>
     <script src="js/sdk/easemob.im-1.0.7.js"></script>
+
+    <!--demo依赖的js文件-->
     <script src="js/lib/avalon.min.js"></script>
-    <script src="js/lib/jquery.min.js"></script>
+    <script src="js/lib/swfupload/swfupload.js"></script>
+    <script src="js/easemob.im.config.js"></script>
     <script src="js/easemob.im.js"></script>
-    <!--[if lte IE 9]>
-    <script src="js/sdk/swfupload/swfupload.js"></script>
-    <script src="js/sdk/jplayer/jplayer.js"></script>
-    <![endif]-->
 </head>
 <body>
     
-    <div ms-controller='signin' ms-include='emimSignin' ms-visible='display'></div><!-- 登录界面 -->
-    <div ms-controller='signup' ms-include='emimSignup' ms-visible='display'></div><!-- 注册界面 -->
-    <div id='emimWrapper' ms-controller='chat' ms-visible='display' ms-include='emimChat' class='emim-wrapper emim-auto'></div><!-- 聊天主界面 -->
-    <div ms-controller='loading' ms-visible='display'></div><!-- loading -->
-    <div ms-controller='prompt' class='emim-w100 emim-prompt' ms-css-top='t'>{{content}}</div><!-- prompt -->
+    <div ms-controller='signin' ms-include='emimSignin'></div><!-- 登录界面 -->
+    <div ms-controller='signup' ms-include='emimSignup'></div><!-- 注册界面 -->
+    <div ms-controller='chat' ms-include='emimChat'></div><!-- 聊天主界面 -->
     <footer class='emim-w100'>© 2015 easemob</footer><!-- footer -->
 
+
+
+
+
+
+
+
+    <!----------------modules start-------------------->
+
     <!-- 登录界面 -->
-    <script id='emimSignin' type='avalon'>
-    <div class='emim-prl emim-sign-bg emim-auto emim-mt50'>
+    <script id='emimSignin' type='tpl'>
+    <div ms-visible='display' class='emim-prl emim-sign-bg emim-auto emim-mt50'>
         <h3 class='emim-w100 emim-center'>Sign In</h3>
         <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin'>
         <input type='password' ms-attr-placeholder='port' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin'>
@@ -38,7 +46,7 @@
 
     <!-- 注册界面 -->
     <script id='emimSignup' type='tpl'>
-    <div class="emim-sign-bg emim-auto emim-mt50">
+    <div ms-visible='display' class="emim-prl emim-sign-bg emim-auto emim-mt50">
         <h3 class='emim-w100 emim-center'>Sign Up</h3>
         <input type='text' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signup'>
         <input type='password' placeholder='Password' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signup'>
@@ -50,23 +58,25 @@
 
     <!-- 聊天主界面 -->
     <script id='emimChat' type='tpl'>
-    <div class='emim-h100 emim-prl emim-chatLeft emim-fl'>
-        <div class='emim-profile' ms-controller='profile' ms-include='emimProfile'></div>
-        <div class='emim-list-tab' ms-include='emimListTab'></div>
-        <div class='emim-list' ms-controller='emimContactWrapper' ms-css-height='height-118' ms-include='emimList'></div>
-    </div>
-    <div class='emim-h100 emim-prl emim-chatRight'>
-        <div class='emim-center emim-current-header' ms-controller='chatHeader'>
-            <span class='emim-chat-to'>{{to}}</span>
-            <span class='emim-font emim-pab emim-font-hover emim-chat-clear'>h</span>
+    <div id='emimWrapper' ms-visible='display' class='emim-wrapper emim-auto'>
+        <div class='emim-h100 emim-prl emim-chatLeft emim-fl'>
+            <div class='emim-profile' ms-controller='profile' ms-include='emimProfile'></div>
+            <div class='emim-list-tab' ms-include='emimListTab'></div>
+            <div class='emim-list' ms-controller='emimContactWrapper' ms-css-height='height-118' ms-include='emimList'></div>
         </div>
-        <hr class='emim-auto emim-current-header-border'/>
-        <div class='emim-chat-wrapper' ms-controller='chatWrapper' ms-css-height='height-228'>
-            <div class='emim-h100 emim-chat-content' ms-repeat-item='friend' ms-attr-id='item.name' ms-class='emim-hide:cur!=item.name'></div>
-            <div class='emim-h100' ms-repeat-item='group'></div>
-            <div class='emim-h100' ms-repeat-item='stranger'></div>
+        <div class='emim-h100 emim-prl emim-chatRight'>
+            <div class='emim-center emim-current-header' ms-controller='chatHeader'>
+                <span class='emim-chat-to'>{{to}}</span>
+                <span class='emim-font emim-pab emim-font-hover emim-chat-clear'>h</span>
+            </div>
+            <hr class='emim-auto emim-current-header-border'/>
+            <div class='emim-chat-wrapper' ms-controller='chatWrapper' ms-css-height='height-228'>
+                <div class='emim-h100 emim-chat-content' ms-repeat-item='friend' ms-attr-id='item.name' ms-class='emim-hide:cur!=item.name'></div>
+                <div class='emim-h100 emim-chat-content' ms-repeat-item='group' ms-attr-id='item.id' ms-class='emim-hide:cur!=item.id'></div>
+                <div class='emim-h100 emim-chat-content' ms-repeat-item='stranger' ms-attr-id='item.name' ms-class='emim-hide:cur!=item.name'></div>
+            </div>
+            <div class='emim-pab emim-w100 emim-chat-send' ms-include='emimSendWrapper'></div>
         </div>
-        <div class='emim-pab emim-w100 emim-chat-send' ms-include='emimSendWrapper'></div>
     </div>
     </script>
 
@@ -93,35 +103,28 @@
 
     <!-- 联系人列表 -->
     <script id='emimList' type='tpl'>
-    <div ms-controller='tabList'>
-        <div ms-class='emim-hide: cur!="friend"'>
-            <div ms-repeat-item='friend'>
-                <div ms-attr-id='{{item.name + "Contact"}}' ms-include='emimContact'></div>
-            </div>
+    <div ms-controller='contactList'>
+        <div ms-class='emim-hide: curWrapper!="friend"'>
+            <div ms-repeat-item='friend' ms-attr-id='item.name + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.name + "Contact"' ms-include='emimContact'></div>
         </div>
-        <div ms-class='emim-hide: cur!="group"'>
-            <div ms-repeat-item='group'>
-                <div ms-attr-id='{{item.roomId + "Contact"}}' ms-include='emimContact'></div>
-            </div>
+        <div ms-class='emim-hide: curWrapper!="group"'>
+            <div ms-repeat-item='group' ms-attr-id='item.roomId + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.roomId + "Contact"' ms-include='emimContact'></div>
         </div>
-        <div ms-class='emim-hide: cur!="stranger"'>
-            <div ms-repeat-item='stranger'>
-                <div ms-attr-id='{{item.name + "Contact"}}' ms-include='emimContact'></div>
-            </div>
+        <div ms-class='emim-hide: curWrapper!="stranger"'>
+            <div ms-repeat-item='stranger' ms-attr-id='item.id + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.id + "Contact"' ms-include='emimContact'></div>
         </div>
     </div>
     </script>
 
-    <!-- 联系人 -->
+
     <script id='emimContact' type='tpl'>
-    <div class='emim-prl emim-contact' ms-attr-name='item.name' ms-controller='contact' ms-click='select' ms-class='emim-contact-cur:cur==item.id + "Contact"'>
-        <img class='emim-avatar emim-contact-avatar' ms-attr-src='{{item.src || "img/header.png"}}' />
+        <img class='emim-avatar emim-contact-avatar' ms-attr-src='"img/header.png" || item.src'/>
         <span class='emim-prl emim-contact-username'>{{item.name}}</span>
-        <span class='emim-contact-msg'>{{msg}}</span>
-        <span class='emim-contact-count' ms-if='cur!=item.id + "Contact" && count[item.name]>0'>{{count[item.name]}}</span>
-    </div>
+        <span class='emim-contact-msg'></span>
+        <span class='emim-contact-count' style='display: none'></span>
     </script>
 
+    
     <!-- 消息发送区 -->
     <script id='emimSendWrapper' type='tpl'>
     <div ms-controller='send'>
@@ -159,8 +162,16 @@
     </div>
     </script>
 
+    <!-- loading -->
+    <div ms-controller='loading' ms-visible='display'></div>
+
+    <!-- prompt -->
+    <div ms-controller='prompt' class='emim-w100 emim-prompt' ms-css-top='t'>{{content}}</div>
+
     <!--layer-->
     <div class='emim-w100 emim-h100 emim-layer' ms-visible='display' ms-controller='layer'></div>
+    <!----------------modules end-------------------->
+
     <!--
     <div id="addFridentModal" class="">
         <div class="modal-header">

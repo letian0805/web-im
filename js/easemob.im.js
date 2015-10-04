@@ -1,48 +1,3 @@
-/*
-    Config here
-*/
-Easemob.im.config = {
-    /*
-        The global value set for xmpp server
-        ws://im-api.easemob.com/ws/
-        wss://im-api.easemob.com/ws/
-        http://im-api.easemob.com/http-bind/
-        https://im-api.easemob.com/http-bind/
-    */
-    xmppURL: 'ws://im-api.easemob.com/ws/',
-    /*
-        The global value set for Easemob backend REST API
-        http://a1.easemob.com
-        https://a1.easemob.com
-    */
-    apiURL: 'https://a1.easemob.com',
-    /*
-        连接时提供appkey
-    */
-    appkey: "easemob-demo#chatdemoui",
-    https : false,
-    wss: false
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************
 ---                             demo相关代码                            ---
 **************************************************************************/
@@ -50,52 +5,46 @@ Easemob.im.config = {
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
     
-
-
-    /*
-        common
-    */
-    Easemob.im.utils = { 
-        getAttr: function(dom, attr) {
-            return dom.getAttribute(attr);
-        }
-        , setAttr(dom, attr, value) {
-            return dom.setAttribute(attr, value);
-        }
-
-        /*
-            消息上屏
-        */
-        , appendMsg: function(to, html) {
-            var curWrapper = document.getElementById(to);
-
-            var div = document.createElement('div');
-            div.innerHTML = html;
-            curWrapper.appendChild(div);
-            div = null;
-        }
-
-        /*
-            文本消息，包括表情，文字
-        */
-        , textMessage: function(msg) {
-            return '<div class="emim-textmsg">' + msg + '</div>';
-        }    
-
-        /*
-            文件消息，其中图片和语音对应展示，其他类型显示下载容器
-        */
-        , fileMessage: function() {
-            
-        }
-    }
-
-
-    
-
-
     avalon.ready(function() {
 
+        /*
+            common
+        */
+        Easemob.im.utils = { 
+            getAttr: function(dom, attr) {
+                return dom.getAttribute(attr);
+            }
+            , setAttr(dom, attr, value) {
+                return dom.setAttribute(attr, value);
+            }
+
+            /*
+                消息上屏
+            */
+            , appendMsg: function(from, to, html) {
+                var curWrapper = document.getElementById(to);
+
+                var div = document.createElement('div');
+                div.className = from == profileInfo.username ? 'emim-fr' : 'emim-fl';
+                div.innerHTML = html;
+                curWrapper.appendChild(div);
+                div = null;
+            }
+
+            /*
+                文本消息，包括表情，文字
+            */
+            , textMessage: function(msg) {
+                return '<div class="emim-textmsg">' + msg + '</div>';
+            }    
+
+            /*
+                文件消息，其中图片和语音对应展示，其他类型显示下载容器
+            */
+            , fileMessage: function() {
+                
+            }
+        }
         
         /**************************************************************************
         ---                               MODULES                               ---
@@ -319,7 +268,7 @@ Easemob.im.config = {
         /*
             profile
         */
-        var profile = avalon.define({
+        var profileInfo = avalon.define({
             $id: 'profile'
             , username: ''
             , src: 'img/header.png'
@@ -342,7 +291,7 @@ Easemob.im.config = {
                 signin.show();
             }
             , toggle: function() {
-                profile.display = !profile.display;
+                profileInfo.display = !profileInfo.display;
             }
         });
  
@@ -355,7 +304,7 @@ Easemob.im.config = {
             , cur: 'friend'
             , toggle: function(idx) {
                 contactTab.cur = idx;
-                tabList.show(idx);
+                contactList.show(idx);
             }
         });
 
@@ -363,36 +312,25 @@ Easemob.im.config = {
         /*
             list wrapper
         */
-        var tabList = avalon.define({
-            $id: 'tabList'
+        var contactList = avalon.define({
+            $id: 'contactList'
             , friend: []
             , group: []
             , stranger: []
-            , cur: 'friend'
+            , curWrapper: 'friend'
+            , cur: ''
             , show: function(tab) {
-                tabList.cur = tab;
+                contactList.curWrapper = tab;
+            }
+            , select: function() {
+                contactList.cur = Easemob.im.utils.getAttr(this, 'id');
+
+                var cur = this.getElementsByTagName('span')[0].innerHTML;
+                chatHeader.to = cur;
+                chatWrapper.toggle(cur);
             }
         });
 
-
-        /*
-            contact
-        */
-        var contact = avalon.define({
-            $id: 'contact'
-            , display: false
-            , username: ''
-            , count: {}
-            , cur: 0
-            , msg: ''
-            , select: function() {
-                contact.cur = Easemob.im.utils.getAttr(this.parentNode, 'id');
-                chatHeader.to = Easemob.im.utils.getAttr(this, 'name');
-                chatWrapper.toggle(contact.cur.slice(0, -7));
-                contact.count[contact.cur.slice(0, -7)] = 0;
-            }   
-        });
-        
 
         /*
             chat header
@@ -437,7 +375,7 @@ Easemob.im.config = {
                 chatHeader.isGroup && (options.type = 'groupchat');
                 conn.sendTextMessage(options);
                 //当前登录人发送的信息在聊天窗口中原样显示
-                Easemob.im.utils.appendMsg(to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')));
+                Easemob.im.utils.appendMsg(profileInfo.username, to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')));
                 send.text = '';   
             }
         });
@@ -508,7 +446,7 @@ Easemob.im.config = {
         */
         var handleOpen = function(conn) {
             
-            profile.username = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
+            profileInfo.username = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
 
             //获取当前登录人的联系人列表
             conn.getRoster({
@@ -518,9 +456,9 @@ Easemob.im.config = {
                     chat.show();
 
                     var curroster;
-                    tabList.friend = [];
-                    tabList.group = [];
-                    tabList.stranger = [];
+                    contactList.friend = [];
+                    contactList.group = [];
+                    contactList.stranger = [];
 
                     chatWrapper.friend = [];
                     for ( var i in roster) {
@@ -529,7 +467,7 @@ Easemob.im.config = {
                         if (ros.subscription == 'both' || ros.subscription == 'from') {
                             //bothRoster.push(ros);
                             ros.src = ros.src ? ros.src : 'img/header.png';
-                            tabList.friend.push(ros);
+                            contactList.friend.push(ros);
                             chatWrapper.friend.push(ros);
                         } else if (ros.subscription == 'to') {
                             toRoster.push(ros);//to表明了联系人是我的单向好友
@@ -549,7 +487,7 @@ Easemob.im.config = {
                     conn.listRooms({
                         success : function(rooms) {
                             avalon.each(rooms, function(k, v) {
-                                tabList.group.push(v);
+                                contactList.group.push(v);
                             });
                             conn.setPresence();//设置用户上线状态，必须调用
                         },
