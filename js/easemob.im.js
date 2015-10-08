@@ -4,7 +4,26 @@
 ;(function(window, undefined){
     window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
-    
+    //图片格式
+    var IMGTYPE = {
+        png: true
+        , jpg: true
+        , gif: true
+        , bmp: true
+    }
+
+    //音频格式，如果浏览器可以播放gtgt
+    var AUDIOTYPE = {
+        mp3: true
+        , amr: true
+        , wma : true
+        , wav : true
+        , avi : true
+    }
+
+
+
+    //avalon框架
     avalon.ready(function() {
 
         /*
@@ -17,32 +36,187 @@
             , setAttr(dom, attr, value) {
                 return dom.setAttribute(attr, value);
             }
+            
+            /*
+                解析表情
+            */
+            , face: function(msg){
+
+                if(/\[.*\]/.test(msg)){
+                    msg = msg.replace(/&amp;/g, '&');
+                    msg = msg.replace(/&#39;/g, '\'');
+                    msg = msg.replace(/&lt;/g, '\<');
+
+                    avalon.each(send.faces, function(k, v){
+                        while(msg.indexOf(v.data) >= 0){
+                            msg = msg.replace(v.data
+                                , '<img class=\"emim-face-msg\" src=\"img/faces/' 
+                                    + v.src 
+                                    + '.png\">');
+                        }
+                    });
+                }
+                return msg;
+            }
+
+            /*
+                显示即时消息
+            */
+            , handleBriefMsg: function(target, msg) {
+
+                var target = document.getElementById(target);
+
+                if(!target) {
+                    return;
+                }
+
+                var list = target.getElementsByTagName('span'),
+                    msgDom = list[list.length - 2];
+
+                switch(msg) {
+                    case 'img':
+                        msg = '[图片]';
+                        break;
+                    case 'audio':
+                        msg = '[语音]';
+                        break;
+                    case 'file':
+                        msg = '[文件]';
+                        break;
+                    default:
+                        break;
+                }
+
+                msgDom.innerHTML = this.face(msg);
+            }
+
+            /*
+                处理消息未读数
+                @param1: domId; @param2: hide count
+            */
+            , handleUnreadCount: function(target, isHide) {
+
+                var target = document.getElementById(target);
+
+                if(!target) {
+                    return;
+                }
+
+                var list = target.getElementsByTagName('span'),
+                    countDom = list[list.length - 1],
+                    count = Number(countDom.innerHTML);
+
+                if(!isHide) {
+                    count += 1;
+                    countDom.innerHTML = count;
+                    countDom.style.display = '';
+                } else {
+                    countDom.innerHTML = '';
+                    countDom.style.display = 'none';
+                }
+            }
 
             /*
                 消息上屏
             */
-            , appendMsg: function(from, to, html) {
-                var curWrapper = document.getElementById(to);
+            , appendMsg: function(from, to, html, msgType) {
+                var isSelf = from == profileInfo.username,
+                    curWrapper = document.getElementById(isSelf ? to : from);
 
                 var div = document.createElement('div');
-                div.className = from == profileInfo.username ? 'emim-fr' : 'emim-fl';
-                div.innerHTML = html;
+                div.className = 'emim-clear emim-mt20 emim-tl emim-msg-wrapper ';
+                div.className += isSelf ? 'emim-fr' : 'emim-fl';
+                div.innerHTML = this.face(html);
                 curWrapper.appendChild(div);
                 div = null;
+
+                isSelf || chatHeader.to == from || this.handleUnreadCount(this.getAttr(curWrapper, 'id') + 'Contact');
+                
+                this.handleBriefMsg(this.getAttr(curWrapper, 'id') + 'Contact', msgType);
+
+                curWrapper.scrollTop = curWrapper.scrollHeight + 100;
             }
 
             /*
                 文本消息，包括表情，文字
             */
             , textMessage: function(msg) {
-                return '<div class="emim-textmsg">' + msg + '</div>';
+                return '<div class="emim-msg-container emim-textmsg">' + msg + '</div>';
             }    
+
+            /*
+
+            */
+            , generateFileDom: function(type, url) {
+                if(IMGTYPE[type]) {//img
+                    return "<div class='emim-msg-container emim-imgmsg'><a target='_blank' href='" + url + "'><img src='" + url + "'/></a></div>";
+                } else if(AUDIOTYPE[type]) {//audio
+                    return "<div class='emim-msg-container emim-audiomsg'><img src='" + url + "'/></div>";
+                } else {//file
+                    return "<div class='emim-msg-container emim-filemsg'><img src='" + url + "'/></div>";
+                }
+            }
 
             /*
                 文件消息，其中图片和语音对应展示，其他类型显示下载容器
             */
-            , fileMessage: function() {
-                
+            , fileMessage: function(fileInput, fileMsg, fileType) {
+
+                if(fileMsg) {//收消息
+                    return this.generateFileDom(fileType, fileMsg);
+                } else {
+
+                    var id = this.getAttr(fileInput, 'id');
+
+                    if(Easemob.im.Helper.isCanUploadFileAsync) {
+
+                        if(fileInput && !fileInput.value) return;
+
+                        var me = this,
+                            file = null,
+                            type = '',
+                            fileDom = '',
+                            to = chatHeader.to;
+
+
+
+                        file = Easemob.im.Helper.getFileUrl(id);
+
+                        type = file.filetype.toLowerCase();
+
+                        fileDom = me.generateFileDom(type, file.url);
+
+                    }
+
+                    var opt = {
+                        type : 'chat',
+                        fileInputId : id,
+                        filename : file && file.name || '',
+                        to : to,
+                        apiUrl: Easemob.im.config.apiURL,
+                        ext: {
+                            postfix: file && file.type || ''
+                        },
+                        onFileUploadError : function(error) {
+                            //var messageContent = (error.msg || '') + ",发送图片文件失败:" + (filename||flashFilename);
+                            //appendMsg(curUserId, to, messageContent);
+                        },
+                        onFileUploadComplete : function(data) {
+                            if(Easemob.im.Helper.isCanUploadFileAsync) {
+                                me.appendMsg(profileInfo.username, to, fileDom, 'img');
+                            } else {
+                                swfupload.settings.upload_success_handler();
+                            }
+                        },
+                        flashUpload: flashUpload
+                    };
+                    if (chatHeader.isGroup) {
+                        opt.type = 'groupchat';
+                        opt.to = chatHeader.roomId;
+                    }
+                            
+                    conn.sendPicture(opt);
+                }
             }
         }
         
@@ -271,7 +445,7 @@
         var profileInfo = avalon.define({
             $id: 'profile'
             , username: ''
-            , src: 'img/header.png'
+            , src: 'img/avatar.png'
             , display: false
             , dialog: function(fn) {
                 
@@ -324,10 +498,21 @@
             }
             , select: function() {
                 contactList.cur = Easemob.im.utils.getAttr(this, 'id');
+                var roomId = Easemob.im.utils.getAttr(this, 'roomId');
+
+                if(roomId) {
+                    chatHeader.isGroup = true;
+                    chatHeader.roomId = roomId;
+                } else {
+                    chatHeader.isGroup = false;
+                    chatHeader.roomId = '';
+                }
 
                 var cur = this.getElementsByTagName('span')[0].innerHTML;
                 chatHeader.to = cur;
                 chatWrapper.toggle(cur);
+
+                Easemob.im.utils.handleUnreadCount(contactList.cur, true);
             }
         });
 
@@ -339,7 +524,9 @@
             $id: 'chatHeader'
             , to: ''
             , isGroup: false
+            , roomId: ''
         });
+
 
         /*
             chat wrapper
@@ -355,15 +542,60 @@
             }
         });
 
+
         /*
             发送区域
         */
         var send = avalon.define({
             $id: 'send'
             , text: ''
+            , faces: [
+                {data: '[):]', src: 'ee_1'},
+                {data: '[:D]', src: 'ee_2'},
+                {data: '[;)]', src: 'ee_3'},
+                {data: '[:-o]', src: 'ee_4'},
+                {data: '[:p]', src: 'ee_5'},
+                {data: '[(H)]', src: 'ee_6'},
+                {data: '[:@]', src: 'ee_7'},
+                {data: '[:s]', src: 'ee_8'},
+                {data: '[:$]', src: 'ee_9'},
+                {data: '[:(]', src: 'ee_10'},
+                {data: '[:\'(]', src: 'ee_11'},
+                {data: '[:|]', src: 'ee_12'},
+                {data: '[(a)]', src: 'ee_13'},
+                {data: '[8o|]', src: 'ee_14'},
+                {data: '[8-|]', src: 'ee_15'},
+                {data: '[+o(]', src: 'ee_16'},
+                {data: '[<o)]', src: 'ee_17'},
+                {data: '[|-)]', src: 'ee_18'},
+                {data: '[*-)]', src: 'ee_19'},
+                {data: '[:-#]', src: 'ee_20'},
+                {data: '[:-*]', src: 'ee_21'},
+                {data: '[^o)]', src: 'ee_22'},
+                {data: '[8-)]', src: 'ee_23'},
+                {data: '[(|)]', src: 'ee_24'},
+                {data: '[(u)]', src: 'ee_25'},
+                {data: '[(S)]', src: 'ee_26'},
+                {data: '[(*)]', src: 'ee_27'},
+                {data: '[(#)]', src: 'ee_28'},
+                {data: '[(R)]', src: 'ee_29'},
+                {data: '[({)]', src: 'ee_30'},
+                {data: '[(})]', src: 'ee_31'},
+                {data: '[(k)]', src: 'ee_32'},
+                {data: '[(F)]', src: 'ee_33'},
+                {data: '[(W)]', src: 'ee_34'},
+                {data: '[(D)]', src: 'ee_35'}
+            ]
+            , realFile: ''
+            , file: ''
+            , faceShow: false
             , send: function() {
                 var to = chatHeader.to;
                 if (!to) {
+                    emprompt.show("请先选择联系人");
+                    return;
+                }
+                if (!send.text) {
                     return;
                 }
                 var options = {
@@ -375,15 +607,36 @@
                 chatHeader.isGroup && (options.type = 'groupchat');
                 conn.sendTextMessage(options);
                 //当前登录人发送的信息在聊天窗口中原样显示
-                Easemob.im.utils.appendMsg(profileInfo.username, to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')));
+                Easemob.im.utils.appendMsg(profileInfo.username, to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')), send.text);
                 send.text = '';   
+            }
+            , showFace: function() {
+                send.faceShow = !send.faceShow;
+            }
+            , sendFile: function() {
+                if(!chatHeader.to) {
+                    emprompt.show("请先选择联系人");
+                    return;
+                }
+                send.realFile = send.realFile ? send.realFile : this.parentNode.parentNode.getElementsByTagName('input')[0];
+                send.realFile.click();
+            }
+            , faceSelect: function(e) {
+                var ev = window.event || e,
+                    target = ev.target || ev.srcElement;
+
+                target.nodeName == 'IMG' && (send.text += Easemob.im.utils.getAttr(target, 'data'));
+            }
+            , realSendFile: function() {
+                Easemob.im.utils.fileMessage(this);
             }
         });
 
         
 
-
+        //avalon main
         avalon.scan();
+
 
 
         /**************************************************************************
@@ -407,13 +660,18 @@
                 handleClosed();
             },
             onTextMessage : function(message) {//收到文本消息时的回调方法
-                handleTextMessage(message);
+                Easemob.im.utils.appendMsg(message.from, message.to, Easemob.im.utils.textMessage(message.data.replace(/\n/g, '<br>')), message.data);
             },
             onEmotionMessage : function(message) {//收到表情消息时的回调方法
-                handleEmotion(message);
+                var str = '';
+                avalon.each(message.data, function(k, v) {
+                    str += v.type == 'emotion' ? '<img class="emim-face-msg" src="' + v.data + '">' : v.data;
+                });
+                Easemob.im.utils.appendMsg(message.from, message.to, Easemob.im.utils.textMessage(str.replace(/\n/g, '<br>')), str);
+                str = null;
             },
             onPictureMessage : function(message) {//收到图片消息时的回调方法
-                handlePictureMessage(message);
+                Easemob.im.utils.appendMsg(message.from, message.to, Easemob.im.utils.fileMessage(null, message.url, message.ext.postfix || message.filename.slice(message.filename.lastIndexOf('.') + 1)), 'img');
             },
             onAudioMessage : function(message) {//收到音频消息的回调方法
                 handleAudioMessage(message);
@@ -465,21 +723,13 @@
                         var ros = roster[i];
                         //both为双方互为好友，要显示的联系人,from我是对方的单向好友
                         if (ros.subscription == 'both' || ros.subscription == 'from') {
-                            //bothRoster.push(ros);
-                            ros.src = ros.src ? ros.src : 'img/header.png';
+                            ros.src = ros.src ? ros.src : 'img/avatar.png';
                             contactList.friend.push(ros);
                             chatWrapper.friend.push(ros);
                         } else if (ros.subscription == 'to') {
                             toRoster.push(ros);//to表明了联系人是我的单向好友
                         }
                     }
-                    /*if (bothRoster.length > 0) {
-                        curroster = bothRoster[0];
-                        //buildContactDiv("contractlist", bothRoster);//联系人列表页面处理
-                        if (curroster) {
-                            //setCurrentContact(curroster.name);//页面处理将第一个联系人作为当前聊天div
-                        }
-                    }*/
 
                     /*
                         获取当前登录人的群组列表
@@ -531,28 +781,27 @@
 
 
     });
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
+
     /*
-    var swfupload = null;
-    var flashFilename = '';
-    var audioDom = [];
-    
-    //处理不支持异步上传的浏览器,使用swfupload作为解决方案
-    var uploadType = null;
+        upload by flash
+        param1: input file ID
+    */
     var uploadShim = function(fileInputId) {
+        if(!Easemob.im.Helper.isCanUploadFile) {
+            return;
+        }
         var pageTitle = document.title;
         var uploadBtn = $('#' + fileInputId);
         if(typeof SWFUpload === 'undefined' || uploadBtn.length < 1) return;
 
         return new SWFUpload({ 
             file_post_name: 'file'
-            , flash_url: "sdk/swfupload/swfupload.swf"
+            , flash_url: "js/swfupload/swfupload.swf"
             , button_placeholder_id: fileInputId
             , button_width: uploadBtn.width() || 120
             , button_height: uploadBtn.height() || 30
             , button_cursor: SWFUpload.CURSOR.HAND
-            , button_text: '点击上传'
             , button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT
             , file_size_limit: 10485760
             , file_upload_limit: 0
@@ -560,1390 +809,61 @@
                 if(this.getStats().files_queued > 1) {
                     this.cancelUpload();
                 }
-                var checkType = uploadType === 'audio' ? audtype : pictype;
-                if(!checkType[file.type.slice(1)]) {
-                    conn.onError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '不支持此文件类型' + file.type
-                    });
-                    this.setButtonText('点击上传');
+                if(!EasemobWidget.PICTYPE[file.type.slice(1).toLowerCase()]) {
+                    im.errorPrompt('不支持此文件类型' + file.type);
                     this.cancelUpload();
                 } else if(10485760 < file.size) {
-                    conn.onError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '文件大小超过限制！请上传大小不超过10M的文件'
-                    });
-                    this.setButtonText('点击上传');
+                    im.errorPrompt('文件大小超过限制！请上传大小不超过10M的文件');
                     this.cancelUpload();
                 } else {
-                    this.setButtonText(file.name);
-                    flashFilename = file.name;
+                    im.sendImgMsg();
                 }
             }
-            , file_dialog_start_handler: function() {
-                if(Easemob.im.Helper.getIEVersion() < 10) {
-                    document.title = pageTitle;
-                }
-            }
+            , file_dialog_start_handler: function() {}
             , upload_error_handler: function(file, code, msg){
                 if(code != SWFUpload.UPLOAD_ERROR.FILE_CANCELLED && code != SWFUpload.UPLOAD_ERROR.UPLOAD_LIMIT_EXCEEDED && code != SWFUpload.UPLOAD_ERROR.FILE_VALIDATION_FAILED) {
-                    this.uploadOptions.onFileUploadError && this.uploadOptions.onFileUploadError({type: EASEMOB_IM_UPLOADFILE_ERROR, msg: msg});
+                    im.errorPrompt('图片发送失败');
                 }
             }
-            , upload_complete_handler: function(){
-                this.setButtonText('点击上传');
-            }
+            , upload_complete_handler: function(){}
             , upload_success_handler: function(file, response){
-                //处理上传成功的回调
+                if(!file || !response) return;
                 try{
                     var res = Easemob.im.Helper.parseUploadResponse(response);
                     
                     res = $.parseJSON(res);
                     res.filename = file.name;
-                    this.uploadOptions.onFileUploadComplete && this.uploadOptions.onFileUploadComplete(res);
+                    if(file && !file.url && res.entities && res.entities.length > 0) {
+                        file.url = res.uri + '/' + res.entities[0].uuid;
+                    }
+                    var temp = $("\
+                        <div class='easemobWidget-right'>\
+                            <div class='easemobWidget-msg-wrapper'>\
+                                <i class='easemobWidget-right-corner'></i>\
+                                <div class='easemobWidget-msg-status hide'><span>发送失败</span><i></i></div>\
+                                <div class='easemobWidget-msg-container'>\
+                                    <a href='"+file.url+"' target='_blank'><img src='"+file.url+"'/></a>\
+                                </div>\
+                            </div>\
+                        </div>\
+                    ");
+                    im.chatWrapper.append(temp);
+                    im.chatWrapper.find('img:last').on('load', im.scrollBottom);
+                    this.uploadOptions.onFileUploadComplete(res);
                 } catch (e) {
-                    conn.onError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '上传图片发生错误'
-                    });
+                    im.errorPrompt('上传图片发生错误');
                 }
             }
         });
     }
 
-    
-    //提供上传接口
+    /*
+        提供上传接口
+    */
     var flashUpload = function(url, options){
-        if(swfupload.settings.button_text == '点击上传') {
-            conn.onError({
-                type : EASEMOB_IM_UPLOADFILE_ERROR,
-                msg : '请选择文件'
-            });
-            return;
-        }
         swfupload.setUploadURL(url);
-        swfupload.uploadOptions = options;
         swfupload.startUpload();
+        swfupload.uploadOptions = options;
     }
 
-    var getLoginInfo = function() {
-        return {
-            isLogin : false
-        };
-    };
-    var showChatUI = function() {
-        $('#content').css({
-            "display" : "block"
-        });
-        var login_userEle = document.getElementById("login_user");
-        login_userEle.innerHTML = curUserId;
-        login_userEle.setAttribute("title", curUserId);
-    };
-    //登录之前不显示web对话框
-    var hiddenChatUI = function() {
-        $('#content').css({
-            "display" : "none"
-        });
-        document.getElementById(talkInputId).value = "";
-    };
-    //定义消息编辑文本域的快捷键，enter和ctrl+enter为发送，alt+enter为换行
-    //控制提交频率
-    $(function() {
-        $("textarea").keydown(function(event) {
-            if (event.altKey && event.keyCode == 13) {
-                e = $(this).val();
-                $(this).val(e + '\n');
-            } else if (event.ctrlKey && event.keyCode == 13) {
-                //e = $(this).val();
-                //$(this).val(e + '<br>');
-                event.returnValue = false;
-                sendText();
-                return false;
-            } else if (event.keyCode == 13) {
-                event.returnValue = false;
-                sendText();
-                return false;
-            }
-        });
-        $("#usetoken").on("click", function(){
-            if ($("#password").attr("disabled")) {
-                $("#password").removeAttr("disabled");
-            } else {
-                $("#password").attr("disabled", "disabled");
-            }
-            if ($("#token").attr("disabled")) {
-                $("#token").removeAttr("disabled");
-            } else {
-                $("#token").attr("disabled", "disabled");
-            }
-        });
-    });
-    //easemobwebim-sdk注册回调函数列表
-    $(document).ready(function() {
-
-        if(!Easemob.im.Helper.isCanUploadFileAsync && typeof uploadShim === 'function') {
-            swfupload = uploadShim('fileInput');
-        }
-
-        
-        var loginInfo = getLoginInfo();
-        if (loginInfo.isLogin) {
-            showWaitLoginedUI();
-        } else {
-            //showLoginUI();
-        }
-        //发送文件的模态窗口
-        $('#fileModal').on('hidden.bs.modal', function(e) {
-            document.getElementById("fileSend").disabled = false;
-			document.getElementById("cancelfileSend").disabled = false;
-            
-            if(!Easemob.im.Helper.isCanUploadFileAsync) return;
-            var ele = document.getElementById(fileInputId);
-            ele.value = "";
-            if (!window.addEventListener) {
-                ele.outerHTML = ele.outerHTML;
-            }
-        });
-        $('#addFridentModal').on('hidden.bs.modal', function(e) {
-            var ele = document.getElementById("addfridentId");
-            ele.value = "";
-            if (!window.addEventListener) {
-                ele.outerHTML = ele.outerHTML;
-            }
-            document.getElementById("addFridend").disabled = false;
-            document.getElementById("cancelAddFridend").disabled = false;
-        });
-        $('#delFridentModal').on('hidden.bs.modal', function(e) {
-            var ele = document.getElementById("delfridentId");
-            ele.value = "";
-            if (!window.addEventListener) {
-                ele.outerHTML = ele.outerHTML;
-            }
-            document.getElementById("delFridend").disabled = false;
-            document.getElementById("canceldelFridend").disabled = false;
-        });
-        $('#confirm-block-div-modal').on('hidden.bs.modal', function(e) {
-        });
-        $('#option-room-div-modal').on('hidden.bs.modal', function(e) {
-        });
-        $('#notice-block-div').on('hidden.bs.modal', function(e) {
-        });
-        $('#regist-div-modall').on('hidden.bs.modal', function(e) {
-        });
-        //在 密码输入框时的回车登录
-        $('#password').keypress(function(e) {
-            var key = e.which;
-            if (key == 13) {
-                login();
-            }
-        });
-        $(function() {
-            $(window).bind('beforeunload', function() {
-                if (conn) {
-                    conn.close();
-                    if (navigator.userAgent.indexOf("Firefox") > 0)
-                        return ' ';
-                    else
-                        return '';
-                }
-            });
-        });
-    });
-    
-    //连接中断时的处理，主要是对页面进行处理
-    var handleClosed = function() {
-        curUserId = null;
-        curChatUserId = null;
-        curRoomId = null;
-        bothRoster = [];
-        toRoster = [];
-        hiddenChatUI();
-        for(var i=0,l=audioDom.length;i<l;i++) {
-            if(audioDom[i].jPlayer) audioDom[i].jPlayer('destroy');
-        }
-        clearContactUI("contactlistUL", "contactgrouplistUL",
-                "momogrouplistUL", msgCardDivId);
-        //showLoginUI();
-        groupQuering = false;
-        textSending = false;
-    };
-    
-    //easemobwebim-sdk中收到联系人订阅请求的处理方法，具体的type值所对应的值请参考xmpp协议规范
-    var handlePresence = function(e) {
-        //（发送者希望订阅接收者的出席信息），即别人申请加你为好友
-        if (e.type == 'subscribe') {
-            if (e.status) {
-                if (e.status.indexOf('resp:true') > -1) {
-                    agreeAddFriend(e.from);
-                    return;
-                }
-            }
-            var subscribeMessage = e.from + "请求加你为好友。\n验证消息：" + e.status;
-            showNewNotice(subscribeMessage);
-            $('#confirm-block-footer-confirmButton').click(function() {
-                //同意好友请求
-                agreeAddFriend(e.from);//e.from用户名
-                //反向添加对方好友
-                conn.subscribe({
-                    to : e.from,
-                    message : "[resp:true]"
-                });
-                $('#confirm-block-div-modal').modal('hide');
-            });
-            $('#confirm-block-footer-cancelButton').click(function() {
-                rejectAddFriend(e.from);//拒绝加为好友
-                $('#confirm-block-div-modal').modal('hide');
-            });
-            return;
-        }
-        //(发送者允许接收者接收他们的出席信息)，即别人同意你加他为好友
-        if (e.type == 'subscribed') {
-            toRoster.push({
-                name : e.from,
-                jid : e.fromJid,
-                subscription : "to"
-            });
-            return;
-        }
-        //（发送者取消订阅另一个实体的出席信息）,即删除现有好友
-        if (e.type == 'unsubscribe') {
-            //单向删除自己的好友信息，具体使用时请结合具体业务进行处理
-            delFriend(e.from);
-            return;
-        }
-        //（订阅者的请求被拒绝或以前的订阅被取消），即对方单向的删除了好友
-        if (e.type == 'unsubscribed') {
-            delFriend(e.from);
-            return;
-        }
-    };
-    //easemobwebim-sdk中处理出席状态操作
-    var handleRoster = function(rosterMsg) {
-        for (var i = 0; i < rosterMsg.length; i++) {
-            var contact = rosterMsg[i];
-            if (contact.ask && contact.ask == 'subscribe') {
-                continue;
-            }
-            if (contact.subscription == 'to') {
-                toRoster.push({
-                    name : contact.name,
-                    jid : contact.jid,
-                    subscription : "to"
-                });
-            }
-            //app端删除好友后web端要同时判断状态from做删除对方的操作
-            if (contact.subscription == 'from') {
-                toRoster.push({
-                    name : contact.name,
-                    jid : contact.jid,
-                    subscription : "from"
-                });
-            }
-            if (contact.subscription == 'both') {
-                var isexist = contains(bothRoster, contact);
-                if (!isexist) {
-                    var lielem = $('<li>').attr({
-                        "id" : contact.name,
-                        "class" : "offline",
-                        "className" : "offline"
-                    }).click(function() {
-                        chooseContactDivClick(this);
-                    });
-                    $('<img>').attr({
-                        "src" : "img/head/contact_normal.png"
-                    }).appendTo(lielem);
-                    $('<span>').html(contact.name).appendTo(lielem);
-                    $('#contactlistUL').append(lielem);
-                    bothRoster.push(contact);
-                }
-            }
-            if (contact.subscription == 'remove') {
-                var isexist = contains(bothRoster, contact);
-                if (isexist) {
-                    removeFriendDomElement(contact.name);
-                }
-            }
-        }
-    };
-    
-    //判断要操作的联系人和当前联系人列表的关系
-    var contains = function(roster, contact) {
-        var i = roster.length;
-        while (i--) {
-            if (roster[i].name === contact.name) {
-                return true;
-            }
-        }
-        return false;
-    };
-    Array.prototype.indexOf = function(val) {
-        for (var i = 0; i < this.length; i++) {
-            if (this[i].name == val.name)
-                return i;
-        }
-        return -1;
-    };
-    Array.prototype.remove = function(val) {
-        var index = this.indexOf(val);
-        if (index > -1) {
-            this.splice(index, 1);
-        }
-    };
-    
-    //注册新用户操作方法
-    var regist = function() {
-        var user = $("#regist_username").val();
-        var pass = $("#regist_password").val();
-        var nickname = $("#regist_nickname").val();
-        if (user == '' || pass == '' || nickname == '') {
-            alert("用户名/密码/昵称 不能为空");
-            return;
-        }
-        
-    };
-    
-    //设置当前显示的聊天窗口div，如果有联系人则默认选中联系人中的第一个联系人，如没有联系人则当前div为null-nouser
-    var setCurrentContact = function(defaultUserId) {
-        showContactChatDiv(defaultUserId);
-        if (curChatUserId != null) {
-            hiddenContactChatDiv(curChatUserId);
-        } else {
-            $('#null-nouser').css({
-                "display" : "none"
-            });
-        }
-        curChatUserId = defaultUserId;
-    };
-    //构造联系人列表
-    var buildContactDiv = function(contactlistDivId, roster) {
-        var uielem = document.getElementById("contactlistUL");
-        var cache = {};
-        for (i = 0; i < roster.length; i++) {
-            if (!(roster[i].subscription == 'both' || roster[i].subscription == 'from')) {
-                continue;
-            }
-            var jid = roster[i].jid;
-            var userName = jid.substring(jid.indexOf("_") + 1).split("@")[0];
-            if (userName in cache) {
-                continue;
-            }
-            cache[userName] = true;
-            var lielem = $('<li>').attr({
-                'id' : userName,
-                'class' : 'offline',
-                'className' : 'offline',
-                'type' : 'chat',
-                'displayName' : userName
-            }).click(function() {
-                chooseContactDivClick(this);
-            });
-            $('<img>').attr("src", "img/haoyou.png").appendTo(
-                    lielem);
-            $('<span>').html(userName).appendTo(lielem);
-            $('#contactlistUL').append(lielem);
-        }
-        var contactlist = document.getElementById(contactlistDivId);
-        var children = contactlist.children;
-        if (children.length > 0) {
-            contactlist.removeChild(children[0]);
-        }
-        contactlist.appendChild(uielem);
-    };
-    //构造群组列表
-    var buildListRoomDiv = function(contactlistDivId, rooms) {
-        var uielem = document.getElementById("contactgrouplistUL");
-        var cache = {};
-        for (i = 0; i < rooms.length; i++) {
-            var roomsName = rooms[i].name;
-            var roomId = rooms[i].roomId;
-            if (roomId in cache) {
-                continue;
-            }
-            cache[roomId] = true;
-            var lielem = $('<li>').attr({
-                'id' : groupFlagMark + roomId,
-                'class' : 'offline',
-                'className' : 'offline',
-                'type' : 'groupchat',
-                'displayName' : roomsName,
-                'roomId' : roomId,
-                'joined' : 'false'
-            }).click(function() {
-                chooseContactDivClick(this);
-            });
-            $('<img>').attr({
-                'src' : 'img/qun.png'
-            }).appendTo(lielem);
-            $('<span>').html(roomsName).appendTo(lielem);
-            $('#contactgrouplistUL').append(lielem);
-        }
-        var contactlist = document.getElementById(contactlistDivId);
-        var children = contactlist.children;
-        if (children.length > 0) {
-            contactlist.removeChild(children[0]);
-        }
-        contactlist.appendChild(uielem);
-    };
-    //选择联系人的处理
-    var getContactLi = function(chatUserId) {
-        return document.getElementById(chatUserId);
-    };
-    //构造当前聊天记录的窗口div
-    var getContactChatDiv = function(chatUserId) {
-        return document.getElementById(curUserId + "-" + chatUserId);
-    };
-    //如果当前没有某一个联系人的聊天窗口div就新建一个
-    var createContactChatDiv = function(chatUserId) {
-        var msgContentDivId = curUserId + "-" + chatUserId;
-        var newContent = document.createElement("div");
-        $(newContent).attr({
-            "id" : msgContentDivId,
-            "class" : "chat01_content",
-            "className" : "chat01_content",
-            "style" : "display:none"
-        });
-        return newContent;
-    };
-    //显示当前选中联系人的聊天窗口div，并将该联系人在联系人列表中背景色置为蓝色
-    var showContactChatDiv = function(chatUserId) {
-        var contentDiv = getContactChatDiv(chatUserId);
-        if (contentDiv == null) {
-            contentDiv = createContactChatDiv(chatUserId);
-            document.getElementById(msgCardDivId).appendChild(contentDiv);
-        }
-        contentDiv.style.display = "block";
-        var contactLi = document.getElementById(chatUserId);
-        if (contactLi == null) {
-            return;
-        }
-        contactLi.style.backgroundColor = "#393F45";
-        var dispalyTitle = null;//聊天窗口显示当前对话人名称
-        if (chatUserId.indexOf(groupFlagMark) >= 0) {
-            dispalyTitle = "群组" + $(contactLi).attr('displayname') + "聊天中";
-            curRoomId = $(contactLi).attr('roomid');
-            $("#roomMemberImg").css('display', 'block');
-        } else {
-            dispalyTitle = chatUserId;
-            $("#roomMemberImg").css('display', 'none');
-        }
-        document.getElementById(talkToDivId).innerHTML = dispalyTitle;
-    };
-    //对上一个联系人的聊天窗口div做隐藏处理，并将联系人列表中选择的联系人背景色置空
-    var hiddenContactChatDiv = function(chatUserId) {
-        var contactLi = document.getElementById(chatUserId);
-        if (contactLi) {
-            contactLi.style.backgroundColor = "";
-        }
-        var contentDiv = getContactChatDiv(chatUserId);
-        if (contentDiv) {
-            contentDiv.style.display = "none";
-        }
-    };
-    //切换联系人聊天窗口div
-    var chooseContactDivClick = function(li) {
-        var chatUserId = li.id;
-        if ($(li).attr("type") == 'groupchat'
-                && ('true' != $(li).attr("joined"))) {
-            conn.join({
-                roomId : $(li).attr("roomId")
-            });
-            $(li).attr("joined", "true");
-        }
-        if (chatUserId != curChatUserId) {
-            if (curChatUserId == null) {
-                showContactChatDiv(chatUserId);
-            } else {
-                showContactChatDiv(chatUserId);
-                hiddenContactChatDiv(curChatUserId);
-            }
-            curChatUserId = chatUserId;
-        }
-        //对默认的null-nouser div进行处理,走的这里说明联系人列表肯定不为空所以对默认的聊天div进行处理
-        $('#null-nouser').css({
-            "display" : "none"
-        });
-        var badgespan = $(li).children(".badge");
-        if (badgespan && badgespan.length > 0) {
-            li.removeChild(li.children[2]);
-        }
-        //点击有未读消息对象时对未读消息提醒的处理
-        var badgespanGroup = $(li).parent().parent().parent().find(".badge"),
-            badgespan = $('.accordion-heading').find('#'+$(li).parents('.accordion-body').data('hook'));
-        if (badgespanGroup.length == 0) {
-            badgespan.find('.badgegroup').remove();
-        }
-    };
-    var clearContactUI = function(contactlistUL, contactgrouplistUL,
-            momogrouplistUL, contactChatDiv) {
-        //清除左侧联系人内容
-        $('#contactlistUL').empty();
-        $('#contactgrouplistUL').empty();
-        $('#momogrouplistUL').empty();
-        //处理联系人分组的未读消息处理
-        var accordionChild = $('#accordionDiv').children();
-        for (var i = 1; i <= accordionChild.length; i++) {
-            var badgegroup = $('#accordion' + i).find(".badgegroup");
-            if (badgegroup && badgegroup.length > 0) {
-                $('#accordion' + i).children().remove();
-            }
-        }
-        ;
-        //清除右侧对话框内容
-        document.getElementById(talkToDivId).children[0].innerHTML = "";
-        var chatRootDiv = document.getElementById(contactChatDiv);
-        var children = chatRootDiv.children;
-        for (var i = children.length - 1; i > 1; i--) {
-            chatRootDiv.removeChild(children[i]);
-        }
-        $('#null-nouser').css({
-            "display" : "block"
-        });
-    };
-    var emotionFlag = false;
-    var showEmotionDialog = function() {
-        var emotionBox = $('#wl_faces_box');
-        emotionBox.css({
-            display : emotionBox.get(0).style.display == 'block' ? "none" : "block"
-        });
-        if (emotionFlag) return;
-        emotionFlag = true;
-        // Easemob.im.Helper.EmotionPicData设置表情的json数组
-        var sjson = Easemob.im.Helper.EmotionPicData;
-        var emotionCount = 0, li,
-            emotionWrapper = $('#emotionUL');
-        for ( var key in sjson) {
-            var emotions = $('<img>').attr({
-                "id" : key,
-                "src" : sjson[key],
-                "style" : "cursor:pointer;"
-            }).click(function() {
-                selectEmotionImg(this);
-            });
-            li = emotionCount % 7 === 0 ? $('<li>') : li;
-            li.append(emotions);
-            emotionCount % 7 === 0 && li.appendTo(emotionWrapper);
-            emotionCount += 1;
-        }
-    };
-    //表情选择div的关闭方法
-    var turnoffFaces_box = function() {
-        $("#wl_faces_box").fadeOut();
-    };
-    var selectEmotionImg = function(selImg) {
-        var txt = document.getElementById(talkInputId);
-        txt.value = txt.value + selImg.id;
-        txt.focus();
-    };
-    var showSendPic = function() {
-        $('#fileModal').modal('toggle');
-        $('#sendfiletype').val('pic');
-        $('#send-file-warning').html("");
-        uploadType = 'pic';
-    };
-    var showSendAudio = function() {
-        $('#fileModal').modal('toggle');
-        $('#sendfiletype').val('audio');
-        $('#send-file-warning').html("");
-        uploadType = 'audio';
-    };
-    var sendText = function() {
-        if (textSending) {
-            return;
-        }
-        textSending = true;
-        var msgInput = document.getElementById(talkInputId);
-        var msg = msgInput.value;
-        if (msg == null || msg.length == 0) {
-            return;
-        }
-        var to = curChatUserId;
-        if (to == null) {
-            return;
-        }
-        var options = {
-            to : to,
-            msg : msg,
-            type : "chat"
-        };
-        // 群组消息和个人消息的判断分支
-        if (curChatUserId.indexOf(groupFlagMark) >= 0) {
-            options.type = 'groupchat';
-            options.to = curRoomId;
-        }
-        //easemobwebim-sdk发送文本消息的方法 to为发送给谁，meg为文本消息对象
-        conn.sendTextMessage(options);
-        //当前登录人发送的信息在聊天窗口中原样显示
-        var msgtext = msg.replace(/\n/g, '<br>');
-        appendMsg(curUserId, to, msgtext);
-        turnoffFaces_box();
-        msgInput.value = "";
-        msgInput.focus();
-        setTimeout(function() {
-            textSending = false;
-        }, 1000);
-    };
-    var pictype = {
-        "jpg" : true,
-        "gif" : true,
-        "png" : true,
-        "bmp" : true
-    };
-    var sendFile = function() {
-        var type = $("#sendfiletype").val();
-        if (type == 'pic') {
-            sendPic();
-        } else {
-            sendAudio();
-        }
-    };
-    //发送图片消息时调用方法
-    var sendPic = function() {
-        var to = curChatUserId;
-        if (to == null) {
-            return;
-        }
-        // Easemob.im.Helper.getFileUrl为easemobwebim-sdk获取发送文件对象的方法，fileInputId为 input 标签的id值
-        var fileObj = Easemob.im.Helper.getFileUrl(fileInputId);
-        if (Easemob.im.Helper.isCanUploadFileAsync && (fileObj.url == null || fileObj.url == '')) {
-            $('#send-file-warning').html("<font color='#FF0000'>请选择发送图片</font>");
-            return;
-        }
-        var filetype = fileObj.filetype;
-        var filename = fileObj.filename;
-        if (!Easemob.im.Helper.isCanUploadFileAsync || filetype in pictype) {
-            document.getElementById("fileSend").disabled = true;
-            document.getElementById("cancelfileSend").disabled = true;
-            var opt = {
-                type : 'chat',
-                fileInputId : fileInputId,
-                filename : flashFilename || '',
-                to : to,
-                apiUrl: Easemob.im.config.apiURL,
-                onFileUploadError : function(error) {
-                    $('#fileModal').modal('hide');
-                    var messageContent = (error.msg || '') + ",发送图片文件失败:" + (filename||flashFilename);
-                    appendMsg(curUserId, to, messageContent);
-                },
-                onFileUploadComplete : function(data) {
-                    $('#fileModal').modal('hide');
-                    var file = document.getElementById(fileInputId);
-                    if (file && file.files) {
-                        var objUrl = getObjectURL(file.files[0]);
-                        if (objUrl) {
-                            var img = document.createElement("img");
-                            img.src = objUrl;
-                            img.width = maxWidth;
-                        }
-                    } else {
-                        filename = data.filename || '';
-                        var img = document.createElement("img");
-						img.src = data.uri + '/' + data.entities[0].uuid + '?token=';
-						img.width = maxWidth;
-                    }
-                    appendMsg(curUserId, to, {
-                        data : [ {
-                            type : 'pic',
-                            filename : (filename||flashFilename),
-                            data : img
-                        } ]
-                    });
-                },
-                flashUpload: flashUpload
-            };
-            if (curChatUserId.indexOf(groupFlagMark) >= 0) {
-                opt.type = 'groupchat';
-                opt.to = curRoomId;
-            }
-            conn.sendPicture(opt);
-            return;
-        }
-        $('#send-file-warning').html("<font color='#FF0000'>不支持此图片类型" + filetype + "</font>");
-    };
-    var audtype = {
-        "mp3" : true,
-        "wma" : true,
-        "wav" : true,
-        "amr" : true,
-        "avi" : true
-    };
-    //发送音频消息时调用的方法
-    var sendAudio = function() {
-        var to = curChatUserId;
-        if (to == null) {
-            return;
-        }
-        //利用easemobwebim-sdk提供的方法来构造一个file对象
-        var fileObj = Easemob.im.Helper.getFileUrl(fileInputId);
-        if (Easemob.im.Helper.isCanUploadFileAsync && (fileObj.url == null || fileObj.url == '')) {
-            $('#send-file-warning').html("<font color='#FF0000'>请选择发送音频</font>");
-            return;
-        }
-        var filetype = fileObj.filetype;
-        var filename = fileObj.filename;
-        if (!Easemob.im.Helper.isCanUploadFileAsync || filetype in audtype) {
-            document.getElementById("fileSend").disabled = true;
-            document.getElementById("cancelfileSend").disabled = true;
-            var opt = {
-                type : "chat",
-                fileInputId : fileInputId,
-                filename : flashFilename || '',
-                to : to,//发给谁
-                apiUrl: Easemob.im.config.apiURL,
-                onFileUploadError : function(error) {
-                    $('#fileModal').modal('hide');
-                    var messageContent = (error.msg || '') + ",发送音频失败:" + (filename || flashFilename);
-                    appendMsg(curUserId, to, messageContent);
-                },
-                onFileUploadComplete : function(data) {
-                    var messageContent = "发送音频" + (filename || flashFilename);
-                    $('#fileModal').modal('hide');
-                    appendMsg(curUserId, to, messageContent);
-                },
-                flashUpload: flashUpload
-            };
-            //构造完opt对象后调用easemobwebim-sdk中发送音频的方法
-            if (curChatUserId.indexOf(groupFlagMark) >= 0) {
-                opt.type = 'groupchat';
-                opt.to = curRoomId;
-            }
-            conn.sendAudio(opt);
-            return;
-        }
-        $('#send-file-warning').html("<font color='#FF0000'>不支持此音频类型" + filetype + "</font>");
-    };
-    //easemobwebim-sdk收到文本消息的回调方法的实现
-    var handleTextMessage = function(message) {
-        var from = message.from;//消息的发送者
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        var messageContent = message.data;//文本消息体
-        //TODO  根据消息体的to值去定位那个群组的聊天记录
-        var room = message.to;
-        if (mestype == 'groupchat') {
-            appendMsg(message.from, message.to, messageContent, mestype);
-        } else {
-            appendMsg(from, from, messageContent);
-        }
-    };
-    //easemobwebim-sdk收到表情消息的回调方法的实现，message为表情符号和文本的消息对象，文本和表情符号sdk中做了
-    //统一的处理，不需要用户自己区别字符是文本还是表情符号。
-    var handleEmotion = function(message) {
-        var from = message.from;
-        var room = message.to;
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        if (mestype == 'groupchat') {
-            appendMsg(message.from, message.to, message, mestype);
-        } else {
-            appendMsg(from, from, message);
-        }
-    };
-    //easemobwebim-sdk收到图片消息的回调方法的实现
-    var handlePictureMessage = function(message) {
-        var filename = message.filename;//文件名称，带文件扩展名
-        var from = message.from;//文件的发送者
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        var contactDivId = from;
-        if (mestype == 'groupchat') {
-            contactDivId = groupFlagMark + message.to;
-        }
-        var options = message;
-        // 图片消息下载成功后的处理逻辑
-        options.onFileDownloadComplete = function(response, xhr) {
-            var objectURL = Easemob.im.Helper.parseDownloadResponse.call(this, response);
-            img = document.createElement("img");
-            img.onload = function(e) {
-                img.onload = null;
-                window.URL && window.URL.revokeObjectURL && window.URL.revokeObjectURL(img.src);
-            };
-            img.onerror = function() {
-                img.onerror = null;
-                if (typeof FileReader == 'undefined') {
-                    img.alter = "当前浏览器不支持blob方式";
-                    return;
-                }
-                img.onerror = function() {
-                    img.alter = "当前浏览器不支持blob方式";
-                };
-                var reader = new FileReader();
-                reader.onload = function(event) {
-                    img.src = this.result;
-                };
-                reader.readAsDataURL(response);
-            }
-            img.src = objectURL;
-            var pic_real_width = options.width;
-            if (!pic_real_width || pic_real_width == 0) {
-                $("<img/>").attr("src", objectURL).load(function() {
-                    pic_real_width = this.width;
-                    if (pic_real_width > maxWidth) {
-                        img.width = maxWidth;
-                    } else {
-                        img.width = pic_real_width;
-                    }
-                    appendMsg(from, contactDivId, {
-                        data : [ {
-                            type : 'pic',
-                            filename : filename || '',
-                            data : img
-                        } ]
-                    });
-                });
-            } else {
-                if (pic_real_width > maxWidth) {
-                    img.width = maxWidth;
-                } else {
-                    img.width = pic_real_width;
-                }
-                appendMsg(from, contactDivId, {
-                    data : [ {
-                        type : 'pic',
-                        filename : filename || '',
-                        data : img
-                    } ]
-                });
-            }
-        };
-        
-        var redownLoadFileNum = 0;
-        options.onFileDownloadError = function(e) {
-            //下载失败时只重新下载一次
-            if(redownLoadFileNum < 1){
-               redownLoadFileNum++;
-                options.accessToken = options_c;
-               Easemob.im.Helper.download(options);
-               
-            }else{
-              appendMsg(from, contactDivId, e.msg + ",下载图片" + filename + "失败");
-              redownLoadFileNum = 0;
-            }
-           
-        };
-        //easemobwebim-sdk包装的下载文件对象的统一处理方法。
-        Easemob.im.Helper.download(options);
-    };
-    //easemobwebim-sdk收到音频消息回调方法的实现
-    var handleAudioMessage = function(message) {
-        var filename = message.filename;
-        var filetype = message.filetype;
-        var from = message.from;
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        var contactDivId = from;
-        if (mestype == 'groupchat') {
-            contactDivId = groupFlagMark + message.to;
-        }
-        var options = message;
-        options.onFileDownloadComplete = function(response, xhr) {
-            var objectURL = Easemob.im.Helper.parseDownloadResponse.call(this, response);
-            var audio = document.createElement("audio");
-            if (Easemob.im.Helper.getIEVersion() != 9 && ("src" in audio) && ("controls" in audio)) {
-                audio.onload = function() {
-                    audio.onload = null;
-                    window.URL && window.URL.revokeObjectURL && window.URL.revokeObjectURL(audio.src);
-                };
-                audio.onerror = function() {
-                    audio.onerror = null;
-                    appendMsg(from, contactDivId, "当前浏览器不支持播放此音频:" + (filename || ''));
-                };
-                audio.controls = "controls";
-                audio.src = objectURL;
-                appendMsg(from, contactDivId, {
-                    data : [ {
-                        type : 'audio',
-                        filename : filename || '',
-                        data : audio
-                    } ]
-                });
-                //audio.play();
-                return;
-            } else {
-                appendMsg(from, contactDivId, {
-                    data : [ {
-                        type : 'audio',
-                        filename : filename || '',
-                        data : {currentSrc: objectURL}
-                    } ]
-                });
-            }
-        };
-        options.onFileDownloadError = function(e) {
-            appendMsg(from, contactDivId, e.msg + ",下载音频" + filename + "失败");
-        };
-        options.headers = {
-            "Accept" : "audio/mp3"
-        };
-        Easemob.im.Helper.download(options);
-    };
-    //处理收到文件消息
-    var handleFileMessage = function(message) {
-        var filename = message.filename;
-        var filetype = message.filetype;
-        var from = message.from;
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        var contactDivId = from;
-        if (mestype == 'groupchat') {
-            contactDivId = groupFlagMark + message.to;
-        }
-        var options = message;
-        options.onFileDownloadComplete = function(response, xhr) {
-            var spans = "收到文件消息:" + filename;
-            appendMsg(from, contactDivId, spans);
-            return;
-        };
-        options.onFileDownloadError = function(e) {
-            appendMsg(from, contactDivId, e.msg + ",下载文件" + filename + "失败");
-        };
-        Easemob.im.Helper.download(options);
-    };
-    //收到视频消息
-    var handleVideoMessage = function(message) {
-        var filename = message.filename;
-        var filetype = message.filetype;
-        var from = message.from;
-        var mestype = message.type;//消息发送的类型是群组消息还是个人消息
-        var contactDivId = from;
-        if (mestype == 'groupchat') {
-            contactDivId = groupFlagMark + message.to;
-        }
-        var options = message;
-        options.onFileDownloadComplete = function(response, xhr) {
-            var spans = "收到视频消息:" + filename;
-            appendMsg(from, contactDivId, spans);
-        };
-        options.onFileDownloadError = function(e) {
-            appendMsg(from, contactDivId, e.msg + ",下载音频" + filename + "失败");
-        };
-        Easemob.im.Helper.download(options);
-    };
-    var handleLocationMessage = function(message) {
-        var from = message.from;
-        var to = message.to;
-        var mestype = message.type;
-        var content = message.addr;
-        if (mestype == 'groupchat') {
-            appendMsg(from, to, content, mestype);
-        } else {
-            appendMsg(from, from, content, mestype);
-        }
-    };
-    var handleInviteMessage = function(message) {
-        var type = message.type;
-        var from = message.from;
-        var roomId = message.roomid;
-        //获取当前登录人的群组列表
-        conn.listRooms({
-            success : function(rooms) {
-                if (rooms) {
-                    for (i = 0; i < rooms.length; i++) {
-                        var roomsName = rooms[i].name;
-                        var roomId = rooms[i].roomId;
-                        var existRoom = $('#contactgrouplistUL').children(
-                                '#group--' + roomId);
-                        if (existRoom && existRoom.length == 0) {
-                            var lielem = $('<li>').attr({
-                                'id' : groupFlagMark + roomId,
-                                'class' : 'offline',
-                                'className' : 'offline',
-                                'type' : 'groupchat',
-                                'displayName' : roomsName,
-                                'roomId' : roomId,
-                                'joined' : 'false'
-                            }).click(function() {
-                                chooseContactDivClick(this);
-                            });
-                            $('<img>').attr({
-                                'src' : 'img/qun.png'
-                            }).appendTo(lielem);
-                            $('<span>').html(roomsName).appendTo(lielem);
-                            $('#contactgrouplistUL').append(lielem);
-                            //return;
-                        }
-                    }
-                    //cleanListRoomDiv();//先将原群组列表中的内容清除，再将最新的群组列表加入
-                    //buildListRoomDiv("contracgrouplist", rooms);//群组列表页面处理
-                }
-            },
-            error : function(e) {
-            }
-        });
-    };
-    var cleanListRoomDiv = function cleanListRoomDiv() {
-        $('#contactgrouplistUL').empty();
-    };
-    //收到陌生人消息时创建陌生人列表
-    var createMomogrouplistUL = function createMomogrouplistUL(who, message) {
-        var momogrouplistUL = document.getElementById("momogrouplistUL");
-        var cache = {};
-        if (who in cache) {
-            return;
-        }
-        cache[who] = true;
-        var lielem = document.createElement("li");
-        $(lielem).attr({
-            'id' : who,
-            'class' : 'offline',
-            'className' : 'offline',
-            'type' : 'chat',
-            'displayName' : who
-        });
-        lielem.onclick = function() {
-            chooseContactDivClick(this);
-        };
-        var imgelem = document.createElement("img");
-        imgelem.setAttribute("src", "img/haoyou.png");
-        lielem.appendChild(imgelem);
-        var spanelem = document.createElement("span");
-        spanelem.innerHTML = who;
-        lielem.appendChild(spanelem);
-        momogrouplistUL.appendChild(lielem);
-    };
-    //显示聊天记录的统一处理方法
-    var appendMsg = function(who, contact, message, chattype) {
-        var contactUL = document.getElementById("contactlistUL");
-        var contactDivId = contact;
-        if (chattype && chattype == 'groupchat') {
-            contactDivId = groupFlagMark + contact;
-        }
-        var contactLi = getContactLi(contactDivId);
-        if (contactLi == null) {
-            createMomogrouplistUL(who, message);
-        }
-        // 消息体 {isemotion:true;body:[{type:txt,msg:ssss}{type:emotion,msg:imgdata}]}
-        var localMsg = null;
-        if (typeof message == 'string') {
-            localMsg = Easemob.im.Helper.parseTextMessage(message);
-            localMsg = localMsg.body;
-        } else {
-            localMsg = message.data;
-        }
-        var headstr = [ "<p1>" + who + "   <span></span>" + "   </p1>",
-                "<p2>" + getLoacalTimeString() + "<b></b><br/></p2>" ];
-        var header = $(headstr.join(''))
-        var lineDiv = document.createElement("div");
-        for (var i = 0; i < header.length; i++) {
-            var ele = header[i];
-            lineDiv.appendChild(ele);
-        }
-        var messageContent = localMsg;
-        for (var i = 0; i < messageContent.length; i++) {
-            var msg = messageContent[i];
-            var type = msg.type;
-            var data = msg.data;
-            
-            if (type == "emotion") {
-                var eletext = "<p3><img src='" + data + "'/></p3>";
-                var ele = $(eletext);
-                for (var j = 0; j < ele.length; j++) {
-                    lineDiv.appendChild(ele[j]);
-                }
-            } else if (type == "pic" || type == 'audio' || type == 'video') {
-                var filename = msg.filename;
-                var fileele = $("<p3>" + filename + "</p3><br>");
-                for (var j = 0; j < fileele.length; j++) {
-                    lineDiv.appendChild(fileele[j]);
-                }
-                data.nodeType && lineDiv.appendChild(data);
-                if(type == 'audio') {
-                    var d = $(lineDiv),
-                        t = new Date().getTime();
-                    d.append($('<div class="'+t+'"></div>\
-                        <button class="play'+t+'">播放</button><button style="display:none" class="play'+t+'">暂停</button>'));
-                }
-            } else {
-                var eletext = "<p3>" + data + "</p3>";
-                var ele = $(eletext);
-                ele[0].setAttribute("class", "chat-content-p3");
-                ele[0].setAttribute("className", "chat-content-p3");
-                if (curUserId == who) {
-                    ele[0].style.backgroundColor = "#EBEBEB";
-                }
-                for (var j = 0; j < ele.length; j++) {
-                    lineDiv.appendChild(ele[j]);
-                }
-            }
-        }
-        if (curChatUserId == null && chattype == null) {
-            setCurrentContact(contact);
-            if (time < 1) {
-                $('#accordion3').click();
-                time++;
-            }
-        }
-        if (curChatUserId && curChatUserId.indexOf(contact) < 0) {
-            var contactLi = getContactLi(contactDivId);
-            if (contactLi == null) {
-                return;
-            }
-            contactLi.style.backgroundColor = "#393f45";
-            var badgespan = $(contactLi).children(".badge");
-            if (badgespan && badgespan.length > 0) {
-                var count = badgespan.text();
-                var myNum = new Number(count);
-                myNum++;
-                badgespan.text(myNum);
-            } else {
-                $(contactLi).append('<span class="badge">1</span>');
-            }
-            //联系人不同分组的未读消息提醒
-            
-            var badgespan = $('.accordion-heading').find('#'+$(contactLi).parents('.accordion-body').data('hook'));
-            var badgespanGroup = badgespan.find('.badgegroup');
-            if (badgespanGroup.length == 0) {
-                badgespan.append('<span class="badgegroup">New</span>');
-            }
-        }
-        var msgContentDiv = getContactChatDiv(contactDivId);
-        if (curUserId == who) {
-            lineDiv.style.textAlign = "right";
-        } else {
-            lineDiv.style.textAlign = "left";
-        }
-        var create = false;
-        if (msgContentDiv == null) {
-            msgContentDiv = createContactChatDiv(contactDivId);
-            create = true;
-        }
-        msgContentDiv.appendChild(lineDiv);
-        if (create) {
-            document.getElementById(msgCardDivId).appendChild(msgContentDiv);
-        }
-        
-        msgContentDiv.scrollTop = msgContentDiv.scrollHeight;
-        return lineDiv;
-    };
-    var showAddFriend = function() {
-        $('#addFridentModal').modal('toggle');
-        $('#addfridentId').val('好友账号');//输入好友账号
-        $('#add-frident-warning').html("");
-    };
-    //添加输入框鼠标焦点进入时清空输入框中的内容
-    var clearInputValue = function(inputId) {
-        $('#' + inputId).val('');
-    };
-    var showDelFriend = function() {
-        $('#delFridentModal').modal('toggle');
-        $('#delfridentId').val('好友账号');//输入好友账号
-        $('#del-frident-warning').html("");
-    };
-    //消息通知操作时条用的方法
-    var showNewNotice = function(message) {
-        $('#confirm-block-div-modal').modal('toggle');
-        $('#confirm-block-footer-body').html(message);
-    };
-    var showWarning = function(message) {
-        $('#notice-block-div').modal('toggle');
-        $('#notice-block-body').html(message);
-    };
-    //主动添加好友操作的实现方法
-    var startAddFriend = function() {
-        var user = $('#addfridentId').val();
-        if (user == '') {
-            $('#add-frident-warning').html(
-                    "<font color='#FF0000'> 请输入好友名称</font>");
-            return;
-        }
-        if (bothRoster)
-            for (var i = 0; i < bothRoster.length; i++) {
-                if (bothRoster[i].name == user) {
-                    $('#add-frident-warning').html(
-                            "<font color='#FF0000'> 已是您的好友</font>");
-                    return;
-                }
-            }
-        //发送添加好友请求
-        conn.subscribe({
-            to : user,
-            message : "加个好友呗-" + getLoacalTimeString()
-        });
-        $('#addFridentModal').modal('hide');
-        return;
-    };
-    //回调方法执行时同意添加好友操作的实现方法
-    var agreeAddFriend = function(user) {
-        conn.subscribed({
-            to : user,
-            message : "[resp:true]"
-        });
-    };
-    //拒绝添加好友的方法处理
-    var rejectAddFriend = function(user) {
-        conn.unsubscribed({
-            to : user,
-            message : getLoacalTimeString()
-        });
-    };
-    //直接调用删除操作时的调用方法
-    var directDelFriend = function() {
-        var user = $('#delfridentId').val();
-        if (validateFriend(user, bothRoster)) {
-            conn.removeRoster({
-                to : user,
-                success : function() {
-                    conn.unsubscribed({
-                        to : user
-                    });
-                    //删除操作成功时隐藏掉dialog
-                    $('#delFridentModal').modal('hide');
-                },
-                error : function() {
-                    $('#del-frident-warning').html(
-                            "<font color='#FF0000'>删除联系人失败!</font>");
-                }
-            });
-        } else {
-            $('#del-frident-warning').html(
-                    "<font color='#FF0000'>该用户不是你的好友!</font>");
-        }
-    };
-    //判断要删除的好友是否在当前好友列表中
-    var validateFriend = function(optionuser, bothRoster) {
-        for ( var deluser in bothRoster) {
-            if (optionuser == bothRoster[deluser].name) {
-                return true;
-            }
-        }
-        return false;
-    };
-    //回调方法执行时删除好友操作的方法处理
-    var delFriend = function(user) {
-        conn.removeRoster({
-            to : user,
-            groups : [ 'default' ],
-            success : function() {
-                conn.unsubscribed({
-                    to : user
-                });
-            }
-        });
-    };
-    var removeFriendDomElement = function(userToDel, local) {
-        var contactToDel;
-        if (bothRoster.length > 0) {
-            for (var i = 0; i < bothRoster.length; i++) {
-                if (bothRoster[i].name == userToDel) {
-                    contactToDel = bothRoster[i];
-                    break;
-                }
-            }
-        }
-        if (contactToDel) {
-            bothRoster.remove(contactToDel);
-        }
-        // 隐藏删除好友窗口
-        if (local) {
-            $('#delFridentModal').modal('hide');
-        }
-        //删除通讯录
-        $('#' + userToDel).remove();
-        //删除聊天
-        var chatDivId = curUserId + "-" + userToDel;
-        var chatDiv = $('#' + chatDivId);
-        if (chatDiv) {
-            chatDiv.remove();
-        }
-        if (curChatUserId != userToDel) {
-            return;
-        } else {
-            var displayName = '';
-            //将第一个联系人作为当前聊天div
-            if (bothRoster.length > 0) {
-                curChatUserId = bothRoster[0].name;
-                $('#' + curChatUserId).css({
-                    "background-color" : "#393F45"
-                });
-                var currentDiv = getContactChatDiv(curChatUserId)
-                        || createContactChatDiv(curChatUserId);
-                document.getElementById(msgCardDivId).appendChild(currentDiv);
-                $(currentDiv).css({
-                    "display" : "block"
-                });
-                displayName = curChatUserId;
-            } else {
-                $('#null-nouser').css({
-                    "display" : "block"
-                });
-                displayName = '';
-            }
-            $('#talkTo').html(displayName);
-        }
-    };
-    //清除聊天记录
-    var clearCurrentChat = function clearCurrentChat() {
-        var currentDiv = getContactChatDiv(curChatUserId)
-                || createContactChatDiv(curChatUserId);
-        currentDiv.innerHTML = "";
-    };
-    //显示成员列表
-    var showRoomMember = function showRoomMember() {
-        if (groupQuering) {
-            return;
-        }
-        groupQuering = true;
-        queryOccupants(curRoomId);
-    };
-    //根据roomId查询room成员列表
-    var queryOccupants = function queryOccupants(roomId) {
-        var occupants = [];
-        conn.queryRoomInfo({
-            roomId : roomId,
-            success : function(occs) {
-                if (occs) {
-                    for (var i = 0; i < occs.length; i++) {
-                        occupants.push(occs[i]);
-                    }
-                }
-                conn.queryRoomMember({
-                    roomId : roomId,
-                    success : function(members) {
-                        if (members) {
-                            for (var i = 0; i < members.length; i++) {
-                                occupants.push(members[i]);
-                            }
-                        }
-                        showRoomMemberList(occupants);
-                        groupQuering = false;
-                    },
-                    error : function() {
-                        groupQuering = false;
-                    }
-                });
-            },
-            error : function() {
-                groupQuering = false;
-            }
-        });
-    };
-    var showRoomMemberList = function showRoomMemberList(occupants) {
-        var list = $('#room-member-list')[0];
-        var childs = list.childNodes;
-        for (var i = childs.length - 1; i >= 0; i--) {
-            list.removeChild(childs.item(i));
-        }
-        for (i = 0; i < occupants.length; i++) {
-            var jid = occupants[i].jid;
-            var userName = jid.substring(jid.indexOf("_") + 1).split("@")[0];
-            var txt = $("<p></p>").text(userName);
-            $('#room-member-list').append(txt);
-        }
-        $('#option-room-div-modal').modal('toggle');
-    };
-    var showRegist = function showRegist() {
-        $('#loginmodal').modal('hide');
-        $('#regist-div-modal').modal('toggle');
-    };
-    var getObjectURL = function getObjectURL(file) {
-        var url = null;
-        if (window.createObjectURL != undefined) { // basic
-            url = window.createObjectURL(file);
-        } else if (window.URL != undefined) { // mozilla(firefox)
-            url = window.URL.createObjectURL(file);
-        } else if (window.webkitURL != undefined) { // webkit or chrome
-            url = window.webkitURL.createObjectURL(file);
-        }
-        return url;
-    };
-    var getLoacalTimeString = function getLoacalTimeString() {
-        var date = new Date();
-        var time = date.getHours() + ":" + date.getMinutes() + ":"
-                + date.getSeconds();
-        return time;
-    }*/
 }(window, undefined));

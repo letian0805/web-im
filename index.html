@@ -108,7 +108,7 @@
             <div ms-repeat-item='friend' ms-attr-id='item.name + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.name + "Contact"' ms-include='emimContact'></div>
         </div>
         <div ms-class='emim-hide: curWrapper!="group"'>
-            <div ms-repeat-item='group' ms-attr-id='item.roomId + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.roomId + "Contact"' ms-include='emimContact'></div>
+            <div ms-repeat-item='group' ms-attr-roomId='item.roomId' ms-attr-id='item.roomId + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.roomId + "Contact"' ms-include='emimContact'></div>
         </div>
         <div ms-class='emim-hide: curWrapper!="stranger"'>
             <div ms-repeat-item='stranger' ms-attr-id='item.id + "Contact"' class='emim-prl emim-contact' ms-click='select' ms-class='emim-contact-cur:cur==item.id + "Contact"' ms-include='emimContact'></div>
@@ -118,7 +118,7 @@
 
 
     <script id='emimContact' type='tpl'>
-        <img class='emim-avatar emim-contact-avatar' ms-attr-src='"img/header.png" || item.src'/>
+        <img class='emim-avatar emim-contact-avatar' ms-attr-src='"img/avatar.png" || item.src'/>
         <span class='emim-prl emim-contact-username'>{{item.name}}</span>
         <span class='emim-contact-msg'></span>
         <span class='emim-contact-count' style='display: none'></span>
@@ -127,17 +127,19 @@
     
     <!-- 消息发送区 -->
     <script id='emimSendWrapper' type='tpl'>
-    <div ms-controller='send'>
+    <div ms-controller='send' class='emim-prl'>
         <div class='chat02_title'>
-            <span class='emim-font emim-font-hover' ms-onclick='showFace' title='选择表情'>d</span>
-            <span class='emim-font emim-font-hover' fn='img' ms-onclick='sendfile' title='选择图片'>e</span>
-            <span class='emim-font emim-font-hover' fn='audio' ms-onclick='sendfile' title='选择语音'>f</span>
+            <span class='emim-font emim-font-hover' ms-click='showFace' title='选择表情'>d</span>
+            <span class='emim-font emim-font-hover' ms-click='sendFile' title='选择文件'>e</span>
         </div>
-        <ul id="emotionUL"></ul>
+        <ul ms-click="faceSelect"  ms-visible='faceShow' class='emim-face-wrapper'>
+            <li ms-repeat-item='faces' class='emim-center'><img ms-attr-src='"img/faces/" + item.src + ".png"' ms-attr-data='item.data'></li>
+        </ul>
         <div class='emim-w95 emim-auto'>
             <textarea class='emim-w100 emim-chat-textarea' spellcheck='false' ms-duplex='text'></textarea>
         </div>
         <button class='emim-themebg emim-pab emim-send-button' ms-click="send">Send</button>
+        <input id='fileInput' type='file' ms-visible='false' ms-duplex='file' ms-change='realSendFile'>
     </div>
     </script>
 

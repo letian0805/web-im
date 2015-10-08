@@ -113,11 +113,24 @@ input, textarea, button, img {
 .emim-w90 {
     width: 90%;
 }
+.emim-w60 {
+    width: 60%;
+}
 .emim-h100 {
     height: 100%;
 }
 .emim-center {
     text-align: center;
+}
+.emim-tl {
+    text-align: left;
+}
+.emim-tr {
+    text-align: right;
+}
+.emim-clear {
+    clear: both;
+    *zoom: 1;
 }
 .emim-themebg {
     background-color: #5E8FFF;
@@ -300,12 +313,16 @@ footer {
 .emim-contact-msg {
     float: left;
     margin: -28px 0 0 66px;
-    width: 190px;
+    width: 168px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     color: #AFAFAF;
     font-size: 12px;
+}
+.emim-contact-msg .emim-face-msg {
+    width: 16px;
+    margin: 0;
 }
 .emim-contact-count:before {
     content: '';
@@ -343,6 +360,30 @@ footer {
 .emim-chat-clear {
     right: 10px;
 }
+.emim-fr .emim-msg-container {
+    color: #fff;
+    background-color: #323538;
+}
+.emim-fl .emim-msg-container {
+    color: #323538;
+    background-color: #eee;
+}
+.emim-msg-wrapper {
+    max-width: 70%;
+}
+.emim-msg-container {
+    padding: 10px;
+    border-radius: 17px;
+    min-height: 20px;
+    min-width: 10px;
+    line-height: 20px;
+    word-wrap: break-word;
+}
+.emim-imgmsg img {
+    width: 100%;
+    vertical-align: middle;
+    border-radius: 2px;
+}
 /*
     send
 */
@@ -363,10 +404,36 @@ footer {
     font-size: 16px;
     color: #fff;
     right: 10px;
-    bottom: 10px;
+    bottom: -45px;
 }
-
-
+.emim-face-wrapper {
+    position: absolute;
+    top: -185px;
+    left: 8px;
+    background-color: #e6e6e6;
+    width: 224px;
+    padding: 8px;
+    border-radius: 8px;
+}
+.emim-face-wrapper li:hover {
+    cursor: pointer;
+}
+.emim-face-wrapper li {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+}
+.emim-face-wrapper li img {
+    display: inline-block;
+    width: 80%;
+    vertical-align: middle;
+}
+.emim-face-msg {
+    width: 24px;
+    vertical-align: middle;
+    margin: 0 2px;
+}
 
 
 
