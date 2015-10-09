@@ -168,7 +168,7 @@
 
                     var id = this.getAttr(fileInput, 'id');
 
-                    if(Easemob.im.Helper.isCanUploadFileAsync) {
+                    if(Easemob.im.Utils.isCanUploadFileAsync()) {
 
                         if(fileInput && !fileInput.value) return;
 
@@ -180,7 +180,7 @@
 
 
 
-                        file = Easemob.im.Helper.getFileUrl(id);
+                        file = Easemob.im.Utils.getFileUrl(id);
 
                         type = file.filetype.toLowerCase();
 
@@ -191,18 +191,18 @@
                     var opt = {
                         type : 'chat',
                         fileInputId : id,
-                        filename : file && file.name || '',
+                        filename : file && file.filename || '',
                         to : to,
                         apiUrl: Easemob.im.config.apiURL,
                         ext: {
-                            postfix: file && file.type || ''
+                            postfix: file && file.filetype || ''
                         },
                         onFileUploadError : function(error) {
                             //var messageContent = (error.msg || '') + ",发送图片文件失败:" + (filename||flashFilename);
                             //appendMsg(curUserId, to, messageContent);
                         },
                         onFileUploadComplete : function(data) {
-                            if(Easemob.im.Helper.isCanUploadFileAsync) {
+                            if(Easemob.im.Utils.isCanUploadFileAsync) {
                                 me.appendMsg(profileInfo.username, to, fileDom, 'img');
                             } else {
                                 swfupload.settings.upload_success_handler();
@@ -381,7 +381,7 @@
                     }
                     , apiUrl : Easemob.im.config.apiURL
                 };
-                Easemob.im.Helper.registerUser(options);   
+                Easemob.im.Utils.registerUser(options);   
             }
             , back: function() {
                 signup.hide();
@@ -643,16 +643,17 @@
         ---                              SDK INVOKE                             ---
         **************************************************************************/
         
-        var conn = new Easemob.im.Connection();
+        var conn = new Easemob.im.Connection({
+            https : Easemob.im.config.https,
+            wss: Easemob.im.config.wss,
+            url: Easemob.im.config.xmppURL
+        });
 
 
         /*
-            初始化连接
+            监听回调
         */
-        conn.init({
-            https : Easemob.im.config.https,
-            wss: Easemob.im.config.wss,
-            url: Easemob.im.config.xmppURL,
+        conn.listen({
             onOpened : function() {//当连接成功时的回调方法
                 handleOpen(conn);
             },
@@ -788,7 +789,7 @@
         param1: input file ID
     */
     var uploadShim = function(fileInputId) {
-        if(!Easemob.im.Helper.isCanUploadFile) {
+        if(!Easemob.im.Utils.isCanUploadFile) {
             return;
         }
         var pageTitle = document.title;
@@ -829,7 +830,7 @@
             , upload_success_handler: function(file, response){
                 if(!file || !response) return;
                 try{
-                    var res = Easemob.im.Helper.parseUploadResponse(response);
+                    var res = Easemob.im.Utils.parseUploadResponse(response);
                     
                     res = $.parseJSON(res);
                     res.filename = file.name;
