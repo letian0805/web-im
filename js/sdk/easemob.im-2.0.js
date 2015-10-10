@@ -1,20 +1,18 @@
 /**************************************************************************
----                             Easemob WebIm Js SDK                    ---
----                             v2.0                                    ---
+***                             Easemob WebIm Js SDK                    ***
+***                             v2.0                                    ***
 **************************************************************************/
 /*
     Module1:    工具类，开放给开发者 
     Module2:    Message
     Module3:    Connection
 */
-
+//audio, picture, receipts, location, vedio, file
 ;(function(window, undefined) {
 
     if(typeof Strophe == 'undefined'){
         throw 'need Strophe';
     }
-
-
 
     var Easemob = Easemob || {};
     Easemob.im = Easemob.im || {};
@@ -62,7 +60,6 @@
        
         return {
             hasFormData: typeof FormData != 'undefined'
-            , isIe: "ActiveXObject" in window
             , hasBlob: typeof Blob != 'undefined'
 
             , isCanSetRequestHeader: function() {
@@ -85,10 +82,6 @@
                 return Utils.isCanSetRequestHeader() && (Utils.hasBlob || Utils.hasOverrideMimeType());
             }
 
-            , inherit: function() {
-
-            }
-            
             , stringify: function(json) {
                 if(JSON.stringify) {
                     return JSON.stringify(json);
@@ -143,8 +136,8 @@
                 }
                 if(!orgName && !appName){
                     options.error({
-                        type : EASEMOB_IM_RESISTERUSER_ERROR,
-                        msg : '没有指定开发者信息'
+                        type: EASEMOB_IM_RESISTERUSER_ERROR
+                        , msg: '没有指定开发者信息'
                     });
                     return;
                 }
@@ -154,18 +147,18 @@
                 var restUrl = apiUrl + '/' + orgName + '/' + appName + '/users';
 
                 var userjson = {
-                        username : options.username,
-                        password : options.password,
-                        nickname : options.nickname || ''
+                        username: options.username
+                        , password: options.password
+                        , nickname: options.nickname || ''
                 };
 
                 var userinfo = JSON.stringify(userjson);
                 var options = {
-                    url : restUrl,
-                    dataType : 'json',
-                    data : userinfo,
-                    success : options.success || EMPTYFN,
-                    error : options.error || EMPTYFN
+                    url: restUrl
+                    , dataType: 'json'
+                    , data: userinfo
+                    , success: options.success || EMPTYFN
+                    , error: options.error || EMPTYFN
                 };
                 return Utils.ajax(options);
             }
@@ -176,8 +169,8 @@
                 var devInfos = appKey.split('#');
                 if(devInfos.length!=2){
                     error({
-                        type : EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR,
-                        msg : '请指定正确的开发者信息(appKey)'
+                        type: EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR
+                        , msg: '请指定正确的开发者信息(appKey)'
                     });
                     return false;
                 }
@@ -185,15 +178,15 @@
                 var appName = devInfos[1];
                 if(!orgName){
                     error({
-                        type : EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR,
-                        msg : '请指定正确的开发者信息(appKey)'
+                        type: EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR
+                        , msg: '请指定正确的开发者信息(appKey)'
                     });
                     return false;
                 }
                 if(!appName){
                     error({
-                        type : EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR,
-                        msg : '请指定正确的开发者信息(appKey)'
+                        type: EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR
+                        , msg: '请指定正确的开发者信息(appKey)'
                     });
                     return false;
                 }
@@ -207,26 +200,26 @@
                 var apiUrl = options.apiUrl || url;
 
                 var loginJson = {
-                    grant_type : 'password',
-                    username : user,
-                    password : pwd
+                    grant_type: 'password'
+                    , username: user
+                    , password: pwd
                 };
                 var loginfo = JSON.stringify(loginJson);
 
                 var options = {
-                    url : apiUrl+"/"+orgName+"/"+appName+"/token",
-                    dataType : 'json',
-                    data : loginfo,
-                    success : suc || EMPTYFN,
-                    error : error || EMPTYFN
+                    url: apiUrl + "/" + orgName + "/" + appName + "/token"
+                    , dataType: 'json'
+                    , data: loginfo
+                    , success: suc || EMPTYFN
+                    , error: error || EMPTYFN
                 };
                 return Utils.ajax(options);
             }
             , getFileUrl: function(fileInputId) {
                 var uri = {
-                    url : '',
-                    filename : '',
-                    filetype : ''
+                    url: ''
+                    , filename: ''
+                    , filetype: ''
                 };
 
                 if(!Utils.isCanUploadFileAsync()) return uri;
@@ -264,7 +257,7 @@
                         if(file.files.length>0){
                             fileSize = file.files[0].size;
                         }
-                    } else if(Utils.isIe) {
+                    } else if(file.select && 'ActiveXObject' in window) {
                         file.select();
                         var fileobject = new ActiveXObject ("Scripting.FileSystemObject");
                         var file = fileobject.GetFile (file.value);
@@ -275,8 +268,12 @@
             }
 
             , hasFlash: (function() {
-                if (/*@cc_on!@*/0) {//ie
-                    return new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+                if ('ActiveXObject' in window) {
+                    try {
+                        return new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+                    } catch (ex) {
+                        return 0;
+                    }
                 } else {
                     if (navigator.plugins && navigator.plugins.length > 0) {
                         return navigator.plugins["Shockwave Flash"];
@@ -335,24 +332,24 @@
                     || 0 > Object.prototype.toString.call(response).indexOf('Blob')) ? 
                         this.url+'?token=' : window.URL.createObjectURL(response);
             }
-            , uploadFn: function(options) {
+            , uploadFile: function(options) {
                 options = options || {};
                 options.onFileUploadProgress = options.onFileUploadProgress || EMPTYFN;
                 options.onFileUploadComplete = options.onFileUploadComplete || EMPTYFN;
                 options.onFileUploadError = options.onFileUploadError || EMPTYFN;
                 options.onFileUploadCanceled = options.onFileUploadCanceled || EMPTYFN;
-                var acc = options.accessToken;
+                var acc = options.accessToken || this.context.accessToken;
                 if (!acc) {
                     options.onFileUploadError({
-                        type : EASEMOB_IM_UPLOADFILE_NO_LOGIN,
-                        msg : '用户未登录到usergrid服务器,无法使用文件上传功能'
+                        type: EASEMOB_IM_UPLOADFILE_NO_LOGIN
+                        , msg: '用户未登录到usergrid服务器,无法使用文件上传功能'
                     });
                     return;
                 }
 
-                orgName = options.orgName || '';
-                appName = options.appName || '';
-                appKey = options.appKey || '';
+                orgName = options.orgName || this.context.orgName || '';
+                appName = options.appName || this.context.appName || '';
+                appKey = options.appKey || this.context.appKey || '';
                 if(!orgName && !appName && appKey){
                     var devInfos = appKey.split('#');
                     if(devInfos.length==2){
@@ -362,22 +359,18 @@
                 }
                 if(!orgName && !appName){
                     options.onFileUploadError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '没有指定开发者信息'
+                        type: EASEMOB_IM_UPLOADFILE_ERROR
+                        , msg: '没有指定开发者信息'
                     });
                     return;
                 }
                 var apiUrl = options.apiUrl || 'http://a1.easemob.com';
                 var uploadUrl = apiUrl + '/' + orgName + '/' + appName + '/chatfiles';
                 if (!Utils.isCanUploadFileAsync()) {
-                    if(Utils.hasFlash && typeof options.flashUpload === 'function') {
-                        options.flashUpload && options.flashUpload(uploadUrl, options); 
-                    } else {
-                        this.onError({
-                            type : EASEMOB_IM_UPLOADFILE_BROWSER_ERROR,
-                            msg : '当前浏览器不支持异步上传！'
-                        });
-                    }
+                    this.onError({
+                        type: EASEMOB_IM_UPLOADFILE_BROWSER_ERROR
+                        , msg: '当前浏览器不支持异步上传！'
+                    });
                     return;
                 }
 
@@ -385,14 +378,14 @@
                 var fileSize = Utils.getFileSizeFn(options.fileInputId);
                 if(fileSize > EASEMOB_IM_FILESIZE_LIMIT){
                     options.onFileUploadError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '上传文件超过服务器大小限制（10M）'
+                        type: EASEMOB_IM_UPLOADFILE_ERROR
+                        , msg: '上传文件超过服务器大小限制（10M）'
                     });
                     return ;
                 }else if(fileSize <= 0){
                     options.onFileUploadError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '上传文件大小为0'
+                        type: EASEMOB_IM_UPLOADFILE_ERROR
+                        , msg: '上传文件大小为0'
                     });
                     return ;
                 }
@@ -400,10 +393,9 @@
                 var xhr = Utils.xmlrequest();
                 var onError = function(e) {
                     options.onFileUploadError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '上传文件失败',
-                        e : e,
-                        xhr : xhr
+                        type: EASEMOB_IM_UPLOADFILE_ERROR
+                        , msg: '上传文件失败'
+                        , xhr: xhr
                     });
                 }
                 if(xhr.upload){
@@ -417,11 +409,10 @@
                             options.onFileUploadComplete(json);
                         } catch(e){
                             options.onFileUploadError({
-                                type : EASEMOB_IM_UPLOADFILE_ERROR,
-                                msg : '上传文件失败,服务端返回值值不正确',
-                                e : e,
-                                data : xhr.responseText,
-                                xhr : xhr
+                                type: EASEMOB_IM_UPLOADFILE_ERROR
+                                , msg: '上传文件失败,服务端返回值值不正确'
+                                , data: xhr.responseText
+                                , xhr: xhr
                             });
                         }
                     }, false);
@@ -435,19 +426,18 @@
                                     options.onFileUploadComplete(json);
                                 } catch(e){
                                     options.onFileUploadError({
-                                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                                        msg : '上传文件失败,服务端返回值不正确',
-                                        e : e,
-                                        data : xhr.responseText,
-                                        xhr : xhr
+                                        type: EASEMOB_IM_UPLOADFILE_ERROR
+                                        , msg: '上传文件失败,服务端返回值不正确'
+                                        , data: xhr.responseText
+                                        , xhr: xhr
                                     });
                                 }
                             } else {
                                     options.onFileUploadError({
-                                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                                        msg : '上传文件失败,服务端返回异常',
-                                        data : xhr.responseText,
-                                        xhr : xhr
+                                        type: EASEMOB_IM_UPLOADFILE_ERROR
+                                        , msg: '上传文件失败,服务端返回异常'
+                                        , data: xhr.responseText
+                                        , xhr: xhr
                                     });
                             }
                         } else {
@@ -460,6 +450,7 @@
                 xhr.open("POST", uploadUrl);
 
                 xhr.setRequestHeader('restrict-access', 'true');
+                xhr.setRequestHeader('Accept', '*/*');//android qq browser has some problem at this attr
                 xhr.setRequestHeader('Authorization', 'Bearer ' + acc);
 
                 var localFile = '';
@@ -482,18 +473,17 @@
                 var accessToken = options.accessToken || '';
                 if (!accessToken) {
                     options.onFileDownloadError({
-                        type : EASEMOB_IM_DOWNLOADFILE_NO_LOGIN,
-                        msg : '用户未登录到usergrid服务器,无法使用文件下载功能'
+                        type: EASEMOB_IM_DOWNLOADFILE_NO_LOGIN
+                        , msg: '用户未登录到usergrid服务器,无法使用文件下载功能'
                     });
                     return;
                 }
 
                 var onError = function(e) {
                     options.onFileDownloadError({
-                        type : EASEMOB_IM_DOWNLOADFILE_ERROR,
-                        msg : '下载文件失败',
-                        xhr : xhr,
-                        e : e
+                        type: EASEMOB_IM_DOWNLOADFILE_ERROR
+                        , msg: '下载文件失败'
+                        , xhr: xhr
                     });
                 }
                 if (!Utils.isCanDownLoadFile()) {
@@ -513,17 +503,17 @@
                                 options.onFileDownloadComplete(xhr.response,xhr);
                             } else {
                                     options.onFileDownloadError({
-                                        type : EASEMOB_IM_DOWNLOADFILE_ERROR,
-                                        msg : '下载文件失败,服务端返回异常',
-                                        xhr : xhr
+                                        type: EASEMOB_IM_DOWNLOADFILE_ERROR
+                                        , msg: '下载文件失败,服务端返回异常'
+                                        , xhr: xhr
                                     });
                             }
                         } else {
                             xhr.abort();
                             options.onFileDownloadError({
-                                type : EASEMOB_IM_DOWNLOADFILE_ERROR,
-                                msg : '错误的下载状态,退出下载',
-                                xhr : xhr
+                                type: EASEMOB_IM_DOWNLOADFILE_ERROR
+                                , msg: '错误的下载状态,退出下载'
+                                , xhr: xhr
                             });
                         }
                     }
@@ -540,10 +530,10 @@
                 }
 
                 var innerHeaer = {
-                    'X-Requested-With' : 'XMLHttpRequest',
-                    'Accept' : 'application/octet-stream',
-                    'share-secret' : options.secret,
-                    'Authorization' : 'Bearer ' + accessToken
+                    'X-Requested-With': 'XMLHttpRequest'
+                    , 'Accept': 'application/octet-stream'
+                    , 'share-secret': options.secret
+                    , 'Authorization': 'Bearer ' + accessToken
                 };
                 var headers = options.headers || {};
                 for(var key in headers){
@@ -560,8 +550,8 @@
             , parseTextMessageFn: function(message) {
                 if(typeof(message) != 'string'){
                     conn.onError({
-                        type : EASEMOB_IM_MESSAGE_REC_TEXT_ERROR,
-                        msg : '不合法的消息内容格式，请检查发送消息内容！'
+                        type: EASEMOB_IM_MESSAGE_REC_TEXT_ERROR
+                        , msg: '不合法的消息内容格式，请检查发送消息内容！'
                     });
                     return;
                 }
@@ -570,28 +560,28 @@
                 var expr = /\[[^[\]]{2,3}\]/mg;
                 var emotions = receiveMsg.match(expr);
                 if (!emotions || emotions.length < 1){
-                    return {"isemotion":false,"body":[{"type" : "txt","data":message}]};
+                    return {"isemotion": false, "body": [{"type": "txt", "data": message}]};
                 }
                 var isemotion = false;
                 for (var i = 0; i < emotions.length; i++) {
                     var tmsg = receiveMsg.substring(0,receiveMsg.indexOf(emotions[i]));
                     if (tmsg) {
                         emessage.push({
-                            "type" : "txt",
-                            "data" : tmsg
+                            type: "txt"
+                            , data: tmsg
                         });
                     }
                     var emotion = emotionPicData[emotions[i]];
                     if (emotion) {
                         isemotion = true;
                         emessage.push({
-                            "type" : "emotion",
-                            "data" : emotion
+                            type: 'emotion'
+                            , data: emotion
                         });
                     } else {
                         emessage.push({
-                            "type" : "txt",
-                            "data" : emotions[i]
+                            type: 'txt'
+                            , data: emotions[i]
                         });
                     }
                     var restMsgIndex = receiveMsg.indexOf(emotions[i]) + emotions[i].length;
@@ -599,14 +589,14 @@
                 }
                 if (receiveMsg) {
                     emessage.push({
-                        "type" : "txt",
-                        "data" : receiveMsg
+                        type: 'txt'
+                        , data: receiveMsg
                     });
                 }
                 if(isemotion){
                     return {"isemotion":isemotion,"body":emessage};
                 }
-                return {"isemotion":false,"body":[{"type" : "txt","data":message}]};
+                return {"isemotion": false, "body": [{"type": "txt", "data": message}]};
             }
 
             , xmlrequest: function (crossDomain) {
@@ -643,22 +633,6 @@
                     xhr.onreadystatechange();
                 };
                 return xhr;
-            }
-
-            , getIEVersion: function() {
-                var ua = navigator.userAgent,
-                    matches,
-                    tridentMap = {'4':8,'5':9,'6':10,'7':11};
-
-                matches = ua.match(/MSIE (\d+)/i);
-                if(matches&&matches[1]) {
-                    return +matches[1];
-                }
-                matches = ua.match(/Trident\/(\d+)/i);
-                if(matches&&matches[1]) {
-                    return tridentMap[matches[1]]||null;
-                }
-                return null;
             }
 
             , ajax: function(options) {
@@ -757,31 +731,92 @@
         };
     }());
 
+
+
     /*
         Module2:    Message
     */
-    var Message = function(msg) {
-        this.type = '';
-        this.to = '';
-        this.apiUrl = '';
+    var _msgHash = {};
+    var Message = function(message, conn) {
+
+        if(!(this instanceof Message)) {
+            return new Message(message, conn);
+        }
+        
+        var me = this;
+        me.msg = message;
+
+        var _send = function(message) {
+            var json = {
+                from: conn.context.userId || ''
+                , to: message.to
+                , bodies: [message.body]
+                , ext: message.ext || {}
+            };
+            
+            var jsonstr = JSON.stringify(json);
+            var dom = $msg({
+                type: message.type || 'chat'
+                , to: message.toJid
+                , id: message.id
+                , xmlns: "jabber:client"
+            }).c("body").t(jsonstr);
+            conn.sendCommand(dom.tree());
+        }
+
+
+
+        if(me.msg.filename) {
+            var _tmpComplete = me.msg.onFileUploadComplete;
+            var _complete = function(data) {
+
+                if(data.entities[0]['file-metadata']){
+                    var file_len = data.entities[0]['file-metadata']['content-length'];
+                    me.msg.file_length = file_len;
+                    me.msg.filetype = data.entities[0]['file-metadata']['content-type']
+                    if (file_len > 204800) {
+                        me.msg.thumbnail = true;
+                    }
+                }
+                
+                me.msg.body = {
+                    type: me.msg.ext.messageType || 'file'
+                    , url: data.uri + '/' + data.entities[0]['uuid']
+                    , secret: data.entities[0]['share-secret']
+                    , filename: me.msg.filename
+                    , thumb: data.uri + '/' + data.entities[0].uuid
+                    , thumb_secret: ''
+                    , size: {
+                        width: me.msg.width
+                        , height: me.msg.height
+                    }
+                    , file_length: me.msg.file_length
+                    , filetype: me.msg.filetype
+                }
+
+                _send(me.msg);
+                _tmpComplete instanceof Function && _tmpComplete(data);
+            };
+
+            me.msg.onFileUploadComplete = _complete;
+
+            Utils.uploadFile.call(conn, me.msg);
+        } else {
+            me.msg.body = {
+                type: "txt"
+                , msg: me.msg.msg 
+            };
+            _send(me.msg);
+        }
     }
-    Message.prototype.onerror = new Function();
-    Message.prototype.oncomplete = new Function();
-
-    var TextMessage = Utils.inherit(Message);
-    var ImageMessage = Utils.inherit(Message, {filename: '', ext: {postfix: ''}});
-    var AudioMessage = Utils.inherit(Message, {filename: '', ext: {postfix: ''}});
-    var FileMessage = Utils.inherit(Message, {filename: '', ext: {postfix: ''}});
-    var LocalMessage = Utils.inherit(Message, {filename: '', ext: {postfix: ''}});
-    var VedioMessage = Utils.inherit(Message, {filename: '', ext: {postfix: ''}});
-    var CmdMessage = Utils.inherit(Message, {ext: {cmd: {}}});
-
-
+        
+    
 
     /*
         Module3: Connection
     */
     var Connection = (function() {
+
         var _parseRoomFn = function(result) {
             var rooms = [];
             var items = result.getElementsByTagName("item");
@@ -791,10 +826,10 @@
                     var roomJid = item.getAttribute('jid');
                     var tmp = roomJid.split("@")[0];
                     var room = {
-                            jid : roomJid,
-                            name : item.getAttribute('name'),
-                            roomId : tmp.split('_')[1]
-                        };
+                        jid: roomJid
+                        , name: item.getAttribute('name')
+                        , roomId: tmp.split('_')[1]
+                    };
                     rooms.push(room);
                 }
             }
@@ -808,9 +843,9 @@
                 for(var i=0;i<items.length;i++){
                     var item = items[i];
                     var room = {
-                            jid : item.getAttribute('jid'),
-                            name : item.getAttribute('name')
-                        };
+                        jid: item.getAttribute('jid')
+                        , name: item.getAttribute('name')
+                    };
                     occupants.push(room);
                 }
             }
@@ -889,8 +924,8 @@
                         }
                         var subscription = item.getAttribute('subscription');
                         var friend = {
-                                    subscription : subscription,
-                                    jid : jid
+                            subscription: subscription
+                            , jid: jid
                         };
                         var ask = item.getAttribute('ask');
                         if(ask){
@@ -919,19 +954,19 @@
             if(accessToken == ''){
                 var loginfo = JSON.stringify(options);
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR,
-                    msg : "登录失败,"+ loginfo,
-                    data : options,
-                    xhr : xhr
+                    type: EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR
+                    , msg: "登录失败," + loginfo
+                    , data: options
+                    , xhr: xhr
                 });
                 return;
             }
             conn.context.accessToken = options.access_token;
             conn.context.accessTokenExpires = options.expires_in;
-            var stropheConn = conn.context.stropheConn || new Strophe.Connection(conn.url,{
-                                inactivity : conn.inactivity,
-                                maxRetries : conn.maxRetries,
-                                pollingTime : conn.pollingTime
+            var stropheConn = conn.context.stropheConn || new Strophe.Connection(conn.url, {
+                inactivity: conn.inactivity
+                , maxRetries: conn.maxRetries
+                , pollingTime: conn.pollingTime
             });
             var callback = function(status,msg){
                 _login2ImCallback(status,msg,conn);
@@ -962,9 +997,9 @@
 
         var _login2ImCallback = function(status,msg,conn) {
             if (status == Strophe.Status.CONNFAIL){
-              conn.onError({
-                    type : EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR,
-                    msg : msg
+                conn.onError({
+                    type: EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR
+                    , msg: msg
                 });
             } else if ((status == Strophe.Status.ATTACHED) || (status == Strophe.Status.CONNECTED)){
                 var handleMessage = function(msginfo){
@@ -1013,16 +1048,16 @@
                 }
                 conn.notifyVersion();
                 conn.onOpened({
-                    canReceive : supportRecMessage,
-                    canSend : supportSedMessage,
-                    accessToken : conn.context.accessToken
+                    canReceive: supportRecMessage
+                    , canSend: supportSedMessage
+                    , accessToken: conn.context.accessToken
                 });
             } else if (status == Strophe.Status.DISCONNECTING) {
                 if(conn.isOpened()){// 不是主动关闭
                     conn.context.status = STATUS_CLOSING;
                     conn.onError({
-                        type : EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR,
-                        msg : msg
+                        type: EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR
+                        , msg: msg
                     });
                 }
             } else if (status == Strophe.Status.DISCONNECTED) {
@@ -1031,14 +1066,14 @@
                 conn.onClosed();
             } else if (status == Strophe.Status.AUTHFAIL){
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_AUTH_ERROR,
-                    msg : '登录失败,请输入正确的用户名和密码'
+                    type: EASEMOB_IM_CONNCTION_AUTH_ERROR
+                    , msg: '登录失败,请输入正确的用户名和密码'
                 });
                 conn.clear();
             } else if(status == Strophe.Status.ERROR){
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_SERVER_ERROR,
-                    msg : msg || '服务器异常'
+                    type: EASEMOB_IM_CONNCTION_SERVER_ERROR
+                    , msg: msg || '服务器异常'
                 });
             }
         };
@@ -1060,8 +1095,8 @@
         var _innerCheck = function(options,conn) {
             if (conn.isOpened() || conn.isOpening()) {
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_REOPEN_ERROR,
-                    msg : '重复打开连接,请先关闭连接再打开'
+                    type: EASEMOB_IM_CONNCTION_REOPEN_ERROR
+                    , msg: '重复打开连接,请先关闭连接再打开'
                 });
                 return false;
             }
@@ -1070,8 +1105,8 @@
             var user = options.user || '';
             if (options.user == '') {
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_USER_NOT_ASSIGN_ERROR,
-                    msg : '未指定用户'
+                    type: EASEMOB_IM_CONNCTION_USER_NOT_ASSIGN_ERROR
+                    , msg: '未指定用户'
                 });
                 return false;
             }
@@ -1080,8 +1115,8 @@
             var devInfos = appKey.split('#');
             if(devInfos.length!=2){
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_OPEN_ERROR,
-                    msg : '请指定正确的开发者信息(appKey)'
+                    type: EASEMOB_IM_CONNCTION_OPEN_ERROR
+                    , msg: '请指定正确的开发者信息(appKey)'
                 });
                 return false;
             }
@@ -1089,15 +1124,15 @@
             var appName = devInfos[1];
             if(!orgName){
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_OPEN_ERROR,
-                    msg : '请指定正确的开发者信息(appKey)'
+                    type: EASEMOB_IM_CONNCTION_OPEN_ERROR
+                    , msg: '请指定正确的开发者信息(appKey)'
                 });
                 return false;
             }
             if(!appName){
                 conn.onError({
-                    type : EASEMOB_IM_CONNCTION_OPEN_ERROR,
-                    msg : '请指定正确的开发者信息(appKey)'
+                    type: EASEMOB_IM_CONNCTION_OPEN_ERROR
+                    , msg: '请指定正确的开发者信息(appKey)'
                 });
                 return false;
             }
@@ -1146,7 +1181,7 @@
             this.maxRetries = options.maxRetries || 5;
             this.pollingTime = options.pollingTime || 800;
             this.stropheConn = false;
-            this.context = {status : STATUS_INIT};
+            this.context = {status: STATUS_INIT};
         };
 
         connection.prototype.listen = function(options) {
@@ -1166,6 +1201,18 @@
             this.onReceivedMessage = options.onReceivedMessage || EMPTYFN;
             this.onInviteMessage = options.onInviteMessage || EMPTYFN;
         }
+
+        connection.prototype.sendReceiptsMessage = function(options){
+            var dom = $msg({
+                from: this.context.jid || ''
+                , to: "easemob.com"
+                , id: options.id || ''
+            }).c("received",{
+                xmlns: "urn:xmpp:receipts"
+                , id: options.id || ''
+            });
+            this.sendCommand(dom.tree());
+        };
 
         connection.prototype.open = function(options) {
             var pass = _innerCheck(options,this);
@@ -1192,17 +1239,17 @@
                 var error = function(res,xhr,msg){
                     if(res.error && res.error_description){
                         conn.onError({
-                            type : EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR,
-                            msg : "登录失败,"+res.error_description,
-                            data : res,
-                            xhr : xhr
+                            type: EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR
+                            , msg: "登录失败,"+res.error_description
+                            , data: res
+                            , xhr: xhr
                         });
                     } else {
                         conn.onError({
-                            type : EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR,
-                            msg : "登录失败",
-                            data : res,
-                            xhr : xhr
+                            type: EASEMOB_IM_CONNCTION_OPEN_USERGRID_ERROR
+                            , msg: "登录失败"
+                            , data: res
+                            , xhr: xhr
                         });
                     }
                     conn.clear();
@@ -1210,18 +1257,18 @@
                 this.context.status = STATUS_DOLOGIN_USERGRID;
 
                 var loginJson = {
-                    grant_type : 'password',
-                    username : userId,
-                    password : pwd
+                    grant_type: 'password'
+                    , username: userId
+                    , password: pwd
                 };
                 var loginfo = JSON.stringify(loginJson);
 
                 var options = {
-                    url : apiUrl+"/"+orgName+"/"+appName+"/token",
-                    dataType : 'json',
-                    data : loginfo,
-                    success : suc || EMPTYFN,
-                    error : error || EMPTYFN
+                    url: apiUrl + "/" + orgName + "/" + appName + "/token"
+                    , dataType: 'json'
+                    , data: loginfo
+                    , success: suc || EMPTYFN
+                    , error: error || EMPTYFN
                 };
                 Utils.ajax(options);
             }
@@ -1238,8 +1285,8 @@
             var accessToken = options.accessToken || '';
             if(accessToken == ''){
                 this.onError({
-                    type : EASEMOB_IM_CONNCTION_ATTACH_USERGRID_ERROR,
-                    msg : '未指定用户的accessToken'
+                    type: EASEMOB_IM_CONNCTION_ATTACH_USERGRID_ERROR
+                    , msg: '未指定用户的accessToken'
                 });
                 return;
             }
@@ -1247,8 +1294,8 @@
             var sid = options.sid || '';
             if(sid == ''){
                 this.onError({
-                    type : EASEMOB_IM_CONNCTION_ATTACH_ERROR,
-                    msg : '未指定用户的会话信息'
+                    type: EASEMOB_IM_CONNCTION_ATTACH_ERROR
+                    , msg: '未指定用户的会话信息'
                 });
                 return;
             }
@@ -1256,8 +1303,8 @@
             var rid = options.rid || '';
             if(rid == ''){
                 this.onError({
-                    type : EASEMOB_IM_CONNCTION_ATTACH_ERROR,
-                    msg : '未指定用户的消息id'
+                    type: EASEMOB_IM_CONNCTION_ATTACH_ERROR
+                    , msg: '未指定用户的消息id'
                 });
                 return;
             }
@@ -1303,17 +1350,17 @@
         connection.prototype.notifyVersion = function (suc,fail){
             var jid = _getJid({},this);
             var dom = $iq({
-                    from : this.context.jid || '',
-                    to: this.domain,
-                    type: "result"
+                    from: this.context.jid || ''
+                    , to: this.domain
+                    , type: "result"
             }).c("query", {xmlns: "jabber:iq:version"}).c("name").t("easemob").up().c("version").t(Easemob.im.version).up().c("os").t("webim");
             suc = suc || EMPTYFN;
             error = fail || this.onError;
             var failFn = function(ele){
                 error({
-                    type : EASEMOB_IM_CONNCTION_NOTIFYVERSION_ERROR,
-                    msg : '发送版本信息给服务器时失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_NOTIFYVERSION_ERROR
+                    , msg: '发送版本信息给服务器时失败'
+                    , data: ele
                 });
             };
             this.context.stropheConn.sendIQ(dom.tree(),suc,failFn);
@@ -1330,11 +1377,11 @@
             var fromUser = _parseNameFromJidFn(from);
             var toUser = _parseNameFromJidFn(to);
             var info = {
-                from: fromUser,
-                to : toUser,
-                fromJid : from,
-                toJid : to,
-                type : type
+                from: fromUser
+                , to: toUser
+                , fromJid: from
+                , toJid: to
+                , type: type
             };
 
             var showTags = msginfo.getElementsByTagName("show");
@@ -1393,54 +1440,54 @@
             return true;
         };
 
-        connection.prototype.handleMessage = function(msginfo){
+        connection.prototype.handleMessage = function(msginfo) {
             if(this.isClosed()){
                 return;
             }
             var id = msginfo.getAttribute('id') || '';
             this.sendReceiptsMessage({
-                id : id
+                id: id
             });
             var parseMsgData = _parseResponseMessageFn(msginfo);
-            if(parseMsgData.errorMsg){
+            if(parseMsgData.errorMsg) {
                 return;
             }
             var msgDatas = parseMsgData.data;
-            for(var i in msgDatas){
+            for(var i in msgDatas) {
                 var msg = msgDatas[i];
                 var from = msg.from;
                 var too = msg.to;
                 var extmsg = msg.ext || {};
                 var chattype = msginfo.getAttribute('type') || 'chat';
                 var msgBodies = msg.bodies;
-                if(!msgBodies || msgBodies.length==0){
+                if(!msgBodies || msgBodies.length==0) {
                     continue;
                 }
                 var msgBody = msg.bodies[0];
                 var type = msgBody.type;
-                if ("txt" == type) {
+                if("txt" == type) {
                     var receiveMsg = msgBody.msg;
                     var emotionsbody = Utils.parseTextMessageFn(receiveMsg);
-                    if(emotionsbody.isemotion){
+                    if(emotionsbody.isemotion) {
                         this.onEmotionMessage({
-                            id: id,
-                            type : chattype,
-                            from : from,
-                            to : too,
-                            data : emotionsbody.body,
-                            ext : extmsg
+                            id: id
+                            , type: chattype
+                            , from: from
+                            , to: too
+                            , data: emotionsbody.body
+                            , ext: extmsg
                         });
                     } else {
                         this.onTextMessage({
-                            id: id,
-                            type : chattype,
-                            from : from,
-                            to : too,
-                            data : receiveMsg,
-                            ext : extmsg
+                            id: id
+                            , type: chattype
+                            , from: from
+                            , to: too
+                            , data: receiveMsg
+                            , ext: extmsg
                         });
                     }
-                } else if ("img" == type) {
+                } else if("img" == type) {
                     var rwidth = 0;
                     var rheight = 0;
                     if(msgBody.size){
@@ -1448,82 +1495,82 @@
                         rheight = msgBody.size.height;
                     }
                     var msg = {
-                        id: id,
-                        type : chattype,
-                        from : from,
-                        to : too,
-                        url : msgBody.url,
-                        secret : msgBody.secret,
-                        filename : msgBody.filename,
-                        thumb : msgBody.thumb,
-                        thumb_secret : msgBody.thumb_secret,
-                        file_length : msgBody.file_length||'',
-                        width : rwidth,
-                        height : rheight,
-                        filetype : msgBody.filetype||'',
-                        accessToken : this.context.accessToken || '',
-                        ext : extmsg
+                        id: id
+                        , type: chattype
+                        , from: from
+                        , to: too
+                        , url: msgBody.url
+                        , secret: msgBody.secret
+                        , filename: msgBody.filename
+                        , thumb: msgBody.thumb
+                        , thumb_secret: msgBody.thumb_secret
+                        , file_length: msgBody.file_length || ''
+                        , width: rwidth
+                        , height: rheight
+                        , filetype: msgBody.filetype || ''
+                        , accessToken: this.context.accessToken || ''
+                        , ext: extmsg
                     };
                     this.onPictureMessage(msg);
-                } else if ("audio" == type) {
+                } else if("audio" == type) {
                     this.onAudioMessage({
-                        id: id,
-                        type : chattype,
-                        from : from,
-                        to : too,
-                        url : msgBody.url,
-                        secret : msgBody.secret,
-                        filename : msgBody.filename,
-                        length : msgBody.length||'',
-                        file_length : msgBody.file_length||'',
-                        filetype : msgBody.filetype||'',
-                        accessToken : this.context.accessToken || '',
-                        ext : extmsg
+                        id: id
+                        , type: chattype
+                        , from: from
+                        , to: too
+                        , url: msgBody.url
+                        , secret: msgBody.secret
+                        , filename: msgBody.filename
+                        , length: msgBody.length || ''
+                        , file_length: msgBody.file_length || ''
+                        , filetype: msgBody.filetype || ''
+                        , accessToken: this.context.accessToken || ''
+                        , ext: extmsg
                     });
-                } else if ("file" == type) {
+                } else if("file" == type) {
                     this.onFileMessage({
-                        id: id,
-                        type : chattype,
-                        from : from,
-                        to : too,
-                        url : msgBody.url,
-                        secret : msgBody.secret,
-                        filename : msgBody.filename,
-                        file_length : msgBody.file_length,
-                        accessToken : this.context.accessToken || '',
-                        ext : extmsg
+                        id: id
+                        , type: chattype
+                        , from: from
+                        , to: too
+                        , url: msgBody.url
+                        , secret: msgBody.secret
+                        , filename: msgBody.filename
+                        , file_length: msgBody.file_length
+                        , accessToken: this.context.accessToken || ''
+                        , ext: extmsg
                     });
-                } else if ("loc" == type) {
+                } else if("loc" == type) {
                     this.onLocationMessage({
-                        id: id,
-                        type : chattype,
-                        from : from,
-                        to : too,
-                        addr : msgBody.addr,
-                        lat : msgBody.lat,
-                        lng : msgBody.lng,
-                        ext : extmsg
+                        id: id
+                        , type: chattype
+                        , from: from
+                        , to: too
+                        , addr: msgBody.addr
+                        , lat: msgBody.lat
+                        , lng: msgBody.lng
+                        , ext: extmsg
                     });
-                }else if("video" == type){
+                } else if("video" == type){
                     this.onVideoMessage({
-                        id: id,
-                        type : chattype,
-                        from : from,
-                        to : too,
-                        url : msgBody.url,
-                        secret : msgBody.secret,
-                        filename : msgBody.filename,
-                        file_length : msgBody.file_length,
-                        accessToken : this.context.accessToken || '',
-                        ext : extmsg
+                        id: id
+                        , type: chattype
+                        , from: from
+                        , to: too
+                        , url: msgBody.url
+                        , secret: msgBody.secret
+                        , filename: msgBody.filename
+                        , file_length: msgBody.file_length
+                        , accessToken: this.context.accessToken || ''
+                        , ext: extmsg
                     });
-                }else if("cmd" == type){
+                } else if("cmd" == type){
                     this.onCmdMessage({
-                        id: id,
-                        from : from,
-                        to : too,
-                        action : msgBody.action,
-                        ext : extmsg
+                        id: id
+                        , from: from
+                        , to: too
+                        , action: msgBody.action
+                        , ext: extmsg
                     });
                 }
             }
@@ -1531,6 +1578,11 @@
 
         connection.prototype.handleReceivedMessage = function(message){
             this.onReceivedMessage(message);
+
+            var rcv = message.getElementsByTagName('received');
+            var id = rcv.length > 0 ? rcv[0].innerHTML || rcv[0].innerText : 0;
+
+            _msgHash[id] && _msgHash[id].msg.success instanceof Function && _msgHash[id].msg.success(id);
         };
 
         connection.prototype.handleInviteMessage = function(message){
@@ -1551,9 +1603,9 @@
                 }
             }
             this.onInviteMessage({
-                type : 'invite',
-                from : form,
-                roomid : roomid
+                type: 'invite'
+                , from: form
+                , roomid: roomid
             });
         };
 
@@ -1562,8 +1614,8 @@
                 this.context.stropheConn.send(dom);
             } else {
                 this.onError({
-                    type : EASEMOB_IM_CONNCTION_OPEN_ERROR,
-                    msg : '连接还未建立,请先登录或等待登录处理完毕'
+                    type: EASEMOB_IM_CONNCTION_OPEN_ERROR
+                    , msg: '连接还未建立,请先登录或等待登录处理完毕'
                 });
             }
         };
@@ -1579,40 +1631,26 @@
                 return 'WEBIM_'+hexd;
             }
         };
-
-        connection.prototype.sendTextMessage = function(options) {
+        
+        connection.prototype.send = function(message) {
             var appKey = this.context.appKey || '';
-            var toJid = appKey + "_" + options.to + "@" + this.domain;
-            if(options.type && options.type == 'groupchat'){
-                toJid = appKey + "_"+options.to+'@conference.' + this.domain;
+            var toJid = appKey + "_" + message.to + "@" + this.domain;
+            if(message.type && message.type == 'groupchat'){
+                toJid = appKey + "_" + message.to + '@conference.' + this.domain;
             }
-            if(options.resource){
-                toJid = toJid + "/" + options.resource;
+            if(message.resource){
+                toJid = toJid + "/" + message.resource;
             }
-            var msgTxt = options.msg;
-            var json = {
-                from : this.context.userId || '',
-                to :    options.to,
-                bodies : [{
-                    type : "txt",
-                    msg : msgTxt
-                }],
-                ext : options.ext || {}
-            };
-            var jsonstr = JSON.stringify(json);
-            var dom = $msg({
-                to : toJid,
-                type : options.type || 'chat',
-                id : this.getUniqueId(),
-                xmlns : "jabber:client"
-            }).c("body").t(jsonstr);
-            this.sendCommand(dom.tree());
-        };
+
+            message.toJid = toJid;
+            message.id = this.getUniqueId();
+            _msgHash[message.id] = new Message(message, this);
+        }
 
         connection.prototype.heartBeat = function(conn) {
             var options = {
-                to : conn.domain,
-                type : "normal"
+                to: conn.domain
+                , type: "normal"
             };
             conn.heartBeatID = setInterval(function() {
                 conn.sendHeartBeatMessage(options);
@@ -1623,10 +1661,10 @@
             var json = {};
             var jsonstr = JSON.stringify(json);
             var dom = $msg({
-                to : options.to,
-                type : options.type,
-                id : this.getUniqueId(),
-                xmlns : "jabber:client"
+                to: options.to
+                , type: options.type
+                , id: this.getUniqueId()
+                , xmlns: "jabber:client"
             }).c("body").t(jsonstr);
             this.sendCommand(dom.tree());
         };
@@ -1635,271 +1673,14 @@
             clearInterval(conn.heartBeatID);
         };
 
-        connection.prototype.sendPicture = function(options) {
-            var onerror =  options.onFileUploadError || this.onError || EMPTYFN;
-            var onFileUploadComplete = options.onFileUploadComplete || EMPTYFN;
-            var conn = this;
-
-            var myUploadComplete = function(data) {
-                options["url"] = data.uri;
-                options["secret"] = data.entities[0]["share-secret"];
-                if(data.entities[0]["file-metadata"]){
-                    var file_len = data.entities[0]["file-metadata"]["content-length"];
-                    options["file_length"] = file_len;
-                    options["filetype"] = data.entities[0]["file-metadata"]["content-type"]
-                    if (file_len > 204800) {
-                        options["thumbnail"] = true;
-                    }
-                }
-                options["uuid"] = data.entities[0].uuid;
-
-                onFileUploadComplete(data);
-                conn.sendPictureMessage(options);
-            };
-            options.onFileUploadComplete = myUploadComplete;
-            options.onFileUploadError = options.onFileUploadError|| this.onError || EMPTYFN;
-            if(!Utils.isCanUploadFileAsync()){
-                options.appName = conn.context.appName || '';
-                options.orgName = conn.context.orgName || '';
-                options.accessToken = conn.context.accessToken || '';
-                Utils.uploadFn.call(this, options);
-                return;
-            }
-            
-            var image = new Image();
-            var imageLoadFn = function() {
-                image.onload = null;
-                if (!this.readyState || this.readyState == 'loaded'
-                        || this.readyState == 'complete') {
-                    var heigth = image.height;
-                    var width = image.width;
-                    options.height = heigth;
-                    options.width = width;
-                    options.appName = conn.context.appName || '';
-                    options.orgName = conn.context.orgName || '';
-                    options.accessToken = conn.context.accessToken || '';
-                    Utils.uploadFn(options);
-                };
-            };
-            if("onload" in image){
-                image.onload = imageLoadFn;
-            } else {
-                image.onreadystatechange = imageLoadFn;
-            }
-            image.onerror = function() {
-                image.onerror = function(){
-                    image.onerror = null;
-                    options.onFileUploadError({
-                        type : EASEMOB_IM_UPLOADFILE_ERROR,
-                        msg : '指定的图片不存在或者不是一个图片格式文件'
-                    });
-                };
-                image.src = document.getElementById(options.fileInputId).value;
-            };
-            var picId = options.fileInputId;
-            file = Utils.getFileUrl(picId);
-            options.fileInfo = file;
-            options.filename = file.filename;
-
-            if (!file.url) {
-                options.onFileUploadError({
-                    type : EASEMOB_IM_UPLOADFILE_NO_FILE,
-                    msg : '未选择上传文件'
-                });
-            } else {
-                image.src = file.url;
-            }
-        };
-
-        connection.prototype.sendPictureMessage = function(options) {
-            var appKey = this.context.appKey || '';
-            var toJid = appKey + "_" + options.to + "@" + this.domain;
-            if(options.type && options.type == 'groupchat'){
-                toJid = appKey + "_"+options.to+'@conference.' + this.domain;
-            }
-            if(options.resource){
-                toJid = toJid + "/" + options.resource;
-            }
-
-            var json = {
-                        from : this.context.userId || '',
-                        to :    options.to,
-                        bodies :[{
-                                type : "img",
-                                url : options.url + '/' + options.uuid,
-                                secret : options.secret,
-                                filename : options.filename,
-                                thumb : options.url + '/' + options.uuid,
-                                thumb_secret : '',
-                                size : {
-                                    width : options.width,
-                                    height : options.height
-                                },
-                                "file_length" : options.file_length,
-                                filetype : options.filetype
-                        }],
-                        ext : options.ext || {}
-            };
-            var jsonstr = JSON.stringify(json);
-            var date = new Date();
-            var dom = $msg({
-                        type : options.type || 'chat',
-                        to : toJid,
-                        id : this.getUniqueId(),
-                        xmlns : "jabber:client"
-            }).c("body").t(jsonstr);
-            this.sendCommand(dom.tree());
-        };
-
-        connection.prototype.sendAudio = function(options) {
-            var onerror =  options.onFileUploadError || this.onError || EMPTYFN;
-            var onFileUploadComplete = options.onFileUploadComplete || EMPTYFN;
-            var conn = this;
-            var myonComplete = function(data) {
-                options["url"] = data.uri;
-                options["secret"] = data.entities[0]["share-secret"];
-                if(data.entities[0]["file-metadata"]){
-                    options["file_length"] = data.entities[0]["file-metadata"]["content-length"];
-                    options["filetype"] = data.entities[0]["file-metadata"]["content-type"];
-                }
-                options["uuid"] = data.entities[0].uuid;
-                options["length"] = data.duration;
-                onFileUploadComplete(data);
-                conn.sendAudioMessage(options);
-            };
-            options.appName = this.context.appName || '';
-            options.orgName = this.context.orgName || '';
-            options.accessToken = this.context.accessToken || '';
-            options.onFileUploadComplete = myonComplete;
-
-            if(!Utils.isCanUploadFileAsync()){
-                Utils.uploadFn.call(this, options);
-                return;
-            }
-
-            var file = Utils.getFileUrl(options.fileInputId);
-            options.fileInfo = file;
-            options.filename = file.filename;
-
-            Utils.uploadFn(options, this);
-        };
-
-        connection.prototype.sendAudioMessage = function(options) {
-            var appKey = this.context.appKey || '';
-            var toJid = appKey + "_" + options.to + "@" + this.domain;
-            if(options.type && options.type == 'groupchat'){
-                toJid =appKey + "_"+options.to+'@conference.' + this.domain;
-            }
-            if(options.resource){
-                toJid = toJid + "/" + options.resource;
-            }
-
-            var json = {
-                        from : this.context.userId || '',
-                        to :    options.to,
-                        bodies :[{
-                                type : "audio",
-                                url : options.url + '/' + options.uuid,
-                                secret : options.secret,
-                                filename : options.filename,
-                                "file_length" : options.file_length,
-                                length : options.length
-                        }],
-                        ext : options.ext || {}
-            };
-            var jsonstr = JSON.stringify(json);
-            var dom = $msg({
-                        type : options.type || 'chat',
-                        to : toJid,
-                        id : this.getUniqueId(),
-                        xmlns : "jabber:client"
-            }).c("body").t(jsonstr);
-            this.sendCommand(dom.tree());
-        };
-
-        connection.prototype.sendFileMessage = function(options) {
-            var appKey = this.context.appKey || '';
-            var toJid = appKey + "_" + options.to + "@" + this.domain;
-            if(options.type && options.type == 'groupchat'){
-                toJid =appKey + "_"+options.to+'@conference.' + this.domain;
-            }
-
-            if(options.resource){
-                toJid = toJid + "/" + options.resource;
-            }
-            var json = {
-                        from : this.context.userId || '',
-                        to :    options.to,
-                        bodies :[{
-                                type : "file",
-                                url : options.url,
-                                secret : options.secret,
-                                filename : options.filename,
-                                "file_length" : options.file_length
-                        }],
-                        ext : options.ext || {}
-            };
-            var jsonstr = JSON.stringify(json);
-            var dom = $msg({
-                        type : 'chat',
-                        to : toJid,
-                        id : this.getUniqueId(),
-                        xmlns : "jabber:client"
-            }).c("body").t(jsonstr);
-            this.sendCommand(dom.tree());
-        };
-
-        connection.prototype.sendLocationMessage = function(options) {
-            var appKey = this.context.appKey || '';
-            var toJid = appKey + "_" + options.to + "@" + this.domain;
-            if(options.type && options.type == 'groupchat'){
-                toJid =appKey + "_"+options.to+'@conference.' + this.domain;
-            }
-
-            if(options.resource){
-                toJid = toJid + "/" + options.resource;
-            }
-            var json = {
-                        from : this.context.userId || '',
-                        to :    options.to,
-                        bodies :[{
-                                type : "loc",
-                                addr : options.addr,
-                                lat : options.lat,
-                                lng : options.lng
-                        }],
-                        ext : options.ext || {}
-            };
-            var jsonstr = JSON.stringify(json);
-            var dom = $msg({
-                        type : 'chat',
-                        to : toJid,
-                        id : this.getUniqueId(),
-                        xmlns : "jabber:client"
-            }).c("body").t(jsonstr);
-            this.sendCommand(dom.tree());
-        };
-
-        connection.prototype.sendReceiptsMessage = function(options) {
-            var dom = $msg({
-                        from : this.context.jid || '',
-                        to : "easemob.com",
-                        id : options.id || ''
-            }).c("received",{
-                        xmlns : "urn:xmpp:receipts",
-                        id : options.id || ''
-                    });
-            this.sendCommand(dom.tree());
-        };
-
         connection.prototype.addRoster = function(options) {
             var jid = _getJid(options,this);
             var name = options.name || '';
             var groups = options.groups || '';
 
-            var iq = $iq({type : 'set'});
-            iq.c("query",{xmlns:'jabber:iq:roster'});
-            iq.c("item",{jid: jid ,name : name});
+            var iq = $iq({type: 'set'});
+            iq.c("query", {xmlns:'jabber:iq:roster'});
+            iq.c("item", {jid: jid, name: name});
 
             if(groups){
                 for (var i = 0; i < groups.length; i++){
@@ -1913,7 +1694,7 @@
 
         connection.prototype.removeRoster = function(options) {
             var jid = _getJid(options,this);
-            var iq = $iq({type: 'set'}).c('query', {xmlns : "jabber:iq:roster"}).c('item', {jid: jid,subscription: "remove"});
+            var iq = $iq({type: 'set'}).c('query', {xmlns: "jabber:iq:roster"}).c('item', {jid: jid,subscription: "remove"});
 
             var suc = options.success || EMPTYFN;
             var error = options.error || EMPTYFN;
@@ -1940,17 +1721,17 @@
             error = options.error || this.onError;
             var failFn = function(ele){
                 error({
-                    type : EASEMOB_IM_CONNCTION_GETROSTER_ERROR,
-                    msg : '获取联系人信息失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_GETROSTER_ERROR
+                    , msg: '获取联系人信息失败'
+                    , data: ele
                 });
             };
             if(this.isOpened()){
                 this.context.stropheConn.sendIQ(dom.tree(),completeFn,failFn);
             } else {
                 error({
-                    type : EASEMOB_IM_CONNCTION_OPEN_ERROR,
-                    msg : '连接还未建立,请先登录或等待登录处理完毕'
+                    type: EASEMOB_IM_CONNCTION_OPEN_ERROR
+                    , msg: '连接还未建立,请先登录或等待登录处理完毕'
                 });
             }
         };
@@ -1969,7 +1750,7 @@
 
         connection.prototype.subscribed = function(options) {
             var jid = _getJid(options,this);
-            var pres = $pres({to : jid, type : "subscribed"});
+            var pres = $pres({to: jid, type: "subscribed"});
             if (options.message) {
                 pres.c("status").t(options.message).up();
             }
@@ -1978,7 +1759,7 @@
 
         connection.prototype.unsubscribe = function(options) {
             var jid = _getJid(options,this);
-            var pres = $pres({to : jid, type : "unsubscribe"});
+            var pres = $pres({to: jid, type: "unsubscribe"});
             if (options.message) {
                 pres.c("status").t(options.message);
             }
@@ -1987,7 +1768,7 @@
 
         connection.prototype.unsubscribed = function(options) {
             var jid = _getJid(options,this);
-            var pres = $pres({to : jid, type : "unsubscribed"});
+            var pres = $pres({to: jid, type: "unsubscribed"});
             if (options.message) {
                 pres.c("status").t(options.message).up();
             }
@@ -2017,9 +1798,9 @@
             var err =  options.error || EMPTYFN;
             var errorFn = function (ele){
                 err({
-                    type : EASEMOB_IM_CONNCTION_JOINROOM_ERROR,
-                    msg : '加入房间失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_JOINROOM_ERROR
+                    , msg: '加入房间失败'
+                    , data: ele
                 });
             }
             var iq = $pres({
@@ -2049,9 +1830,9 @@
             var err =  options.error || EMPTYFN;
             var errorFn = function (ele){
                 err({
-                    type : EASEMOB_IM_CONNCTION_GETROOM_ERROR,
-                    msg : '获取群组列表失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_GETROOM_ERROR
+                    , msg: '获取群组列表失败'
+                    , data: ele
                 });
             }
             this.context.stropheConn.sendIQ(iq.tree(), completeFn, errorFn);
@@ -2061,12 +1842,12 @@
             var domain = this.domain;
             var members = [];
              var iq= $iq({
-                  to : this.context.appKey+"_"+options.roomId+'@conference.' + this.domain,
-                  type : 'get'
+                  to: this.context.appKey + "_" + options.roomId + '@conference.' + this.domain
+                  , type: 'get'
                 }).c('query', {
                     xmlns: Strophe.NS.MUC+'#admin'
-                }).c('item',{
-                    affiliation:'member'
+                }).c('item', {
+                    affiliation: 'member'
                 });
             var suc =options.success || EMPTYFN;
             var completeFn = function(result){
@@ -2075,8 +1856,8 @@
                     for(var i=0;i<items.length;i++){
                         var item = items[i];
                         var mem = {
-                                jid : item.getAttribute('jid'),
-                                affiliation : 'member'
+                                jid: item.getAttribute('jid')
+                                , affiliation: 'member'
                             };
                         members.push(mem);
                     }
@@ -2086,9 +1867,9 @@
             var err =  options.error || EMPTYFN;
             var errorFn = function (ele){
                 err({
-                    type : EASEMOB_IM_CONNCTION_GETROOMMEMBER_ERROR,
-                    msg : '获取群组成员列表失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_GETROOMMEMBER_ERROR
+                    , msg: '获取群组成员列表失败'
+                    , data: ele
                 });
             }
             this.context.stropheConn.sendIQ(iq.tree(), completeFn, errorFn);
@@ -2111,9 +1892,9 @@
                         var field = fields[i];
                         if(field.getAttribute('label') == 'owner'){
                             var mem = {
-                                    jid : (field.textContent||field.text) + "@" + domain,
-                                    affiliation : 'owner'
-                                };
+                                jid: (field.textContent || field.text) + "@" + domain
+                                , affiliation: 'owner'
+                            };
                             members.push(mem);
                         }
                     }
@@ -2123,9 +1904,9 @@
             var err =  options.error || EMPTYFN;
             var errorFn = function (ele){
                 err({
-                    type : EASEMOB_IM_CONNCTION_GETROOMINFO_ERROR,
-                    msg : '获取群组信息失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_GETROOMINFO_ERROR
+                    , msg: '获取群组信息失败'
+                    , data: ele
                 });
             }
             this.context.stropheConn.sendIQ(iq.tree(), completeFn, errorFn);
@@ -2141,32 +1922,32 @@
             var err =  options.error || EMPTYFN;
             var errorFn = function (ele){
                 err({
-                    type : EASEMOB_IM_CONNCTION_GETROOMOCCUPANTS_ERROR,
-                    msg : '获取群组出席者列表失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_GETROOMOCCUPANTS_ERROR
+                    , msg: '获取群组出席者列表失败'
+                    , data: ele
                 });
             }
             var attrs = {
               xmlns: Strophe.NS.DISCO_ITEMS
             };
             var info = $iq({
-              from : this.context.jid,
-              to : this.context.appKey+"_"+options.roomId+'@conference.' + this.domain,
-              type : 'get'
+              from: this.context.jid
+              , to: this.context.appKey + "_" + options.roomId + '@conference.' + this.domain
+              , type: 'get'
             }).c('query', attrs);
             this.context.stropheConn.sendIQ(info.tree(), completeFn, errorFn);
         };
 
         connection.prototype.setUserSig = function(desc) {
-            var dom = $pres({xmlns : 'jabber:client'});
+            var dom = $pres({xmlns: 'jabber:client'});
             desc = desc || "";
             dom.c("status").t(desc);
             this.sendCommand(dom.tree());
         };
 
         connection.prototype.setPresence = function(type,status) {
-            var dom = $pres({xmlns : 'jabber:client'});
-            if (type){
+            var dom = $pres({xmlns: 'jabber:client'});
+            if(type){
                 if(status){
                     dom.c("show").t(type);
                     dom.up().c("status").t(status);
@@ -2178,7 +1959,7 @@
         };
 
         connection.prototype.getPresence = function() {
-            var dom = $pres({xmlns : 'jabber:client'});
+            var dom = $pres({xmlns: 'jabber:client'});
             var conn = this;
             this.sendCommand(dom.tree());
         };
@@ -2188,26 +1969,26 @@
             var jid = _getJid(options,this);
 
             var dom = $iq({
-                from : this.context.jid || '',
-                to: jid,
-                type: "get"
+                from: this.context.jid || ''
+                , to: jid
+                , type: "get"
             }).c("ping", {xmlns: "urn:xmpp:ping"});
 
             suc = options.success || EMPTYFN;
             error = options.error || this.onError;
             var failFn = function(ele){
                 error({
-                    type : EASEMOB_IM_CONNCTION_PING_ERROR,
-                    msg : 'ping失败',
-                    data : ele
+                    type: EASEMOB_IM_CONNCTION_PING_ERROR
+                    , msg: 'ping失败'
+                    , data: ele
                 });
             };
             if(this.isOpened()){
                 this.context.stropheConn.sendIQ(dom.tree(),suc,failFn);
             } else {
                 error({
-                    type : EASEMOB_IM_CONNCTION_OPEN_ERROR,
-                    msg : '连接还未建立,请先登录或等待登录处理完毕'
+                    type: EASEMOB_IM_CONNCTION_OPEN_ERROR
+                    , msg: '连接还未建立,请先登录或等待登录处理完毕'
                 });
             }
             return;
@@ -2235,7 +2016,7 @@
 
         connection.prototype.clear = function() {
             this.context = {
-                status : STATUS_INIT
+                status: STATUS_INIT
             };
         };
 
@@ -2353,7 +2134,7 @@
     };
 
     Easemob.im.Connection = Connection;
-    Easemob.im.Message = Message;
+     
     Easemob.im.Utils = Utils;
     window.Easemob = Easemob;
 

@@ -197,25 +197,24 @@
                         ext: {
                             postfix: file && file.filetype || ''
                         },
-                        onFileUploadError : function(error) {
+                        fail : function(error) {
                             //var messageContent = (error.msg || '') + ",发送图片文件失败:" + (filename||flashFilename);
                             //appendMsg(curUserId, to, messageContent);
                         },
-                        onFileUploadComplete : function(data) {
+                        success : function(data) {
                             if(Easemob.im.Utils.isCanUploadFileAsync) {
                                 me.appendMsg(profileInfo.username, to, fileDom, 'img');
                             } else {
                                 swfupload.settings.upload_success_handler();
                             }
-                        },
-                        flashUpload: flashUpload
+                        }
                     };
                     if (chatHeader.isGroup) {
                         opt.type = 'groupchat';
                         opt.to = chatHeader.roomId;
                     }
                             
-                    conn.sendPicture(opt);
+                    conn.send(opt);
                 }
             }
         }
@@ -599,13 +598,19 @@
                     return;
                 }
                 var options = {
-                    to : to,
-                    msg : send.text,
-                    type : "chat"
+                    to : to
+                    , msg : send.text
+                    , type : "chat"
+                    , fail: function(error) {
+
+                    }
+                    , success: function(message) {
+                        console.log(message);
+                    }
                 };
                 // 群组消息和个人消息的判断分支
                 chatHeader.isGroup && (options.type = 'groupchat');
-                conn.sendTextMessage(options);
+                conn.send(options);
                 //当前登录人发送的信息在聊天窗口中原样显示
                 Easemob.im.utils.appendMsg(profileInfo.username, to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')), send.text);
                 send.text = '';   
