@@ -15,9 +15,9 @@
     var AUDIOTYPE = {
         mp3: true
         , amr: true
-        , wma : true
-        , wav : true
-        , avi : true
+        , wma: true
+        , wav: true
+        , avi: true
     }
 
     /**************************************************************************
@@ -26,7 +26,7 @@
     avalon.ready(function() {
 
         //common
-        Easemob.im.utils = { 
+        Easemob.im.utils = {
             getAttr: function ( dom, attr ) {
                 return dom.getAttribute(attr);
             }
@@ -145,9 +145,9 @@
                 } else {
                     var id = this.getAttr(fileInput, 'id');
 
-                    if(Easemob.im.Utils.isCanUploadFileAsync()) {
+                    if ( Easemob.im.Utils.isCanUploadFileAsync() ) {
 
-                        if(fileInput && !fileInput.value) return;
+                        if ( fileInput && !fileInput.value ) return;
 
                         var me = this,
                             file = null,
@@ -161,27 +161,27 @@
                     }
 
                     var opt = {
-                        type : 'chat',
-                        fileInputId : id,
-                        filename : file && file.filename || '',
-                        to : to,
+                        type: 'chat',
+                        fileInputId: id,
+                        filename: file && file.filename || '',
+                        to: to,
                         apiUrl: Easemob.im.config.apiURL,
                         ext: {
                             postfix: file && file.filetype || ''
                         },
-                        fail : function(error) {
+                        fail: function ( error ) {
                             //var messageContent = (error.msg || '') + ",发送图片文件失败:" + (filename||flashFilename);
                             //appendMsg(curUserId, to, messageContent);
                         },
-                        success : function(data) {
-                            if(Easemob.im.Utils.isCanUploadFileAsync) {
+                        success: function ( data ) {
+                            if ( Easemob.im.Utils.isCanUploadFileAsync ) {
                                 me.appendMsg(profileInfo.username, to, fileDom, 'img');
                             } else {
                                 swfupload.settings.upload_success_handler();
                             }
                         }
                     };
-                    if (chatHeader.isGroup) {
+                    if ( chatHeader.isGroup ) {
                         opt.type = 'groupchat';
                         opt.to = chatHeader.roomId;
                     }
@@ -199,10 +199,10 @@
         var layer = avalon.define({
             $id: 'layer'
             , display: false
-            , show: function() {
+            , show: function () {
                 loading.display = true;
             }
-            , hide: function() {
+            , hide: function () {
                 loading.display = false;
             }
         });
@@ -211,11 +211,11 @@
         var loading = avalon.define({
             $id: 'loading'
             , display: false
-            , show: function() {
+            , show: function () {
                 loading.display = true;
                 layer.display = true;
             }
-            , hide: function() {
+            , hide: function () {
                 loading.display = false;
                 layer.display = false;
             }
@@ -227,13 +227,13 @@
             , content: ''
             , t: '-60px'
             , ts: 0
-            , show: function(html) {
+            , show: function ( html ) {
                 emprompt.t = '0';
                 emprompt.content = html;
                 clearTimeout(emprompt.ts);
                 emprompt.ts = setTimeout(emprompt.hide, 2000);
             }
-            , hide: function() {
+            , hide: function () {
                 emprompt.t = '-60px';
             }
         });
@@ -246,21 +246,21 @@
             , content: 'k'
             , port: 'Password'
             , display: true
-            , show: function() {
+            , show: function () {
                 signin.display = true;
             }
-            , hide: function() {
+            , hide: function () {
                 signin.display = false;
             }
-            , check: function() {
+            , check: function () {
                 if ( !this.value ) {
                     this.style.borderBottom = '1px solid rgb(255, 42, 0)';
                 } else {
                     this.style.borderBottom = '1px solid #eee';
                 }
             }
-            , transfer: function() {
-                switch(signin.content) {
+            , transfer: function () {
+                switch ( signin.content ) {
                     case 'j':
                         signin.content = 'k';
                         signin.port = 'Password';
@@ -270,34 +270,36 @@
                         signin.port = 'Token';
                 }
             }
-            , signin: function(e) {
+            , signin: function (e) {
                 var evt = e || window.event;
-                if(evt.keyCode != 0 && evt.keyCode != 13) return false;
-                if (!signin.username) {
+                if ( evt.keyCode != 0 && evt.keyCode != 13 ) {
+                    return false;
+                }
+                if ( !signin.username ) {
                     emprompt.show('请输入用户名');
                     return;
-                } else if (!signin.password) {
+                } else if ( !signin.password ) {
                     emprompt.show('请输入密码');
                     return;
                 }
                 loading.show();
-                if (signin.content === 'k') {
+                if ( signin.content === 'j' ) {
                     conn.open({//根据用户名令牌登录系统
-                        apiUrl : Easemob.im.config.apiURL,
-                        user : signin.username,
-                        accessToken : signin.token,
-                        appKey : Easemob.im.config.appkey
+                        apiUrl: Easemob.im.config.apiURL
+                        , user: signin.username
+                        , accessToken: signin.token
+                        , appKey: Easemob.im.config.appkey
                     });
                 } else {
                     conn.open({//根据用户名密码登录系统
-                        apiUrl : Easemob.im.config.apiURL,
-                        user : signin.username,
-                        pwd : signin.password,
-                        appKey : Easemob.im.config.appkey
+                        apiUrl: Easemob.im.config.apiURL
+                        , user: signin.username
+                        , pwd: signin.password
+                        , appKey: Easemob.im.config.appkey
                     });
                 }               
             }
-            , showSignup: function() {
+            , showSignup: function () {
                 signin.hide();
                 signup.show();
             }
@@ -308,48 +310,71 @@
             $id: 'signup'
             , username: ''
             , password: ''
+            , cpassword: ''
             , nickname: ''
             , display: false
-            , show: function() {
+            , show: function () {
                 signup.display = true;
             }
-            , hide: function() {
+            , check: function () {
+                if ( !this.value ) {
+                    this.style.borderBottom = '1px solid rgb(255, 42, 0)';
+                } else {
+                    this.style.borderBottom = '1px solid #eee';
+                }
+            }
+            , checkPwd: function () {
+                var pwd = document.getElementById('password');
+
+                if ( signup.password != signup.cpassword ) {
+                    pwd.style.borderBottom = '1px solid rgb(255, 42, 0)';
+                } else if ( signup.password ) {
+                    pwd.style.borderBottom = '1px solid #eee';
+                }
+                signup.check.call(this);
+            }
+            , hide: function () {
                 signup.display = false;
             }
-            , signup: function(e) {
+            , signup: function ( e ) {
                 var evt = e || window.event;
-                if(evt.keyCode != 13) return false;
-                if (!signup.username) {
+                if ( evt.keyCode && evt.keyCode != 13 ) {
+                    return false;
+                }
+                if ( !signup.username ) {
                     emprompt.show('请输入用户名');
                     return;
-                } else if (!signup.password) {
+                } else if ( !signup.password ) {
                     emprompt.show('请输入密码');
                     return;
-                } else if (!signup.nickname) {
+                } else if ( !signup.nickname ) {
                     emprompt.show('请输入昵称');
+                    return;
+                } else if ( signup.password != signup.cpassword ) {
+                    emprompt.show('两次输入密码不一致');
                     return;
                 }
                 loading.show();
                 var options = {
-                    username : signup.username
-                    , password : signup.password
-                    , nickname : signup.nickname
-                    , appKey : Easemob.im.config.appkey
-                    , success : function(result) {
+                    username: signup.username
+                    , password: signup.password
+                    , nickname: signup.nickname
+                    , appKey: Easemob.im.config.appkey
+                    , success: function ( result ) {
                         loading.hide();
                         emprompt.show("注册成功!");
                         signup.hide();
                         signin.show();
                     }
-                    , error : function(e) {
+                    , error: function ( e ) {
                         loading.hide();
                         emprompt.show(e.error);
                     }
-                    , apiUrl : Easemob.im.config.apiURL
+                    , apiUrl: Easemob.im.config.apiURL
                 };
                 Easemob.im.Utils.registerUser(options);   
             }
-            , back: function() {
+            , back: function () {
                 signup.hide();
                 signin.show();
             }

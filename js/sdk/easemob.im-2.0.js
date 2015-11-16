@@ -126,7 +126,7 @@
                 }
             }
 
-            , registerUserFn: function(options) {
+            , registerUser: function(options) {
                 var orgName = options.orgName || '';
                 var appName = options.appName || '';
                 var appKey = options.appKey || '';

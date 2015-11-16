@@ -15,15 +15,16 @@ body {
     background-size: 100% 100%;
     font: 14px 'Microsoft YaHei', Arial, sans-serif;
 }
-/*@font-face {
-    font-family: 'IM';
-    src: url('font/iconfont.eot');
-    src: url('font/iconfont.eot?#iefix') format('embedded-opentype'),
-    url('font/iconfont.woff') format('woff'),
-    url('font/iconfont.ttf') format('truetype'),
-    url('font/iconfont.svg#IM') format('svg');
-}*/
-@font-face {  font-family: 'webim';  src: url('//at.alicdn.com/t/font_1447404766_573237.eot'); /* IE9*/  src: url('//at.alicdn.com/t/font_1447404766_573237.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */  url('//at.alicdn.com/t/font_1447404766_573237.woff') format('woff'), /* chrome、firefox */  url('//at.alicdn.com/t/font_1447404766_573237.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/  url('//at.alicdn.com/t/font_1447404766_573237.svg#webim') format('svg'); /* iOS 4.1- */}
+@font-face {
+    font-family: 'webim';
+    src: url('//at.alicdn.com/t/font_1447404766_573237.eot'); /* IE9*/
+    src: url('//at.alicdn.com/t/font_1447404766_573237.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+        url('//at.alicdn.com/t/font_1447404766_573237.woff') format('woff'), /* chrome、firefox */
+        url('//at.alicdn.com/t/font_1447404766_573237.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+        url('//at.alicdn.com/t/font_1447404766_573237.svg#webim') format('svg'); /* iOS 4.1- */
+    font-weight: normal;
+    font-style: normal;
+}
 * {
     margin: 0;
     padding: 0;
@@ -61,7 +62,7 @@ button {
     padding: 0 10px;
 }
 input {
-    padding: 0 10px;
+    
 }
 input, textarea, button, img {
     border: none;
@@ -97,6 +98,12 @@ input, textarea, button, img {
 .emim-mt50 {
     margin-top: 50px;
 }
+.emim-mt80 {
+    margin-top: 80px;
+}
+.emim-mt120 {
+    margin-top: 120px;
+}
 .emim-dib {
     display: inline-block;
 }
@@ -126,6 +133,9 @@ input, textarea, button, img {
 }
 .emim-w90 {
     width: 90%;
+}
+.emim-w80 {
+    width: 80%;
 }
 .emim-w60 {
     width: 60%;
@@ -161,8 +171,8 @@ input, textarea, button, img {
     overflow-x: scroll;
 }
 .emim-avatar {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border-radius: 2px;
 }
 .emim-layer {
@@ -174,7 +184,7 @@ input, textarea, button, img {
 }
 .emim-font {
     font-family: webim;
-    font-size: 35px;
+    font-size: 30px;
     cursor: pointer;
 }
 .emim-theme {
@@ -197,13 +207,17 @@ input, textarea, button, img {
 }
 .emim-cur,
 .emim-font-hover:hover {
-    color: #5B98EB;
+    cursor: pointer;
+    color: rgb(71, 152, 234);
+}
+.emim-font-alarm-hover:hover {
+    cursor: pointer;
+    color: rgb(255, 42, 0);
 }
 .emim-main-btn,
 .emim-vice-btn {
     border-radius: 12px;
     border: 1px solid rgb(71, 152, 234);
-    width: 82%;
     line-height: 40px;
     font-size: 14px;
 }
@@ -301,13 +315,11 @@ footer {
     background-color: #FEFFFF;
     width: 90%;
     padding: 20px 0 30px;
-    margin-top: 80px;
     max-width: 320px;
     border-radius: 2px;
     *width: 320px;
 }
 .emim-sign-wrapper input {
-    width: 76%;
     border-bottom: 1px solid #eee;
     font-size: 14px;
     height: 40px;
@@ -323,19 +335,19 @@ footer {
 }
 .emim-signup-back:before {
     content: 'G';
-    font-family: IM;
+    font-family: webim;
     font-size: 35px;
-    color: #fff;
+    color: #9A9694;
 }
 .emim-signup-back {
     position: absolute;
-    top: -40px;
+    top: -50px;
     left: 0;
     cursor: pointer;
 }
 .emim-signup-back:after {
     content: 'Back';
-    color: #fff;
+    color: #9A9694;
     display: inline-block;
     vertical-align: top;
     margin-top: 12px;
@@ -347,16 +359,20 @@ footer {
 .emim-group-tab,
 .emim-stranger-tab {
     display: inline-block;
-    width: 32.3%;
+    width: 32.2%;
     text-align: center;
     line-height: 56px;
+    color: rgb(153, 153, 153);
 }
 /*
     main
 */
 .emim-profile-dropdown {
+    z-index: 3;
+    position: relative;
     float: right;
     margin: 12px 10px;
+    color: rgb(153, 153, 153);
 }
 .emim-profile-username {
     font-size: 16px;
@@ -366,21 +382,29 @@ footer {
     margin: 10px;
     vertical-align: middle;
 }
-.emim-dropdown-menu {
-    z-index: 1;
+.emim-dropdown-menu:before {
+    z-index: -1;
+    content: '◆';
     position: absolute;
-    right: 0px;
-    box-shadow: rgba(0, 0, 0, 0.301961) 0px 0px 4px;
-    border-radius: 4px;
+    top: -12px;
+    left: 36px;
+    color: #fff;
+    font-size: 30px;
+    height: 20px;
+    line-height: 20px;
+}
+.emim-dropdown-menu {
+    z-index: 2;
+    position: absolute;
+    top: 48px;
+    right: -24px;
+    border-radius: 2px;
     background-color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.14902) 0px 5px 15px 0px;
 }
 .emim-dropdown-menu li {
-    padding: 0 5px;
+    padding: 0 20px;
     line-height: 30px;
-}
-.emim-dropdown-menu li:hover {
-    cursor: pointer;
-    background-color: #eee;
 }
 .emim-list {
     overflow-x: hidden;
@@ -393,7 +417,24 @@ footer {
     cursor: pointer;
 }
 .emim-contact-cur {
-    background-color: #E4E6E9;
+    background-color: rgb(236, 239, 242);
+}
+.emim-contact-cur:before,
+.emim-contact-cur:after {
+    content: '';
+    z-index: 1;
+    width: 100%;
+    position: absolute;
+}
+.emim-contact-cur:before {
+    top: 0;
+    left: 0;
+    border-top: 1px solid rgb(229, 229, 229);
+}
+.emim-contact-cur:after {
+    left: 0;
+    bottom: 0;
+    border-bottom: 1px solid rgb(229, 229, 229);
 }
 .emim-contact-avatar {
     vertical-align: middle;
@@ -402,12 +443,12 @@ footer {
 .emim-contact-username {
     display: inline-block;
     top: -8px;
-    width: 190px;
+    width: 60%;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #757576;
-    font-size: 13px;
+    color: rgb(26, 26, 26);
+    font-size: 14px;
 }
 .emim-contact-msg {
     float: left;
@@ -457,6 +498,7 @@ footer {
     border: 1px solid #F1F1F1;
 }
 .emim-chat-clear {
+    color: rgb(229, 229, 229);
     right: 10px;
 }
 .emim-fr .emim-msg-container {
@@ -514,9 +556,6 @@ footer {
     padding: 8px;
     border-radius: 8px;
 }
-.emim-face-wrapper li:hover {
-    cursor: pointer;
-}
 .emim-face-wrapper li {
     display: inline-block;
     width: 32px;
@@ -557,510 +596,16 @@ footer {
 }
 .emim-chatLeft {
     background-color: #F5F5F5;
-	width: 269px;
+	width: 239px;
     border-right: 1px solid #E1E1E1;
 }
 .emim-chatRight {
     background-color: #FFFFFF;
-	margin-left: 270px;
+	margin-left: 240px;
 }
 .emim-chat-content {
     overflow-x: hidden;
     overflow-y: auto;
     padding: 10px;
     box-sizing: border-box;
-}
-
-
-
-
-
-
-
-
-
-
-/** custom login button **/
-
-
-.content_login {
-	width: 1000px;
-	height: auto;
-	padding: 25px;
-	margin: 0 auto;
-	valign: middle;
-	text-align: center;
-}
-
-
-.em-list {
-    position: absolute;
-    top: 28px;
-    right: 16px;
-    background: url(../img/list_1.png) no-repeat;
-    width: 64px;
-    height: 64px;
-    zoom: 45%;
-}
-.em-list:hover {
-    background: url(../img/list_2.png) no-repeat;
-}
-.em-list button {
-    width: 100%;
-    height: 100%;
-    outline: none;
-    background: none;
-}
-.leftheader {
-	z-index: 1000;
-	width: 100%;
-	background-color: #2E3238;
-    height: 60px;
-    line-height: 60px;
-}
-.accordion-heading {
-    padding: 10px 0;
-}
-.accordion-inner {
-    border-top: 1px solid #24272C;  
-}
-.leftheader img {
-    width: 48px;
-    height: 48px;
-    margin: -48px 6px 0 6px;
-    border-radius: 4px;
-}
-.btn-group {
-    position: absolute;
-    right: 6px;
-    top: 14px;
-}
-.login_user_title {
-	display: inline-block;
-	width: 65px;
-	overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 14px;
-	font-weight: bold;
-	color: #E8E8E9;
-}
-.accordion-group {
-    border-radius: 0;
-    height: 100%;
-    border: none;
-}
-.chatRight {
-	
-}
-#roomMemberImg {
-    position: absolute;
-    right: 60px;
-    top: 15px;
-    width: 20px;
-}
-.chat01_title {
-	height: 50px;
-    border-bottom: 1px solid #d6d6d6;
-}
-
-.chat03_title {
-	background-color: #5D6978;
-	height: 30px;
-	position: relative;
-}
-
-.talkTo {
-	position: relative;
-    margin: 0;
-}
-#talkTo {
-    float: none;
-    text-align: center;
-    line-height: 50px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #4F4F4F;
-}
-.talkTo li a {
-	padding: 4px 11px 4px 7px;
-	_padding-top: 0px;
-	_padding-bottom: 0px;
-	height: 19px;
-	font-size: 14px;
-	font-weight: bold;
-	color: #333;
-	text-decoration: none;
-}
-
-.close_btn {
-	background: url('../img/icon.png') no-repeat 0 0;
-	position: absolute;
-	top: 10px;
-	right: 8px;
-	display: block;
-	width: 15px;
-	height: 15px;
-}
-.chat02 {
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-}
-.accordion-body {
-    height: 100%;
-    overflow-y: auto;
-    width: 100%;
-}
-.accordion-body li {
-    padding: 12px 0;
-}
-.accordion-body img {
-    margin: 0 6px;
-    width: 36px;
-    height: 36px;
-}
-.chat02_title {
-	position: relative;
-    border-top: 1px solid #d6d6d6;
-}
-.chat02_bar {
-	width: 100%;
-    text-align: right;
-}
-.chat02_bar button {
-    outline: none;
-    border: 1px solid #4b4b4b;
-    border-radius: 4px;
-    margin: 5px 10px 10px 0;
-    width: 100px;
-    height: 30px;
-    background-color: #eee;
-    color: #444;
-    text-align: center;
-    line-height: 30px;
-    font-size: 16px;
-}
-
-.chat03_title_t {
-	background: url('../img/icon.png') no-repeat 0px -370px;
-	position: absolute;
-	padding-left: 25px;
-	top: 8px;
-	left: 20px;
-	display: block;
-	width: auto;
-	height: 15px;
-	font-size: 12px;
-	font-weight: bold;
-}
-
-.chat01_content {
-	width: 100%;
-	overflow-y: auto;
-}
-
-.chat02_content {
-	height: auto;
-}
-
-.chat03_content_ul {
-	text-align: left;
-	color: #E8E8E9;
-	margin: 0px 0px;
-	overflow-y: auto;
-	position: relative;
-	resize: none;
-}
-
-.chat03_content {
-	height: 480px;
-	text-align: left;
-	font-size: 12px;
-	color: #333;
-	margin: 0px 0px;
-	overflow-y: auto;
-	position: relative;
-	resize: vertical;
-}
-.chat02_content textarea:focus {
-    border: none;
-    box-shadow: none;
-}
-.chat02_content textarea {
-    box-shadow: none;
-    outline: none;
-	width: 100%;
-	height: 96px;
-	overflow-y: auto;
-	padding: 0;
-	resize: none;
-    border: none;
-    margin: 0;
-    background-color: #eee;
-}
-#recycle {
-    position: absolute;
-    top: 13px;
-    right: 20px;
-    font-size: 30px;
-    cursor: pointer;
-}
-#contractlist11 {
-    height: 100%;
-    background-color: #2E3238;
-    color: #E8E8E9;
-}
-.accordion {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-}
-#accordion1,
-#accordion2,
-#accordion3 {
-    width: 31.8999999%;
-    display: inline-block;
-    padding: 0;
-    text-align: center;
-    line-height: 16px;
-    position: relative;
-    color: #00A0E9;
-    font-size: 14px;
-}
-#accordion1,
-#accordion2 {
-    border-right: 1px solid #e5e5e5;
-}
-.chat03_name {
-	color: #333;
-	position: absolute;
-	top: 9px;
-	left: 40px;
-	display: block;
-	height: 480px;
-}
-
-.chat-content-p3 {
-	white-space: pre-wrap;
-	border-radius: 5px;
-	background-color: #C0C0C0;
-	position: relative;
-	/*padding: 5px 10px 5px 5px;*/ 
-}
-
-.chat03_content ul {
-	position: relative;
-}
-
-.chat03_content ul li {
-	position: relative;
-	padding: 3px 6px;
-	height: 31px;
-	_padding-bottom: 0px;
-}
-
-.chat03_content ul li.hover {
-	background: #ebeef3;
-}
-
-.chat03_content ul li.choosed {
-	background: #ebeef3;
-}
-
-.chat03_content ul li a {
-	
-}
-
-.chat03_content ul img {
-	width: 30px;
-	height: 30px;
-}
-.chat02_title_btn {
-	background: url('../img/icon.png') no-repeat 0 0;
-	cursor: pointer;
-	float: left;
-	display: block;
-	width: 15px;
-	height: 15px;
-	margin: 5px 6px;
-}
-.ctb01,
-.ctb02,
-.ctb03 {
-    width: 64px;
-    height: 64px;
-    zoom: 50%;
-}
-.ctb01 {
-    zoom: 45%;
-    background: url(../img/face_1.png) no-repeat;
-    margin: 12px 12px 12px 20px;
-}
-.ctb01:hover {
-    background: url(../img/face_2.png) no-repeat;
-}
-.ctb02 {
-    background: url(../img/audio_1.png) no-repeat;
-    zoom: 56%;
-    margin-top: 2px;
-}
-.ctb02:hover {
-    background: url(../img/audio_2.png) no-repeat;
-}
-.ctb03 {
-    background: url(../img/pic_1.png) no-repeat;
-    margin-right: 12px;
-}
-.ctb03:hover {
-    background: url(../img/pic_2.png) no-repeat;
-}
-.chat02_title_t {
-	background: url('../img/icon.png') no-repeat 0px -487px;
-	position: absolute;
-	padding-left: 170px;
-	top: 8px;
-	right: 20px;
-	display: block;
-	width: auto;
-	height: 15px;
-}
-.chat02_title_t a {
-	color: #333;
-	font-size: 12px;
-	text-decoration: none;
-}
-.chat02_title_t a:hover {
-	color: #f60;
-	text-decoration: underline;
-}
-
-.wl_faces_box {
-	background: url('../img/wlf_bg.png') repeat 0 0;
-	position: absolute;
-	bottom: 2px;
-	left: 0;
-	display: none;
-}
-
-.wl_faces_content {
-	background: #E8E8E9;
-	border: 1px #ccc solid;
-	margin: 3px 4px;
-}
-
-.wl_faces_content .title {
-	background: url('../img/wlf_title_bg.jpg') repeat-x 0 0;
-	height: 40px;
-	position: relative;
-}
-
-.wl_faces_content .title ul {
-	
-}
-
-.wl_faces_content .title ul li {
-	position: absolute;
-	display: block;
-}
-
-.wl_faces_content .title ul li.title_name {
-	background: url('../img/wlf_title_btn.jpg') no-repeat 0 0;
-	width: 82px;
-	height: 30px;
-	bottom: 0;
-	_bottom: -2px;
-	left: 15px;
-	text-align: center;
-	line-height: 32px;
-	font-weight: bold;
-	color: #333;
-}
-
-.wl_faces_content .title ul li.wl_faces_close {
-	right: 8px;
-	top: 15px;
-}
-
-.wl_faces_content .title ul li.wl_faces_close span {
-	background: url('../img/icon.png') repeat-x 0 0;
-	cursor: pointer;
-	display: block;
-	width: 15px;
-	height: 15px;
-}
-
-.wl_faces_main {
-	
-}
-
-.wl_faces_main ul {
-	overflow: hidden;
-    margin: 0;
-    padding: 0 6px 6px 0;
-}
-.wl_faces_main ul li img {
-	width: 30px;
-	height: 30px;
-    margin: 6px 0 0 6px;
-}
-.wlf_icon {
-	background: url('../img/layer_arrow.png') no-repeat 0 0;
-	position: absolute;
-	width: 22px;
-	height: 9px;
-	bottom: -4px;
-	_bottom: -11px;
-	left: 61px;
-}
-
-.chat03_content li label {
-	display: block;
-	position: absolute;
-	width: 9px;
-	height: 9px;
-	left: 27px;
-}
-
-label.online {
-	background: url('../img/status.gif') no-repeat 0 0;
-	_background: url('../img/status.gif') no-repeat 0 5px;
-	bottom: 4px;
-	_bottom: 2px;
-}
-
-label.offline {
-	background: url('../img/status.gif') no-repeat 0 -11px;
-	bottom: 4px;
-	_top: 25px;
-	align: center
-}
-
-.fade {
-	opacity: 0;
-	-webkit-transition: opacity 0.15s linear;
-	-moz-transition: opacity 0.15s linear;
-	-o-transition: opacity 0.15s linear;
-	transition: opacity 0.15s linear;
-}
-.modal-backdrop {
-    *display: none;
-}
-.fade.in {
-	opacity: 1;
-}
-.badgegroup {
-    position: absolute;
-    right: 1px;
-    top: -10px;
-    padding: 0 1px;
-    font-size: 6px;
-    border-radius: 2px;
-}
-.badge {
-    *margin-top: -30px;
-}
-.accordion-inner {
-    *position: relative;
-    height: 100%;
-    padding: 0;
 }

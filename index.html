@@ -27,25 +27,26 @@
     <!----------------MODULES-------------------->
     <!-- 登录界面 -->
     <script id='emimSignin' type='tpl'>
-    <div ms-visible='display' class='emim-prl emim-auto emim-mt50 emim-sign-wrapper'>
+    <div ms-visible='display' class='emim-prl emim-auto emim-mt80 emim-sign-wrapper'>
         <div class='emim-font emim-center emim-bigger-size emim-theme emim-mt20'>0</div>
         <h3 class='emim-w100 emim-center emim-theme emim-smaller-size emim-normal-weight emim-mt20'>WebIM of Easemob</h3>
-        <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin' ms-blur='check'>
-        <input type='password' ms-attr-placeholder='port' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin' ms-blur='check'>
+        <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin' ms-blur='check'>
+        <input type='password' ms-attr-placeholder='port' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin' ms-blur='check'>
         <i class='emim-font' ms-click='transfer'>{{content}}</i>
-        <button class='emim-db emim-auto emim-mt40 emim-themebg emim-center emim-main-btn' ms-click='signin'>Sign in</button>
-        <button class='emim-db emim-auto emim-theme emim-center emim-mt10 emim-vice-btn' ms-click='showSignup'>Sign up</button>
+        <button class='emim-db emim-w80 emim-auto emim-mt40 emim-themebg emim-center emim-main-btn' ms-click='signin'>Sign in</button>
+        <button class='emim-db emim-w80 emim-auto emim-theme emim-center emim-mt10 emim-vice-btn' ms-click='showSignup'>Sign up</button>
     </div>
     </script>
 
     <!-- 注册界面 -->
     <script id='emimSignup' type='tpl'>
-    <div ms-visible='display' class="emim-prl emim-sign-bg emim-auto emim-mt50">
-        <h3 class='emim-w100 emim-center'>Sign Up</h3>
-        <input type='text' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signup'>
-        <input type='password' placeholder='Password' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signup'>
-        <input type='text' placeholder='Nickname' class='emim-db emim-auto emim-mt20' ms-duplex='nickname' ms-keydown='signup'>
-        <button class='emim-db emim-auto emim-center emim-mt50 emim-themebg' ms-click='signup'>Sign Up</button>
+    <div ms-visible='display' class="emim-prl emim-auto emim-mt120 emim-sign-wrapper">
+        <h3 class='emim-w80 emim-auto emim-theme emim-tl'>Sign Up</h3>
+        <input type='text' placeholder='Username' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='username' ms-keydown='signup' ms-blur='check'>
+        <input id='password' type='password' placeholder='Password' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='password' ms-keydown='signup' ms-blur='checkPwd'>
+        <input type='password' placeholder='Confirm Password' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='cpassword' ms-keydown='signup' ms-blur='checkPwd'>
+        <input type='text' placeholder='Nickname' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='nickname' ms-keydown='signup' ms-blur='check'>
+        <button class='emim-db emim-w80 emim-auto emim-center emim-mt50 emim-themebg emim-main-btn' ms-click='signup'>Sign Up</button>
         <div class='emim-signup-back' ms-click='back'></div>
     </div>
     </script>
@@ -56,12 +57,12 @@
         <div class='emim-h100 emim-prl emim-chatLeft emim-fl'>
             <div class='emim-profile' ms-controller='profile' ms-include='emimProfile'></div>
             <div class='emim-list-tab' ms-include='emimListTab'></div>
-            <div class='emim-list' ms-controller='emimContactWrapper' ms-css-height='height-118' ms-include='emimList'></div>
+            <div class='emim-list' ms-controller='emimContactWrapper' ms-css-height='height-112' ms-include='emimList'></div>
         </div>
         <div class='emim-h100 emim-prl emim-chatRight'>
             <div class='emim-center emim-current-header' ms-controller='chatHeader'>
                 <span class='emim-chat-to'>{{to}}</span>
-                <span class='emim-font emim-pab emim-font-hover emim-chat-clear'>h</span>
+                <span class='emim-font emim-pab emim-font-alarm-hover emim-chat-clear'>H</span>
             </div>
             <hr class='emim-auto emim-current-header-border'/>
             <div class='emim-chat-wrapper' ms-controller='chatWrapper' ms-css-height='height-228'>
@@ -80,9 +81,9 @@
     <span class='emim-profile-username'>{{username}}</span>
     <span class='emim-font emim-font-hover emim-profile-dropdown' ms-click='toggle'>g</span>
     <ul class='emim-dropdown-menu' ms-visible='display'>
-        <li ms-click='dialog'>添加好友</li>
-        <li ms-click='dialog'>删除好友</li>
-        <li ms-click='logout'>退出</li>
+        <li ms-click='dialog' class='emim-font-hover'>添加好友</li>
+        <li ms-click='dialog' class='emim-font-hover'>删除好友</li>
+        <li ms-click='logout' class='emim-font-alarm-hover'>退出</li>
     </ul>
     </script>
 
