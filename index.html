@@ -6,7 +6,7 @@
     <title>环信WebIM</title>
     <link rel="stylesheet" href="css/webim.css">
 
-    <!--sdk所需的js文件-->
+    <!--sdk及所需的js文件-->
     <script src="js/sdk/strophe.js"></script>
     <script src="js/sdk/easemob.im-2.0.js"></script>
 
@@ -24,23 +24,17 @@
     <footer class='emim-w100'>© 2015 easemob</footer><!-- footer -->
 
 
-
-
-
-
-
-
-    <!----------------modules start-------------------->
-
+    <!----------------MODULES-------------------->
     <!-- 登录界面 -->
     <script id='emimSignin' type='tpl'>
-    <div ms-visible='display' class='emim-prl emim-sign-bg emim-auto emim-mt50'>
-        <h3 class='emim-w100 emim-center'>Sign In</h3>
-        <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin'>
-        <input type='password' ms-attr-placeholder='port' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin'>
-        <i ms-click='transfer'>{{content}}</i>
-        <button class='emim-db emim-auto emim-mt50 emim-themebg emim-center' ms-click='signin'>Sign in</button>
-        <button class='emim-db emim-auto emim-sign-btn emim-center emim-mt10' ms-click='showSignup'>Sign up</button>
+    <div ms-visible='display' class='emim-prl emim-auto emim-mt50 emim-sign-wrapper'>
+        <div class='emim-font emim-center emim-bigger-size emim-theme emim-mt20'>0</div>
+        <h3 class='emim-w100 emim-center emim-theme emim-smaller-size emim-normal-weight emim-mt20'>WebIM of Easemob</h3>
+        <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin' ms-blur='check'>
+        <input type='password' ms-attr-placeholder='port' class='emim-db emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin' ms-blur='check'>
+        <i class='emim-font' ms-click='transfer'>{{content}}</i>
+        <button class='emim-db emim-auto emim-mt40 emim-themebg emim-center emim-main-btn' ms-click='signin'>Sign in</button>
+        <button class='emim-db emim-auto emim-theme emim-center emim-mt10 emim-vice-btn' ms-click='showSignup'>Sign up</button>
     </div>
     </script>
 
@@ -116,14 +110,13 @@
     </div>
     </script>
 
-
+    <!-- 联系人列表 -->
     <script id='emimContact' type='tpl'>
         <img class='emim-avatar emim-contact-avatar' ms-attr-src='"img/avatar.png" || item.src'/>
         <span class='emim-prl emim-contact-username'>{{item.name}}</span>
         <span class='emim-contact-msg'></span>
         <span class='emim-contact-count' style='display: none'></span>
     </script>
-
     
     <!-- 消息发送区 -->
     <script id='emimSendWrapper' type='tpl'>
@@ -165,67 +158,18 @@
     </script>
 
     <!-- loading -->
-    <div ms-controller='loading' ms-visible='display'></div>
+    <div ms-controller='loading' ms-visible='display' class='emim-loading'>
+        <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 70 70" enable-background="new 0 0 70 70" xml:space="preserve">
+            <circle opacity="0.3" fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" cx="35" cy="35" r="11"/>
+            <path fill="none" stroke="#E5E5E5" stroke-width="4" stroke-linecap="round" stroke-miterlimit="10" d="M24,35c0-6.1,4.9-11,11-11c2.8,0,5.3,1,7.3,2.8"/>
+                <image src="/webim/resources/loading.gif" width="20" style="margin-top:10px;" />
+        </svg>
+    </div>
 
     <!-- prompt -->
     <div ms-controller='prompt' class='emim-w100 emim-prompt' ms-css-top='t'>{{content}}</div>
 
     <!--layer-->
     <div class='emim-w100 emim-h100 emim-layer' ms-visible='display' ms-controller='layer'></div>
-    <!----------------modules end-------------------->
-
-    <!--
-    <div id="addFridentModal" class="">
-        <div class="modal-header">
-            <button type="button" class="close">×</button>
-            <h3>添加好友</h3>
-        </div>
-        <div class="modal-body">
-            <input id="addfridentId" onfocus="clearInputValue(&quot;addfridentId&quot;)">
-            <div id="add-frident-warning"></div>
-        </div>
-        <div class="modal-footer">
-            <button id="addFridend" class="" onclick="startAddFriend()">添加</button>
-            <button id="cancelAddFridend" class="btn">取消</button>
-        </div>
-    </div>
-
-    <div id="delFridentModal" class="">
-        <div class="modal-header">
-            <button type="button" class="close">×</button>
-            <h3>删除好友</h3>
-        </div>
-        <div class="modal-body">
-            <input id="delfridentId" onfocus="clearInputValue(&quot;delfridentId&quot;)">
-            <div id="del-frident-warning"></div>
-        </div>
-        <div class="modal-footer">
-            <button id="delFridend" class="" onclick="directDelFriend()">删除</button>
-            <button id="canceldelFridend" class="">取消</button>
-        </div>
-    </div>-->
-
-    <!-- 一般消息通知
-    <div id="notice-block-div" class="modal hide">
-        <button type="button" class="close">×</button>
-        <div class="modal-body">
-            <h4>Warning!</h4>
-            <div id="notice-block-body"></div>
-        </div>
-    </div> -->
-
-    <!-- 确认消息通知
-    <div id="confirm-block-div-modal" class="">
-        <div class="modal-header">
-            <h3>订阅通知</h3>
-        </div>
-        <div class="modal-body">
-            <div id="confirm-block-footer-body"></div>
-        </div>
-        <div class="modal-footer">
-            <button id="confirm-block-footer-confirmButton" class="">同意</button>
-            <button id="confirm-block-footer-cancelButton" class="">拒绝</button>
-        </div>
-    </div> -->
 </body>
 </html>

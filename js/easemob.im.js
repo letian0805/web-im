@@ -2,9 +2,8 @@
 ---                             demo相关代码                            ---
 **************************************************************************/
 ;(function(window, undefined){
-    window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
-    //图片格式
+    //自定义允许上传的图片格式
     var IMGTYPE = {
         png: true
         , jpg: true
@@ -12,7 +11,7 @@
         , bmp: true
     }
 
-    //音频格式，如果浏览器可以播放gtgt
+    //自定义允许上传的音频格式
     var AUDIOTYPE = {
         mp3: true
         , amr: true
@@ -21,34 +20,29 @@
         , avi : true
     }
 
-
-
-    //avalon框架
+    /**************************************************************************
+    ---                                 avalon                              ---
+    **************************************************************************/
     avalon.ready(function() {
 
-        /*
-            common
-        */
+        //common
         Easemob.im.utils = { 
-            getAttr: function(dom, attr) {
+            getAttr: function ( dom, attr ) {
                 return dom.getAttribute(attr);
             }
-            , setAttr(dom, attr, value) {
+
+            , setAttr: function ( dom, attr, value ) {
                 return dom.setAttribute(attr, value);
             }
             
-            /*
-                解析表情
-            */
-            , face: function(msg){
-
-                if(/\[.*\]/.test(msg)){
+            , face: function ( msg ) {//解析表情
+                if ( /\[.*\]/.test(msg) ) {
                     msg = msg.replace(/&amp;/g, '&');
                     msg = msg.replace(/&#39;/g, '\'');
                     msg = msg.replace(/&lt;/g, '\<');
 
-                    avalon.each(send.faces, function(k, v){
-                        while(msg.indexOf(v.data) >= 0){
+                    avalon.each(send.faces, function ( k, v ) {
+                        while( msg.indexOf(v.data) >= 0 ) {
                             msg = msg.replace(v.data
                                 , '<img class=\"emim-face-msg\" src=\"img/faces/' 
                                     + v.src 
@@ -59,21 +53,17 @@
                 return msg;
             }
 
-            /*
-                显示即时消息
-            */
-            , handleBriefMsg: function(target, msg) {
-
+            , handleBriefMsg: function ( target, msg ) {//显示即时消息
                 var target = document.getElementById(target);
 
-                if(!target) {
+                if ( !target ) {
                     return;
                 }
 
                 var list = target.getElementsByTagName('span'),
                     msgDom = list[list.length - 2];
 
-                switch(msg) {
+                switch ( msg ) {
                     case 'img':
                         msg = '[图片]';
                         break;
@@ -94,11 +84,11 @@
                 处理消息未读数
                 @param1: domId; @param2: hide count
             */
-            , handleUnreadCount: function(target, isHide) {
+            , handleUnreadCount: function ( target, isHide ) {
 
                 var target = document.getElementById(target);
 
-                if(!target) {
+                if ( !target ) {
                     return;
                 }
 
@@ -106,7 +96,7 @@
                     countDom = list[list.length - 1],
                     count = Number(countDom.innerHTML);
 
-                if(!isHide) {
+                if ( !isHide ) {
                     count += 1;
                     countDom.innerHTML = count;
                     countDom.style.display = '';
@@ -116,10 +106,7 @@
                 }
             }
 
-            /*
-                消息上屏
-            */
-            , appendMsg: function(from, to, html, msgType) {
+            , appendMsg: function ( from, to, html, msgType ) {//消息上屏
                 var isSelf = from == profileInfo.username,
                     curWrapper = document.getElementById(isSelf ? to : from);
 
@@ -137,35 +124,25 @@
                 curWrapper.scrollTop = curWrapper.scrollHeight + 100;
             }
 
-            /*
-                文本消息，包括表情，文字
-            */
-            , textMessage: function(msg) {
+            , textMessage: function ( msg ) {//文本消息，包括表情，文字
                 return '<div class="emim-msg-container emim-textmsg">' + msg + '</div>';
             }    
 
-            /*
-
-            */
-            , generateFileDom: function(type, url) {
-                if(IMGTYPE[type]) {//img
+            , generateFileDom: function ( type, url ) {//
+                if ( IMGTYPE[type] ) {//img
                     return "<div class='emim-msg-container emim-imgmsg'><a target='_blank' href='" + url + "'><img src='" + url + "'/></a></div>";
-                } else if(AUDIOTYPE[type]) {//audio
+                } else if ( AUDIOTYPE[type] ) {//audio
                     return "<div class='emim-msg-container emim-audiomsg'><img src='" + url + "'/></div>";
                 } else {//file
                     return "<div class='emim-msg-container emim-filemsg'><img src='" + url + "'/></div>";
                 }
             }
 
-            /*
-                文件消息，其中图片和语音对应展示，其他类型显示下载容器
-            */
-            , fileMessage: function(fileInput, fileMsg, fileType) {
+            , fileMessage: function ( fileInput, fileMsg, fileType ) {//文件消息，其中图片和语音对应展示，其他类型显示下载容器
 
-                if(fileMsg) {//收消息
+                if ( fileMsg ) {//收消息
                     return this.generateFileDom(fileType, fileMsg);
                 } else {
-
                     var id = this.getAttr(fileInput, 'id');
 
                     if(Easemob.im.Utils.isCanUploadFileAsync()) {
@@ -178,14 +155,9 @@
                             fileDom = '',
                             to = chatHeader.to;
 
-
-
                         file = Easemob.im.Utils.getFileUrl(id);
-
                         type = file.filetype.toLowerCase();
-
                         fileDom = me.generateFileDom(type, file.url);
-
                     }
 
                     var opt = {
@@ -222,9 +194,8 @@
         /**************************************************************************
         ---                               MODULES                               ---
         **************************************************************************/
-        /*
-            layer
-        */
+
+        //layer
         var layer = avalon.define({
             $id: 'layer'
             , display: false
@@ -236,9 +207,7 @@
             }
         });
         
-        /*
-            loading
-        */
+        //loading
         var loading = avalon.define({
             $id: 'loading'
             , display: false
@@ -252,10 +221,7 @@
             }
         });
 
-
-        /*
-            提示信息
-        */
+        //提示信息
         var emprompt = avalon.define({
             $id: 'prompt'
             , content: ''
@@ -272,15 +238,12 @@
             }
         });
 
-
-        /*
-            登录
-        */
+        //登录
         var signin = avalon.define({
             $id: 'signin'
             , username: ''
             , password: ''
-            , content: 'j'
+            , content: 'k'
             , port: 'Password'
             , display: true
             , show: function() {
@@ -289,15 +252,22 @@
             , hide: function() {
                 signin.display = false;
             }
+            , check: function() {
+                if ( !this.value ) {
+                    this.style.borderBottom = '1px solid rgb(255, 42, 0)';
+                } else {
+                    this.style.borderBottom = '1px solid #eee';
+                }
+            }
             , transfer: function() {
                 switch(signin.content) {
                     case 'j':
                         signin.content = 'k';
-                        signin.port = 'Token';
+                        signin.port = 'Password';
                         break;
                     default:
                         signin.content = 'j';
-                        signin.port = 'Password';
+                        signin.port = 'Token';
                 }
             }
             , signin: function(e) {
@@ -333,10 +303,7 @@
             }
         });
 
-
-        /*
-            注册
-        */
+        //注册
         var signup = avalon.define({
             $id: 'signup'
             , username: ''
@@ -388,18 +355,12 @@
             }
         });
  
-       
-        /*
-            contact wrapper
-        */
+        //contact wrapper
         var emimList = avalon.define({
             $id: 'emimContactWrapper'
         });
 
-
-        /*
-            聊天主窗口
-        */
+        //聊天主窗口
         var chat = avalon.define({
             $id: 'chat'
             , display: false
@@ -414,10 +375,7 @@
             }
         });
 
-
-        /*
-            dialog
-        */
+        //dialog
         var dialog = avalon.define({
             $id: 'dialog'
             , title: ''
@@ -438,9 +396,7 @@
         });
 
 
-        /*
-            profile
-        */
+        //profile
         var profileInfo = avalon.define({
             $id: 'profile'
             , username: ''
@@ -458,7 +414,6 @@
                 }
             }
             , logout: function() {
-                conn.stopHeartBeat(conn);
                 conn.close();
                 chat.hide();
                 signin.show();
@@ -469,9 +424,7 @@
         });
  
        
-        /*
-            tab
-        */
+        //tab
         var contactTab = avalon.define({
             $id: 'contactTab'
             , cur: 'friend'
@@ -482,9 +435,7 @@
         });
 
 
-        /*
-            list wrapper
-        */
+        //list wrapper
         var contactList = avalon.define({
             $id: 'contactList'
             , friend: []
@@ -515,10 +466,7 @@
             }
         });
 
-
-        /*
-            chat header
-        */
+        //chat header
         var chatHeader = avalon.define({
             $id: 'chatHeader'
             , to: ''
@@ -526,10 +474,7 @@
             , roomId: ''
         });
 
-
-        /*
-            chat wrapper
-        */
+        //chat wrapper
         var chatWrapper = avalon.define({
             $id: 'chatWrapper'
             , friend: []
@@ -541,54 +486,17 @@
             }
         });
 
-
-        /*
-            发送区域
-        */
+        //发送区域
         var send = avalon.define({
             $id: 'send'
             , text: ''
-            , faces: [
-                {data: '[):]', src: 'ee_1'},
-                {data: '[:D]', src: 'ee_2'},
-                {data: '[;)]', src: 'ee_3'},
-                {data: '[:-o]', src: 'ee_4'},
-                {data: '[:p]', src: 'ee_5'},
-                {data: '[(H)]', src: 'ee_6'},
-                {data: '[:@]', src: 'ee_7'},
-                {data: '[:s]', src: 'ee_8'},
-                {data: '[:$]', src: 'ee_9'},
-                {data: '[:(]', src: 'ee_10'},
-                {data: '[:\'(]', src: 'ee_11'},
-                {data: '[:|]', src: 'ee_12'},
-                {data: '[(a)]', src: 'ee_13'},
-                {data: '[8o|]', src: 'ee_14'},
-                {data: '[8-|]', src: 'ee_15'},
-                {data: '[+o(]', src: 'ee_16'},
-                {data: '[<o)]', src: 'ee_17'},
-                {data: '[|-)]', src: 'ee_18'},
-                {data: '[*-)]', src: 'ee_19'},
-                {data: '[:-#]', src: 'ee_20'},
-                {data: '[:-*]', src: 'ee_21'},
-                {data: '[^o)]', src: 'ee_22'},
-                {data: '[8-)]', src: 'ee_23'},
-                {data: '[(|)]', src: 'ee_24'},
-                {data: '[(u)]', src: 'ee_25'},
-                {data: '[(S)]', src: 'ee_26'},
-                {data: '[(*)]', src: 'ee_27'},
-                {data: '[(#)]', src: 'ee_28'},
-                {data: '[(R)]', src: 'ee_29'},
-                {data: '[({)]', src: 'ee_30'},
-                {data: '[(})]', src: 'ee_31'},
-                {data: '[(k)]', src: 'ee_32'},
-                {data: '[(F)]', src: 'ee_33'},
-                {data: '[(W)]', src: 'ee_34'},
-                {data: '[(D)]', src: 'ee_35'}
-            ]
             , realFile: ''
             , file: ''
             , faceShow: false
-            , send: function() {
+            , showFace: function() {
+                send.faceShow = !send.faceShow;
+            }
+            , sendText: function(message) {
                 var to = chatHeader.to;
                 if (!to) {
                     emprompt.show("请先选择联系人");
@@ -597,26 +505,13 @@
                 if (!send.text) {
                     return;
                 }
-                var options = {
-                    to : to
-                    , msg : send.text
-                    , type : "chat"
-                    , fail: function(error) {
-
-                    }
-                    , success: function(message) {
-                        console.log(message);
-                    }
-                };
+                var options = message;
                 // 群组消息和个人消息的判断分支
                 chatHeader.isGroup && (options.type = 'groupchat');
                 conn.send(options);
                 //当前登录人发送的信息在聊天窗口中原样显示
                 Easemob.im.utils.appendMsg(profileInfo.username, to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')), send.text);
                 send.text = '';   
-            }
-            , showFace: function() {
-                send.faceShow = !send.faceShow;
             }
             , sendFile: function() {
                 if(!chatHeader.to) {
@@ -637,12 +532,9 @@
             }
         });
 
-        
 
         //avalon main
         avalon.scan();
-
-
 
         /**************************************************************************
         ---                              SDK INVOKE                             ---
@@ -650,14 +542,10 @@
         
         var conn = new Easemob.im.Connection({
             https : Easemob.im.config.https,
-            wss: Easemob.im.config.wss,
             url: Easemob.im.config.xmppURL
         });
 
-
-        /*
-            监听回调
-        */
+        //监听回调
         conn.listen({
             onOpened : function() {//当连接成功时的回调方法
                 handleOpen(conn);
@@ -751,10 +639,6 @@
                     });
                 }
             });
-            
-            if (conn.isOpened()) {//启动心跳
-                conn.heartBeat(conn);
-            }
         };
 
 
@@ -781,7 +665,6 @@
                     emprompt.show(e.msg);
                 }
             }
-            conn.stopHeartBeat(conn);
         };
 
 
@@ -873,3 +756,58 @@
     }
 
 }(window, undefined));
+
+
+
+/*
+    表情包集成
+
+    Easemob.im.EMOTIONPACKAGE = {
+        path: 'static/img/faces/',
+        map: {
+            '[):]': 'ee_1.png',
+            '[:D]': 'ee_2.png'
+            ...
+        }
+    }
+*/
+Easemob.im.EMOTIONS = {
+    path: 'img/faces/'
+    , map: {
+        '[):]': 'ee_1.png',
+        '[:D]': 'ee_2.png',
+        '[;)]': 'ee_3.png',
+        '[:-o]': 'ee_4.png',
+        '[:p]': 'ee_5.png',
+        '[(H)]': 'ee_6.png',
+        '[:@]': 'ee_7.png',
+        '[:s]': 'ee_8.png',
+        '[:$]': 'ee_9.png',
+        '[:(]': 'ee_10.png',
+        '[:\'(]': 'ee_11.png',
+        '[:|]': 'ee_12.png',
+        '[(a)]': 'ee_13.png',
+        '[8o|]': 'ee_14.png',
+        '[8-|]': 'ee_15.png',
+        '[+o(]': 'ee_16.png',
+        '[<o)]': 'ee_17.png',
+        '[|-)]': 'ee_18.png',
+        '[*-)]': 'ee_19.png',
+        '[:-#]': 'ee_20.png',
+        '[:-*]': 'ee_21.png',
+        '[^o)]': 'ee_22.png',
+        '[8-)]': 'ee_23.png',
+        '[(|)]': 'ee_24.png',
+        '[(u)]': 'ee_25.png',
+        '[(S)]': 'ee_26.png',
+        '[(*)]': 'ee_27.png',
+        '[(#)]': 'ee_28.png',
+        '[(R)]': 'ee_29.png',
+        '[({)]': 'ee_30.png',
+        '[(})]': 'ee_31.png',
+        '[(k)]': 'ee_32.png',
+        '[(F)]': 'ee_33.png',
+        '[(W)]': 'ee_34.png',
+        '[(D)]': 'ee_35.png'
+    }
+};
