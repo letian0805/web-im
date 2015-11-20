@@ -312,6 +312,27 @@
                 return msg;
             }
 
+            , parseEmotions: function(msg) {
+                if ( typeof Easemob.im.EMOTIONS === 'undefined' || typeof Easemob.im.EMOTIONS.map === 'undefined' ) {
+                    return msg;
+                } else {
+                    var emotion = Easemob.im.EMOTIONS,
+                        reg = null;
+                    msg = msg.replace(/&amp;/g, '&');
+                    msg = msg.replace(/&#39;/g, '\'');
+                    msg = msg.replace(/&lt;/g, '<');
+
+                    for ( var face in emotion.map ) {
+                        if ( emotion.map.hasOwnProperty(face) ) {
+                            while ( msg.indexOf(face) >= 0 ) {
+                                msg = msg.replace(face, '<img src="' + emotion.path + emotion.map[face] + '" alt="表情">');
+                            }
+                        }
+                    }
+                    return msg;
+                }
+            }
+
             , parseJSON: function(data) {
 
                 if (window.JSON && window.JSON.parse) {

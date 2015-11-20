@@ -5,6 +5,7 @@ html, body {
     width: 100%;
     height: 100%;
     min-width: 600px;
+    min-height: 600px;
     -webkit-font-smoothing: antialiased;
 }
 body {
@@ -190,7 +191,8 @@ input, textarea, button, img {
 .emim-theme {
     color: rgb(71, 152, 234);
 }
-.emim-themebg {
+.emim-themebg,
+.emim-send-wrapper .emim-themebg {
     background-color: #5E8FFF;
 }
 .emim-bigger-size {
@@ -205,6 +207,9 @@ input, textarea, button, img {
 .emim-normal-weight {
     font-weight: normal;
 }
+.emim-gray {
+    color: rgb(153, 153, 153);
+}
 .emim-cur,
 .emim-font-hover:hover {
     cursor: pointer;
@@ -214,10 +219,10 @@ input, textarea, button, img {
     cursor: pointer;
     color: rgb(255, 42, 0);
 }
+.emim-disable-btn,
 .emim-main-btn,
 .emim-vice-btn {
     border-radius: 12px;
-    border: 1px solid rgb(71, 152, 234);
     line-height: 40px;
     font-size: 14px;
 }
@@ -226,6 +231,11 @@ input, textarea, button, img {
 }
 .emim-vice-btn {
     background-color: #fff;
+    border: 1px solid rgb(71, 152, 234);
+}
+.emim-disable-btn {
+    color: #fff;
+    background-color: rgb(229, 229, 229);
 }
 /*
     footer
@@ -362,17 +372,13 @@ footer {
     width: 32.2%;
     text-align: center;
     line-height: 56px;
-    color: rgb(153, 153, 153);
 }
 /*
     main
 */
 .emim-profile-dropdown {
     z-index: 3;
-    position: relative;
-    float: right;
     margin: 12px 10px;
-    color: rgb(153, 153, 153);
 }
 .emim-profile-username {
     font-size: 16px;
@@ -460,7 +466,7 @@ footer {
     color: #AFAFAF;
     font-size: 12px;
 }
-.emim-contact-msg .emim-face-msg {
+.emim-contact-msg img {
     width: 16px;
     margin: 0;
 }
@@ -493,9 +499,16 @@ footer {
     height: 46px;
     line-height: 46px;
 }
-.emim-current-header-border {
+.emim-current-header:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
     width: 50%;
-    border: 1px solid #F1F1F1;
+    margin: auto;
+    background-image: linear-gradient(90deg, rgba(229, 229, 229, 0) 0%, rgb(229, 229, 229) 50%, rgba(229, 229, 229, 0) 100%);
 }
 .emim-chat-clear {
     color: rgb(229, 229, 229);
@@ -528,6 +541,21 @@ footer {
 /*
     send
 */
+.emim-send-wrapper:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    width: 90%;
+    margin: auto;
+    background-image: linear-gradient(90deg, rgba(229, 229, 229, 0) 0%, rgb(229, 229, 229) 50%, rgba(229, 229, 229, 0) 100%);
+}
+.emim-send-function-list span {
+    z-index: 1; 
+    margin: 8px -18px 0 16px;
+}
 .emim-chat-send {
     height: 180px;
     bottom: 0;
@@ -539,30 +567,41 @@ footer {
     margin-top: 5px;
 }
 .emim-send-button {
-    width: 120px;
-    height: 36px;
-    border-radius: 2px;
-    font-size: 16px;
-    color: #fff;
-    right: 10px;
-    bottom: -45px;
+    width: 100px;
+    margin-top: 5px;
+    margin-right: 2.5%;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
 }
 .emim-face-wrapper {
     position: absolute;
-    top: -185px;
-    left: 8px;
-    background-color: #e6e6e6;
-    width: 224px;
-    padding: 8px;
-    border-radius: 8px;
+    bottom: 130px;
+    left: 10px;
+    background-color: #fff;
+    width: 280px;
+    padding: 4px;
+    border-radius: 2px;
+    box-shadow: rgba(0, 0, 0, 0.14902) 0px 5px 15px 0px;
+}
+.emim-face-wrapper:after {
+    content: '◆';
+    position: absolute;
+    bottom: -8px;
+    left: 10px;
+    color: #fff;
+    font-size: 30px;
+    height: 20px;
+    line-height: 20px;   
 }
 .emim-face-wrapper li {
     display: inline-block;
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
 }
 .emim-face-wrapper li img {
+    cursor: pointer;
     display: inline-block;
     width: 80%;
     vertical-align: middle;
@@ -593,6 +632,7 @@ footer {
 	max-width: 960px;
 	height: 86%;
     border-radius: 2px;
+    overflow: hidden;
 }
 .emim-chatLeft {
     background-color: #F5F5F5;
@@ -609,3 +649,11 @@ footer {
     padding: 10px;
     box-sizing: border-box;
 }
+
+
+
+
+/*
+    message
+*/
+

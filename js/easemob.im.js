@@ -1,7 +1,7 @@
 /**************************************************************************
 ---                             demo相关代码                            ---
 **************************************************************************/
-;(function(window, undefined){
+;( function ( window, undefined ) {
 
     //自定义允许上传的图片格式
     var IMGTYPE = {
@@ -20,6 +20,12 @@
         , avi: true
     }
 
+    //自定义允许上传的文件格式
+    var FILETYPE = {
+        zip: true
+        , doc: true
+    }
+
     /**************************************************************************
     ---                                 avalon                              ---
     **************************************************************************/
@@ -27,7 +33,31 @@
 
         //common
         Easemob.im.utils = {
-            getAttr: function ( dom, attr ) {
+            $: function ( id ) {
+                return document.getElementById(id);
+            }
+
+            , on: function ( target, ev, fn, isCapture ) {
+                if ( target.addEventListener ) {
+                    target.addEventListener(ev, fn, isCapture);
+                } else if ( target.attachEvent ) {
+                    target.attachEvent('on' + ev, fn);
+                } else {
+                    target['on' + ev] = fn;
+                }
+            }
+
+            , remove: function ( target, ev, fn ) {
+                if ( target.removeEventListener ) {
+                    target.removeEventListener(ev, fn);
+                } else if ( target.detachEvent ) {
+                    target.detachEvent('on' + ev, fn);
+                } else {
+                    target['on' + ev] = null;
+                }
+            }
+
+            , getAttr: function ( dom, attr ) {
                 return dom.getAttribute(attr);
             }
 
@@ -35,26 +65,22 @@
                 return dom.setAttribute(attr, value);
             }
             
-            , face: function ( msg ) {//解析表情
-                if ( /\[.*\]/.test(msg) ) {
-                    msg = msg.replace(/&amp;/g, '&');
-                    msg = msg.replace(/&#39;/g, '\'');
-                    msg = msg.replace(/&lt;/g, '\<');
-
-                    avalon.each(send.faces, function ( k, v ) {
-                        while( msg.indexOf(v.data) >= 0 ) {
-                            msg = msg.replace(v.data
-                                , '<img class=\"emim-face-msg\" src=\"img/faces/' 
-                                    + v.src 
-                                    + '.png\">');
-                        }
-                    });
+            , encode: function ( str ) {
+                if ( !str || str.length === 0 ) {
+                    return str;
                 }
-                return msg;
+                var s = '';
+                s = str.replace(/&amp;/g, "&");
+                s = s.replace(/<(?=[^o][^)])/g, "&lt;");
+                s = s.replace(/>/g, "&gt;");
+                //s = s.replace(/\'/g, "&#39;");
+                s = s.replace(/\"/g, "&quot;");
+                s = s.replace(/\n/g, "<br>");
+                return s;
             }
 
             , handleBriefMsg: function ( target, msg ) {//显示即时消息
-                var target = document.getElementById(target);
+                var target = Easemob.im.utils.$(target);
 
                 if ( !target ) {
                     return;
@@ -77,7 +103,7 @@
                         break;
                 }
 
-                msgDom.innerHTML = this.face(msg);
+                msgDom.innerHTML = Easemob.im.Utils.parseEmotions(Easemob.im.utils.encode(msg.value.replace(/\n/mg, '')));
             }
 
             /*
@@ -86,7 +112,7 @@
             */
             , handleUnreadCount: function ( target, isHide ) {
 
-                var target = document.getElementById(target);
+                var target = Easemob.im.utils.$(target);
 
                 if ( !target ) {
                     return;
@@ -106,20 +132,20 @@
                 }
             }
 
-            , appendMsg: function ( from, to, html, msgType ) {//消息上屏
+            , appendMsg: function ( from, to, msg, msgType ) {//消息上屏
                 var isSelf = from == profileInfo.username,
-                    curWrapper = document.getElementById(isSelf ? to : from);
+                    curWrapper = Easemob.im.utils.$(isSelf ? to : from);
 
                 var div = document.createElement('div');
                 div.className = 'emim-clear emim-mt20 emim-tl emim-msg-wrapper ';
                 div.className += isSelf ? 'emim-fr' : 'emim-fl';
-                div.innerHTML = this.face(html);
+                div.innerHTML = msg.get();
                 curWrapper.appendChild(div);
                 div = null;
 
-                isSelf || chatHeader.to == from || this.handleUnreadCount(this.getAttr(curWrapper, 'id') + 'Contact');
+                isSelf || targetContact.name == from || this.handleUnreadCount(this.getAttr(curWrapper, 'id') + 'Contact');
                 
-                this.handleBriefMsg(this.getAttr(curWrapper, 'id') + 'Contact', msgType);
+                this.handleBriefMsg(this.getAttr(curWrapper, 'id') + 'Contact', msg);
 
                 curWrapper.scrollTop = curWrapper.scrollHeight + 100;
             }
@@ -153,7 +179,7 @@
                             file = null,
                             type = '',
                             fileDom = '',
-                            to = chatHeader.to;
+                            to = targetContact.name;
 
                         file = Easemob.im.Utils.getFileUrl(id);
                         type = file.filetype.toLowerCase();
@@ -181,9 +207,9 @@
                             }
                         }
                     };
-                    if ( chatHeader.isGroup ) {
+                    if ( targetContact.isGroup ) {
                         opt.type = 'groupchat';
-                        opt.to = chatHeader.roomId;
+                        opt.to = targetContact.roomId;
                     }
                             
                     conn.send(opt);
@@ -252,6 +278,9 @@
             , hide: function () {
                 signin.display = false;
             }
+            , active: function () {
+                this.style.borderBottom = '1px solid #000';
+            }
             , check: function () {
                 if ( !this.value ) {
                     this.style.borderBottom = '1px solid rgb(255, 42, 0)';
@@ -316,6 +345,9 @@
             , show: function () {
                 signup.display = true;
             }
+            , active: function () {
+                this.style.borderBottom = '1px solid #000';
+            }
             , check: function () {
                 if ( !this.value ) {
                     this.style.borderBottom = '1px solid rgb(255, 42, 0)';
@@ -324,7 +356,7 @@
                 }
             }
             , checkPwd: function () {
-                var pwd = document.getElementById('password');
+                var pwd = Easemob.im.utils.$('password');
 
                 if ( signup.password != signup.cpassword ) {
                     pwd.style.borderBottom = '1px solid rgb(255, 42, 0)';
@@ -380,22 +412,20 @@
             }
         });
  
-        //contact wrapper
-        var emimList = avalon.define({
-            $id: 'emimContactWrapper'
-        });
-
         //聊天主窗口
         var chat = avalon.define({
             $id: 'chat'
             , display: false
             , height: 0
-            , show: function() {
+            , show: function () {
                 chat.display = true;
-                var chatDom = document.getElementById('emimWrapper');
-                chat.height = chatDom.getBoundingClientRect().height;
+                chat.height = chat.getHeight();
             }
-            , hide: function() {
+            , getHeight: function () {
+                var chatDom = Easemob.im.utils.$('emimWrapper');
+                return chatDom.getBoundingClientRect().height - 112;
+            }
+            , hide: function () {
                 chat.display = false;
             }
         });
@@ -406,20 +436,19 @@
             , title: ''
             , content: ''
             , display: false
-            , show: function() {
+            , show: function () {
                 dialog.display = true;
             }
-            , hide: function() {
+            , hide: function () {
                 dialog.display = false;
             }
-            , cacel: function() {
+            , cacel: function () {
                 dialog.hide();
             }
-            , ok: function() {
+            , ok: function () {
                 dialog.hide();
             }
         });
-
 
         //profile
         var profileInfo = avalon.define({
@@ -427,9 +456,9 @@
             , username: ''
             , src: 'img/avatar.png'
             , display: false
-            , dialog: function(fn) {
+            , dialog: function ( fn ) {
                 
-                switch(fn) {
+                switch ( fn ) {
                     case 'add':
 
                         break;
@@ -438,29 +467,27 @@
                         break;
                 }
             }
-            , logout: function() {
+            , logout: function () {
                 conn.close();
                 chat.hide();
                 signin.show();
             }
-            , toggle: function() {
+            , toggle: function () {
                 profileInfo.display = !profileInfo.display;
             }
         });
  
-       
         //tab
         var contactTab = avalon.define({
             $id: 'contactTab'
             , cur: 'friend'
-            , toggle: function(idx) {
+            , toggle: function ( idx ) {
                 contactTab.cur = idx;
                 contactList.show(idx);
             }
         });
 
-
-        //list wrapper
+        //联系人列表
         var contactList = avalon.define({
             $id: 'contactList'
             , friend: []
@@ -468,33 +495,33 @@
             , stranger: []
             , curWrapper: 'friend'
             , cur: ''
-            , show: function(tab) {
+            , show: function ( tab ) {
                 contactList.curWrapper = tab;
             }
-            , select: function() {
+            , select: function () {
                 contactList.cur = Easemob.im.utils.getAttr(this, 'id');
                 var roomId = Easemob.im.utils.getAttr(this, 'roomId');
 
-                if(roomId) {
-                    chatHeader.isGroup = true;
-                    chatHeader.roomId = roomId;
+                if ( roomId ) {
+                    targetContact.isGroup = true;
+                    targetContact.roomId = roomId;
                 } else {
-                    chatHeader.isGroup = false;
-                    chatHeader.roomId = '';
+                    targetContact.isGroup = false;
+                    targetContact.roomId = '';
                 }
 
                 var cur = this.getElementsByTagName('span')[0].innerHTML;
-                chatHeader.to = cur;
+                targetContact.name = cur;
                 chatWrapper.toggle(cur);
 
                 Easemob.im.utils.handleUnreadCount(contactList.cur, true);
             }
         });
 
-        //chat header
-        var chatHeader = avalon.define({
-            $id: 'chatHeader'
-            , to: ''
+        //目标联系人相关信息
+        var targetContact = avalon.define({
+            $id: 'targetContact'
+            , name: ''
             , isGroup: false
             , roomId: ''
         });
@@ -506,7 +533,7 @@
             , group: []
             , stranger: []
             , cur: 0
-            , toggle: function(idx) {
+            , toggle: function ( idx ) {
                 chatWrapper.cur = idx;
             }
         });
@@ -517,42 +544,55 @@
             , text: ''
             , realFile: ''
             , file: ''
+            , facePath: Easemob.im.EMOTIONS.path
+            , faces: Easemob.im.EMOTIONS.map
             , faceShow: false
-            , showFace: function() {
+            , enableSend: false
+            , showFace: function () {
                 send.faceShow = !send.faceShow;
             }
-            , sendText: function(message) {
-                var to = chatHeader.to;
-                if (!to) {
+            , check: function () {
+                send.enableSend = this.value ? true : false;
+            }
+            , sendText: function () {
+                var to = targetContact.name;
+                if ( !to ) {
                     emprompt.show("请先选择联系人");
                     return;
                 }
-                if (!send.text) {
+                if ( !send.text ) {
                     return;
                 }
-                var options = message;
-                // 群组消息和个人消息的判断分支
-                chatHeader.isGroup && (options.type = 'groupchat');
-                conn.send(options);
-                //当前登录人发送的信息在聊天窗口中原样显示
-                Easemob.im.utils.appendMsg(profileInfo.username, to, Easemob.im.utils.textMessage(send.text.replace(/\n/g, '<br>')), send.text);
+
+                var msg = new Message('txt', conn.getUniqueId());
+                msg.set(to, send.text, function ( id ) {
+                    console.log(id);
+                }, function (e) {
+                    console.log(e);
+                });
+                msg.handleGroup(targetContact.isGroup)
+                conn.send(msg.body);
+
+                //消息上屏
+                Easemob.im.utils.appendMsg(profileInfo.username, to, msg, 'txt');
                 send.text = '';   
             }
-            , sendFile: function() {
-                if(!chatHeader.to) {
+            , sendFile: function () {
+                if ( !targetContact.name ) {
                     emprompt.show("请先选择联系人");
                     return;
                 }
                 send.realFile = send.realFile ? send.realFile : this.parentNode.parentNode.getElementsByTagName('input')[0];
                 send.realFile.click();
             }
-            , faceSelect: function(e) {
+            , faceSelect: function ( e ) {
                 var ev = window.event || e,
                     target = ev.target || ev.srcElement;
 
                 target.nodeName == 'IMG' && (send.text += Easemob.im.utils.getAttr(target, 'data'));
+                send.enableSend = true;
             }
-            , realSendFile: function() {
+            , realSendFile: function () {
                 Easemob.im.utils.fileMessage(this);
             }
         });
@@ -572,48 +612,50 @@
 
         //监听回调
         conn.listen({
-            onOpened : function() {//当连接成功时的回调方法
+            onOpened: function () {//当连接成功时的回调方法
                 handleOpen(conn);
             },
-            onClosed : function() {//当连接关闭时的回调方法
+            onClosed: function () {//当连接关闭时的回调方法
                 handleClosed();
             },
-            onTextMessage : function(message) {//收到文本消息时的回调方法
-                Easemob.im.utils.appendMsg(message.from, message.to, Easemob.im.utils.textMessage(message.data.replace(/\n/g, '<br>')), message.data);
+            onTextMessage: function ( message ) {//收到文本消息时的回调方法
+                //message.data.replace(/\n/g, '<br>')
+                Easemob.im.utils.appendMsg(message);
             },
-            onEmotionMessage : function(message) {//收到表情消息时的回调方法
+            onEmotionMessage: function ( message ) {//收到表情消息时的回调方法
                 var str = '';
+
                 avalon.each(message.data, function(k, v) {
                     str += v.type == 'emotion' ? '<img class="emim-face-msg" src="' + v.data + '">' : v.data;
                 });
                 Easemob.im.utils.appendMsg(message.from, message.to, Easemob.im.utils.textMessage(str.replace(/\n/g, '<br>')), str);
                 str = null;
             },
-            onPictureMessage : function(message) {//收到图片消息时的回调方法
+            onPictureMessage: function ( message ) {//收到图片消息时的回调方法
                 Easemob.im.utils.appendMsg(message.from, message.to, Easemob.im.utils.fileMessage(null, message.url, message.ext.postfix || message.filename.slice(message.filename.lastIndexOf('.') + 1)), 'img');
             },
-            onAudioMessage : function(message) {//收到音频消息的回调方法
+            onAudioMessage: function ( message ) {//收到音频消息的回调方法
                 handleAudioMessage(message);
             },
-            onLocationMessage : function(message) {//收到位置消息的回调方法
+            onLocationMessage: function ( message ) {//收到位置消息的回调方法
                 handleLocationMessage(message);
             },
-            onFileMessage : function(message) {//收到文件消息的回调方法
+            onFileMessage: function ( message ) {//收到文件消息的回调方法
                 handleFileMessage(message);
             },
-            onVideoMessage : function(message) {//收到视频消息的回调方法
+            onVideoMessage: function ( message ) {//收到视频消息的回调方法
                 handleVideoMessage(message);
             },
-            onPresence : function(message) {//收到联系人订阅请求的回调方法
+            onPresence: function ( message ) {//收到联系人订阅请求的回调方法
                 handlePresence(message);
             },
-            onRoster : function(message) {//收到联系人信息的回调方法
+            onRoster: function ( message ) {//收到联系人信息的回调方法
                 handleRoster(message);
             },
-            onInviteMessage : function(message) {//收到群组邀请时的回调方法
+            onInviteMessage: function ( message ) {//收到群组邀请时的回调方法
                 handleInviteMessage(message);
             },
-            onError : function(message) {//异常时的回调方法
+            onError: function ( message ) {//异常时的回调方法
                 handleError(message);
             }
         });
@@ -621,13 +663,13 @@
         /*
             处理连接时函数,主要是登录成功后对页面元素做处理
         */
-        var handleOpen = function(conn) {
+        var handleOpen = function ( conn ) {
             
             profileInfo.username = conn.context.userId;//从连接中获取到当前的登录人注册帐号名
 
             //获取当前登录人的联系人列表
             conn.getRoster({
-                success : function(roster) {
+                success : function ( roster ) {
                     loading.hide();
                     signin.hide();
                     chat.show();
@@ -638,14 +680,14 @@
                     contactList.stranger = [];
 
                     chatWrapper.friend = [];
-                    for ( var i in roster) {
+                    for ( var i in roster ) {
                         var ros = roster[i];
                         //both为双方互为好友，要显示的联系人,from我是对方的单向好友
-                        if (ros.subscription == 'both' || ros.subscription == 'from') {
+                        if ( ros.subscription == 'both' || ros.subscription == 'from' ) {
                             ros.src = ros.src ? ros.src : 'img/avatar.png';
                             contactList.friend.push(ros);
                             chatWrapper.friend.push(ros);
-                        } else if (ros.subscription == 'to') {
+                        } else if ( ros.subscription == 'to' ) {
                             toRoster.push(ros);//to表明了联系人是我的单向好友
                         }
                     }
@@ -654,13 +696,13 @@
                         获取当前登录人的群组列表
                     */
                     conn.listRooms({
-                        success : function(rooms) {
-                            avalon.each(rooms, function(k, v) {
+                        success: function ( rooms ) {
+                            avalon.each(rooms, function ( k, v ) {
                                 contactList.group.push(v);
                             });
                             conn.setPresence();//设置用户上线状态，必须调用
                         },
-                        error : function(e) {}
+                        error: function ( e ) {}
                     });
                 }
             });
@@ -671,19 +713,19 @@
             异常情况下的处理方法
         */
         var handleError = function(e) {
-            if (!chatHeader.to) {
+            if ( !targetContact.name ) {
                 loading.hide();
                 signin.show();
                 emprompt.show(e.msg + ",请重新登录");
             } else {
-                if (e.type == EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR) {
-                    if (e.msg == "" || e.msg == 'unknown' ) {
+                if ( e.type == EASEMOB_IM_CONNCTION_SERVER_CLOSE_ERROR ) {
+                    if ( e.msg == "" || e.msg == 'unknown' ) {
                         emprompt.show("服务器断开连接,可能是因为在别处登录");
                     } else {
                         emprompt.show("服务器断开连接");
                     }
-                } else if (e.type === EASEMOB_IM_CONNCTION_SERVER_ERROR) {
-                    if (e.msg.toLowerCase().indexOf("user removed") != -1) {
+                } else if ( e.type === EASEMOB_IM_CONNCTION_SERVER_ERROR ) {
+                    if ( e.msg.toLowerCase().indexOf("user removed") != -1 ) {
                         emprompt.show("用户已经在管理后台删除");
                     }
                 } else {
@@ -692,8 +734,23 @@
             }
         };
 
-
-
+        /*
+            document event
+        */
+        avalon.bind(document, 'click', function ( ev ) {
+            e = ev || event;
+            
+            var target = e.srcElement || e.target;
+            if ( !target.className || target.className.indexOf('e-face') === -1 ) {
+                send.faceShow = false;
+            }
+            if ( !target.className || target.className.indexOf('e-function') === -1 ) {
+                profileInfo.display = false;
+            }
+        });
+        avalon.bind(window, 'resize', function () {
+            chat.height = chat.getHeight();
+        });
     });
 
 
@@ -701,13 +758,15 @@
         upload by flash
         param1: input file ID
     */
-    var uploadShim = function(fileInputId) {
-        if(!Easemob.im.Utils.isCanUploadFile) {
+    var uploadShim = function ( fileInputId ) {
+        if ( !Easemob.im.Utils.isCanUploadFile ) {
             return;
         }
         var pageTitle = document.title;
         var uploadBtn = $('#' + fileInputId);
-        if(typeof SWFUpload === 'undefined' || uploadBtn.length < 1) return;
+        if ( typeof SWFUpload === 'undefined' || uploadBtn.length < 1 ) {
+            return;
+        }
 
         return new SWFUpload({ 
             file_post_name: 'file'
@@ -719,35 +778,37 @@
             , button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT
             , file_size_limit: 10485760
             , file_upload_limit: 0
-            , file_queued_handler: function(file) {
-                if(this.getStats().files_queued > 1) {
+            , file_queued_handler: function ( file ) {
+                if ( this.getStats().files_queued > 1 ) {
                     this.cancelUpload();
                 }
-                if(!EasemobWidget.PICTYPE[file.type.slice(1).toLowerCase()]) {
+                if ( !EasemobWidget.PICTYPE[file.type.slice(1).toLowerCase()] ) {
                     im.errorPrompt('不支持此文件类型' + file.type);
                     this.cancelUpload();
-                } else if(10485760 < file.size) {
+                } else if ( 10485760 < file.size ) {
                     im.errorPrompt('文件大小超过限制！请上传大小不超过10M的文件');
                     this.cancelUpload();
                 } else {
                     im.sendImgMsg();
                 }
             }
-            , file_dialog_start_handler: function() {}
-            , upload_error_handler: function(file, code, msg){
-                if(code != SWFUpload.UPLOAD_ERROR.FILE_CANCELLED && code != SWFUpload.UPLOAD_ERROR.UPLOAD_LIMIT_EXCEEDED && code != SWFUpload.UPLOAD_ERROR.FILE_VALIDATION_FAILED) {
+            , file_dialog_start_handler: function () {}
+            , upload_error_handler: function ( file, code, msg ) {
+                if ( code != SWFUpload.UPLOAD_ERROR.FILE_CANCELLED && code != SWFUpload.UPLOAD_ERROR.UPLOAD_LIMIT_EXCEEDED && code != SWFUpload.UPLOAD_ERROR.FILE_VALIDATION_FAILED ) {
                     im.errorPrompt('图片发送失败');
                 }
             }
-            , upload_complete_handler: function(){}
-            , upload_success_handler: function(file, response){
-                if(!file || !response) return;
-                try{
+            , upload_complete_handler: function () {}
+            , upload_success_handler: function ( file, response ) {
+                if ( !file || !response ){
+                    return;
+                }
+                try {
                     var res = Easemob.im.Utils.parseUploadResponse(response);
                     
                     res = $.parseJSON(res);
                     res.filename = file.name;
-                    if(file && !file.url && res.entities && res.entities.length > 0) {
+                    if ( file && !file.url && res.entities && res.entities.length > 0 ) {
                         file.url = res.uri + '/' + res.entities[0].uuid;
                     }
                     var temp = $("\
@@ -764,7 +825,7 @@
                     im.chatWrapper.append(temp);
                     im.chatWrapper.find('img:last').on('load', im.scrollBottom);
                     this.uploadOptions.onFileUploadComplete(res);
-                } catch (e) {
+                } catch ( e ) {
                     im.errorPrompt('上传图片发生错误');
                 }
             }
@@ -774,65 +835,123 @@
     /*
         提供上传接口
     */
-    var flashUpload = function(url, options){
+    var flashUpload = function ( url, options ) {
         swfupload.setUploadURL(url);
         swfupload.startUpload();
         swfupload.uploadOptions = options;
-    }
+    };
 
-}(window, undefined));
-
-
-
-/*
-    表情包集成
-
-    Easemob.im.EMOTIONPACKAGE = {
-        path: 'static/img/faces/',
-        map: {
-            '[):]': 'ee_1.png',
-            '[:D]': 'ee_2.png'
-            ...
+    /**************************************************************************
+    ---                                 message                             ---
+    **************************************************************************/
+    var Message = function ( type, id ) {
+        
+        if ( !(this instanceof Message) ) {
+            return new Message(type);
         }
+
+        this._msg = {};
+
+        if ( typeof Message[type] === 'function' ) {
+            this._msg = new Message[type](id);
+        }
+        this._msg.handleGroup = this.handleGroup;
+
+        return this._msg;
     }
-*/
-Easemob.im.EMOTIONS = {
-    path: 'img/faces/'
-    , map: {
-        '[):]': 'ee_1.png',
-        '[:D]': 'ee_2.png',
-        '[;)]': 'ee_3.png',
-        '[:-o]': 'ee_4.png',
-        '[:p]': 'ee_5.png',
-        '[(H)]': 'ee_6.png',
-        '[:@]': 'ee_7.png',
-        '[:s]': 'ee_8.png',
-        '[:$]': 'ee_9.png',
-        '[:(]': 'ee_10.png',
-        '[:\'(]': 'ee_11.png',
-        '[:|]': 'ee_12.png',
-        '[(a)]': 'ee_13.png',
-        '[8o|]': 'ee_14.png',
-        '[8-|]': 'ee_15.png',
-        '[+o(]': 'ee_16.png',
-        '[<o)]': 'ee_17.png',
-        '[|-)]': 'ee_18.png',
-        '[*-)]': 'ee_19.png',
-        '[:-#]': 'ee_20.png',
-        '[:-*]': 'ee_21.png',
-        '[^o)]': 'ee_22.png',
-        '[8-)]': 'ee_23.png',
-        '[(|)]': 'ee_24.png',
-        '[(u)]': 'ee_25.png',
-        '[(S)]': 'ee_26.png',
-        '[(*)]': 'ee_27.png',
-        '[(#)]': 'ee_28.png',
-        '[(R)]': 'ee_29.png',
-        '[({)]': 'ee_30.png',
-        '[(})]': 'ee_31.png',
-        '[(k)]': 'ee_32.png',
-        '[(F)]': 'ee_33.png',
-        '[(W)]': 'ee_34.png',
-        '[(D)]': 'ee_35.png'
+    
+    Message.prototype.handleGroup = function ( flag ) {
+        // 群组消息和个人消息的判断分支
+        flag && (this.type = 'groupchat');
     }
-};
+
+    //
+    Message.txt = function ( id ) {
+        this.id = id;
+        this.type = 'txt';
+        this.body = {};
+    }
+    Message.txt.prototype.get = function () {
+        return [
+            "<div id='" + this.id + "' class='easemobWidget-right'>",
+                "<div class='easemobWidget-msg-wrapper'>",
+                    "<i class='easemobWidget-right-corner'></i>",
+                    "<div class='easemobWidget-msg-status hide'><span>发送失败</span><i></i></div>",
+                    //"<div class='easemobWidget-msg-loading'>" + LOADING + "</div>",
+                    "<div class='easemobWidget-msg-loading'>LOADING</div>",
+                    "<div class='easemobWidget-msg-container'>",
+                        "<p>" + Easemob.im.Utils.parseLink(Easemob.im.Utils.parseEmotions(Easemob.im.utils.encode(this.value))) + "</p>",
+                    "</div>",
+                "</div>",
+            "</div>"
+        ].join('');
+    }
+    Message.txt.prototype.set = function ( to, value, success, fail ) {
+
+        this.value = value;
+
+        this.body = {
+            id: this.id
+            , to: to
+            , msg: value 
+            , type : 'chat'
+            , success: success
+            , fail: fail
+        };
+    }
+
+
+    /*
+        表情包集成
+
+        Easemob.im.EMOTIONPACKAGE = {
+            path: 'img/faces/',
+            map: {
+                '[):]': 'ee_1.png',
+                '[:D]': 'ee_2.png'
+                ...
+            }
+        }
+    */
+    Easemob.im.EMOTIONS = {
+        path: 'img/faces/'
+        , map: {
+            '[):]': 'ee_1.png',
+            '[:D]': 'ee_2.png',
+            '[;)]': 'ee_3.png',
+            '[:-o]': 'ee_4.png',
+            '[:p]': 'ee_5.png',
+            '[(H)]': 'ee_6.png',
+            '[:@]': 'ee_7.png',
+            '[:s]': 'ee_8.png',
+            '[:$]': 'ee_9.png',
+            '[:(]': 'ee_10.png',
+            '[:\'(]': 'ee_11.png',
+            '[:|]': 'ee_12.png',
+            '[(a)]': 'ee_13.png',
+            '[8o|]': 'ee_14.png',
+            '[8-|]': 'ee_15.png',
+            '[+o(]': 'ee_16.png',
+            '[<o)]': 'ee_17.png',
+            '[|-)]': 'ee_18.png',
+            '[*-)]': 'ee_19.png',
+            '[:-#]': 'ee_20.png',
+            '[:-*]': 'ee_21.png',
+            '[^o)]': 'ee_22.png',
+            '[8-)]': 'ee_23.png',
+            '[(|)]': 'ee_24.png',
+            '[(u)]': 'ee_25.png',
+            '[(S)]': 'ee_26.png',
+            '[(*)]': 'ee_27.png',
+            '[(#)]': 'ee_28.png',
+            '[(R)]': 'ee_29.png',
+            '[({)]': 'ee_30.png',
+            '[(})]': 'ee_31.png',
+            '[(k)]': 'ee_32.png',
+            '[(F)]': 'ee_33.png',
+            '[(W)]': 'ee_34.png',
+            '[(D)]': 'ee_35.png'
+        }
+    };
+
+} ( window, undefined ) );

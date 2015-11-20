@@ -6,15 +6,15 @@
     <title>环信WebIM</title>
     <link rel="stylesheet" href="css/webim.css">
 
-    <!--sdk及所需的js文件-->
+    <!-- sdk及所需的js文件 -->
     <script src="js/sdk/strophe.js"></script>
     <script src="js/sdk/easemob.im-2.0.js"></script>
 
-    <!--demo依赖的js文件-->
-    <script src="js/lib/avalon.min.js"></script>
-    <script src="js/lib/swfupload/swfupload.js"></script>
-    <script src="js/easemob.im.config.js"></script>
-    <script src="js/easemob.im.js"></script>
+    <!-- demo依赖的js文件 -->
+    <script src="js/lib/avalon.min.js"></script><!-- demo使用的mv框架 -->
+    <script src="js/lib/swfupload/swfupload.js"></script><!-- 低版本使用此库上传文件 -->
+    <script src="js/easemob.im.config.js"></script><!-- demo使用sdk的配置 -->
+    <script src="js/easemob.im.js"></script><!-- demo业务相关 -->
 </head>
 <body>
     
@@ -30,8 +30,8 @@
     <div ms-visible='display' class='emim-prl emim-auto emim-mt80 emim-sign-wrapper'>
         <div class='emim-font emim-center emim-bigger-size emim-theme emim-mt20'>0</div>
         <h3 class='emim-w100 emim-center emim-theme emim-smaller-size emim-normal-weight emim-mt20'>WebIM of Easemob</h3>
-        <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin' ms-blur='check'>
-        <input type='password' ms-attr-placeholder='port' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin' ms-blur='check'>
+        <input type='text' autofocus='autofocus' placeholder='Username' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='username' ms-keydown='signin' ms-focus='active' ms-blur='check'>
+        <input type='password' ms-attr-placeholder='port' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='password' ms-keydown='signin' ms-blur='check' ms-focus='active'>
         <i class='emim-font' ms-click='transfer'>{{content}}</i>
         <button class='emim-db emim-w80 emim-auto emim-mt40 emim-themebg emim-center emim-main-btn' ms-click='signin'>Sign in</button>
         <button class='emim-db emim-w80 emim-auto emim-theme emim-center emim-mt10 emim-vice-btn' ms-click='showSignup'>Sign up</button>
@@ -42,10 +42,10 @@
     <script id='emimSignup' type='tpl'>
     <div ms-visible='display' class="emim-prl emim-auto emim-mt120 emim-sign-wrapper">
         <h3 class='emim-w80 emim-auto emim-theme emim-tl'>Sign Up</h3>
-        <input type='text' placeholder='Username' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='username' ms-keydown='signup' ms-blur='check'>
-        <input id='password' type='password' placeholder='Password' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='password' ms-keydown='signup' ms-blur='checkPwd'>
-        <input type='password' placeholder='Confirm Password' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='cpassword' ms-keydown='signup' ms-blur='checkPwd'>
-        <input type='text' placeholder='Nickname' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='nickname' ms-keydown='signup' ms-blur='check'>
+        <input type='text' placeholder='Username' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='username' ms-keydown='signup' ms-blur='check' ms-focus='active'>
+        <input id='password' type='password' placeholder='Password' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='password' ms-keydown='signup' ms-blur='checkPwd' ms-focus='active'>
+        <input type='password' placeholder='Confirm Password' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='cpassword' ms-keydown='signup' ms-blur='checkPwd' ms-focus='active'>
+        <input type='text' placeholder='Nickname' class='emim-db emim-w80 emim-auto emim-mt20' ms-duplex='nickname' ms-keydown='signup' ms-blur='check' ms-focus='active'>
         <button class='emim-db emim-w80 emim-auto emim-center emim-mt50 emim-themebg emim-main-btn' ms-click='signup'>Sign Up</button>
         <div class='emim-signup-back' ms-click='back'></div>
     </div>
@@ -57,14 +57,13 @@
         <div class='emim-h100 emim-prl emim-chatLeft emim-fl'>
             <div class='emim-profile' ms-controller='profile' ms-include='emimProfile'></div>
             <div class='emim-list-tab' ms-include='emimListTab'></div>
-            <div class='emim-list' ms-controller='emimContactWrapper' ms-css-height='height-112' ms-include='emimList'></div>
+            <div class='emim-list' ms-css-height='height' ms-include='emimList'></div>
         </div>
         <div class='emim-h100 emim-prl emim-chatRight'>
-            <div class='emim-center emim-current-header' ms-controller='chatHeader'>
-                <span class='emim-chat-to'>{{to}}</span>
+            <div class='emim-prl emim-center emim-current-header' ms-controller='targetContact'>
+                <span class='emim-chat-to'>{{name}}</span>
                 <span class='emim-font emim-pab emim-font-alarm-hover emim-chat-clear'>H</span>
             </div>
-            <hr class='emim-auto emim-current-header-border'/>
             <div class='emim-chat-wrapper' ms-controller='chatWrapper' ms-css-height='height-228'>
                 <div class='emim-h100 emim-chat-content' ms-repeat-item='friend' ms-attr-id='item.name' ms-class='emim-hide:cur!=item.name'></div>
                 <div class='emim-h100 emim-chat-content' ms-repeat-item='group' ms-attr-id='item.id' ms-class='emim-hide:cur!=item.id'></div>
@@ -79,20 +78,20 @@
     <script id='emimProfile' type='tpl'>
     <img class='emim-avatar emim-profile-avatar' ms-attr-src='src' />
     <span class='emim-profile-username'>{{username}}</span>
-    <span class='emim-font emim-font-hover emim-profile-dropdown' ms-click='toggle'>g</span>
-    <ul class='emim-dropdown-menu' ms-visible='display'>
-        <li ms-click='dialog' class='emim-font-hover'>添加好友</li>
-        <li ms-click='dialog' class='emim-font-hover'>删除好友</li>
-        <li ms-click='logout' class='emim-font-alarm-hover'>退出</li>
+    <span class='emim-prl emim-fr emim-font emim-font-hover emim-gray emim-profile-dropdown e-function' ms-click='toggle'>g</span>
+    <ul class='emim-dropdown-menu e-function' ms-visible='display'>
+        <li ms-click='dialog' class='emim-font-hover e-function'>添加好友</li>
+        <li ms-click='dialog' class='emim-font-hover e-function'>删除好友</li>
+        <li ms-click='logout' class='emim-font-alarm-hover e-function'>退出</li>
     </ul>
     </script>
 
     <!-- 列表tab -->
     <script id='emimListTab' type='tpl'>
     <ol ms-controller='contactTab'>
-        <li class='emim-font emim-font-hover emim-friend-tab' ms-class='emim-cur: cur=="friend"' ms-click='toggle("friend")'>a</li>
-        <li class='emim-font emim-font-hover emim-group-tab' ms-class='emim-cur: cur=="group"' ms-click='toggle("group")'>b</li>
-        <li class='emim-font emim-font-hover emim-stranger-tab' ms-class='emim-cur: cur=="stranger"' ms-click='toggle("stranger")'>c</li>       
+        <li class='emim-font emim-font-hover emim-gray emim-friend-tab' ms-class='emim-cur: cur=="friend"' ms-click='toggle("friend")'>a</li>
+        <li class='emim-font emim-font-hover emim-gray emim-group-tab' ms-class='emim-cur: cur=="group"' ms-click='toggle("group")'>b</li>
+        <li class='emim-font emim-font-hover emim-gray emim-stranger-tab' ms-class='emim-cur: cur=="stranger"' ms-click='toggle("stranger")'>c</li>       
     </ol>
     </script>
 
@@ -111,7 +110,7 @@
     </div>
     </script>
 
-    <!-- 联系人列表 -->
+    <!-- 联系人 -->
     <script id='emimContact' type='tpl'>
         <img class='emim-avatar emim-contact-avatar' ms-attr-src='"img/avatar.png" || item.src'/>
         <span class='emim-prl emim-contact-username'>{{item.name}}</span>
@@ -121,18 +120,18 @@
     
     <!-- 消息发送区 -->
     <script id='emimSendWrapper' type='tpl'>
-    <div ms-controller='send' class='emim-prl'>
-        <div class='chat02_title'>
-            <span class='emim-font emim-font-hover' ms-click='showFace' title='选择表情'>d</span>
-            <span class='emim-font emim-font-hover' ms-click='sendFile' title='选择文件'>e</span>
+    <div ms-controller='send' class='emim-prl emim-send-wrapper'>
+        <div class='emim-send-function-list'>
+            <span class='emim-prl emim-font emim-dib emim-font-hover emim-gray e-face' ms-click='showFace' title='选择表情'>d</span>
+            <span class='emim-prl emim-font emim-dib emim-font-hover emim-gray' ms-click='sendFile' title='选择文件'>L</span>
         </div>
-        <ul ms-click="faceSelect"  ms-visible='faceShow' class='emim-face-wrapper'>
-            <li ms-repeat-item='faces' class='emim-center'><img ms-attr-src='"img/faces/" + item.src + ".png"' ms-attr-data='item.data'></li>
+        <ul ms-click="faceSelect"  ms-visible='faceShow' class='emim-face-wrapper e-face'>
+            <li ms-repeat='faces' class='emim-center e-face'><img class='e-face' ms-attr-src='{{facePath + $val}}' ms-attr-data='$key'></li>
         </ul>
         <div class='emim-w95 emim-auto'>
-            <textarea class='emim-w100 emim-chat-textarea' spellcheck='false' ms-duplex='text'></textarea>
+            <textarea class='emim-w100 emim-chat-textarea' spellcheck='false' ms-duplex='text' ms-on-change='check' ms-keyup='check' ms-on-input='check'></textarea>
         </div>
-        <button class='emim-themebg emim-pab emim-send-button' ms-click="send">Send</button>
+        <button class='emim-fr emim-disable-btn emim-send-button' ms-click="sendText" ms-class='emim-themebg:enableSend'>Send</button>
         <input id='fileInput' type='file' ms-visible='false' ms-duplex='file' ms-change='realSendFile'>
     </div>
     </script>
