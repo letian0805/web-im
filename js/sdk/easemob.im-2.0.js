@@ -865,7 +865,8 @@
                         _send(message);
                     }
                 }
-            }, 10000);
+            //}, 10000);
+            }, 1);
             conn.sendCommand(dom.tree(), message.id);
         }
 

@@ -37,6 +37,16 @@
                 return document.getElementById(id);
             }
 
+            , addClass: function ( obj, className ) {
+                obj.className += ' ' + className;
+            }
+
+            , removeClass: function ( obj, className ) {
+                while ( obj.className.indexOf(className) >= 0 ) {
+                    obj.className = obj.className.replace(className, '');
+                }
+            }
+
             , on: function ( target, ev, fn, isCapture ) {
                 if ( target.addEventListener ) {
                     target.addEventListener(ev, fn, isCapture);
@@ -139,7 +149,7 @@
                 var div = document.createElement('div');
                 div.className = 'emim-clear emim-mt20 emim-tl emim-msg-wrapper ';
                 div.className += isSelf ? 'emim-fr' : 'emim-fl';
-                div.innerHTML = msg.get();
+                div.innerHTML = msg.get(!isSelf);
                 curWrapper.appendChild(div);
                 div = null;
 
@@ -253,7 +263,9 @@
             , content: ''
             , t: '-60px'
             , ts: 0
+            , display: false
             , show: function ( html ) {
+                emprompt.display = true;
                 emprompt.t = '0';
                 emprompt.content = html;
                 clearTimeout(emprompt.ts);
@@ -315,14 +327,14 @@
                 if ( signin.content === 'j' ) {
                     conn.open({//根据用户名令牌登录系统
                         apiUrl: Easemob.im.config.apiURL
-                        , user: signin.username
+                        , user: signin.username.toLowerCase()
                         , accessToken: signin.token
                         , appKey: Easemob.im.config.appkey
                     });
                 } else {
                     conn.open({//根据用户名密码登录系统
                         apiUrl: Easemob.im.config.apiURL
-                        , user: signin.username
+                        , user: signin.username.toLowerCase()
                         , pwd: signin.password
                         , appKey: Easemob.im.config.appkey
                     });
@@ -388,7 +400,7 @@
                 }
                 loading.show();
                 var options = {
-                    username: signup.username
+                    username: signup.username.toLowerCase()
                     , password: signup.password
                     , nickname: signup.nickname
                     , appKey: Easemob.im.config.appkey
@@ -416,6 +428,7 @@
         var chat = avalon.define({
             $id: 'chat'
             , display: false
+            , chatHeight: 0
             , height: 0
             , show: function () {
                 chat.display = true;
@@ -423,11 +436,16 @@
             }
             , getHeight: function () {
                 var chatDom = Easemob.im.utils.$('emimWrapper');
-                return chatDom.getBoundingClientRect().height - 112;
+
+                chat.chatHeight = chatDom.getBoundingClientRect().height;
+                return chat.chatHeight - 112;
             }
             , hide: function () {
                 chat.display = false;
             }
+        });
+        chat.$watch('chatHeight', function ( o, n ) {
+            chatWrapper.height = o - 228;
         });
 
         //dialog
@@ -454,7 +472,7 @@
         var profileInfo = avalon.define({
             $id: 'profile'
             , username: ''
-            , src: 'img/avatar.png'
+            , avatar: 'img/avatar.png'
             , display: false
             , dialog: function ( fn ) {
                 
@@ -524,6 +542,7 @@
             , name: ''
             , isGroup: false
             , roomId: ''
+            , avatar: profileInfo.avatar
         });
 
         //chat wrapper
@@ -533,6 +552,7 @@
             , group: []
             , stranger: []
             , cur: 0
+            , height: 0
             , toggle: function ( idx ) {
                 chatWrapper.cur = idx;
             }
@@ -565,17 +585,19 @@
                 }
 
                 var msg = new Message('txt', conn.getUniqueId());
-                msg.set(to, send.text, function ( id ) {
-                    console.log(id);
-                }, function (e) {
-                    console.log(e);
+                msg.set(send.text, to, function ( id ) {
+                    Easemob.im.utils.$(id + '_loading').remove();
+                }, function ( id ) {
+                    Easemob.im.utils.addClass(Easemob.im.utils.$(id + '_loading'), 'emim-hide');
+                    Easemob.im.utils.removeClass(Easemob.im.utils.$(id + '_failed'), 'emim-hide');
                 });
                 msg.handleGroup(targetContact.isGroup)
                 conn.send(msg.body);
 
                 //消息上屏
                 Easemob.im.utils.appendMsg(profileInfo.username, to, msg, 'txt');
-                send.text = '';   
+                send.text = '';
+                send.enableSend = false;
             }
             , sendFile: function () {
                 if ( !targetContact.name ) {
@@ -619,8 +641,9 @@
                 handleClosed();
             },
             onTextMessage: function ( message ) {//收到文本消息时的回调方法
-                //message.data.replace(/\n/g, '<br>')
-                Easemob.im.utils.appendMsg(message);
+                var msg = new Message('txt');
+                msg.set(message.data);
+                Easemob.im.utils.appendMsg(message.from, message.to, msg, 'txt');
             },
             onEmotionMessage: function ( message ) {//收到表情消息时的回调方法
                 var str = '';
@@ -751,6 +774,63 @@
         avalon.bind(window, 'resize', function () {
             chat.height = chat.getHeight();
         });
+
+        /**************************************************************************
+        ---                                 message                             ---
+        **************************************************************************/
+        var Message = function ( type, id ) {
+            
+            if ( !(this instanceof Message) ) {
+                return new Message(type);
+            }
+
+            this._msg = {};
+
+            if ( typeof Message[type] === 'function' ) {
+                this._msg = new Message[type](id);
+            }
+            this._msg.handleGroup = this.handleGroup;
+
+            return this._msg;
+        }
+        
+        Message.prototype.handleGroup = function ( flag ) {
+            // 群组消息和个人消息的判断分支
+            flag && (this.type = 'groupchat');
+        }
+
+        //
+        Message.txt = function ( id ) {
+            this.id = id;
+            this.type = 'txt';
+            this.body = {};
+        }
+        Message.txt.prototype.get = function ( isReceive ) {
+            return [
+                !isReceive ? "<div id='" + this.id + "' class='emim-me'>" : "<div class='emim-notme'>",
+                    "<img class='emim-avatar emim-msg-avatar' src='" + (!isReceive ? targetContact.avatar : profileInfo.avatar) + "'/>",
+                    "<div class='emim-msg-container'>",
+                        "<p>" + Easemob.im.Utils.parseLink(Easemob.im.Utils.parseEmotions(Easemob.im.utils.encode(this.value))) + "</p>",
+                    "</div>",
+                    !isReceive ? "<div id='" + this.id + "_failed' class='emim-msg-status emim-hide'>6</div>" : "",
+                    !isReceive ? "<div id='" + this.id + "_loading' class='emim-msg-loading'>" + Easemob.im.utils.$('emimLoading').innerHTML + "</div>" : "",
+                "</div>"
+            ].join('');
+        }
+        Message.txt.prototype.set = function ( value, to, success, fail ) {
+
+            this.value = value;
+
+            this.body = {
+                id: this.id
+                , to: to
+                , msg: value 
+                , type : 'chat'
+                , success: success
+                , fail: fail
+            };
+        }
+
     });
 
 
@@ -840,66 +920,6 @@
         swfupload.startUpload();
         swfupload.uploadOptions = options;
     };
-
-    /**************************************************************************
-    ---                                 message                             ---
-    **************************************************************************/
-    var Message = function ( type, id ) {
-        
-        if ( !(this instanceof Message) ) {
-            return new Message(type);
-        }
-
-        this._msg = {};
-
-        if ( typeof Message[type] === 'function' ) {
-            this._msg = new Message[type](id);
-        }
-        this._msg.handleGroup = this.handleGroup;
-
-        return this._msg;
-    }
-    
-    Message.prototype.handleGroup = function ( flag ) {
-        // 群组消息和个人消息的判断分支
-        flag && (this.type = 'groupchat');
-    }
-
-    //
-    Message.txt = function ( id ) {
-        this.id = id;
-        this.type = 'txt';
-        this.body = {};
-    }
-    Message.txt.prototype.get = function () {
-        return [
-            "<div id='" + this.id + "' class='easemobWidget-right'>",
-                "<div class='easemobWidget-msg-wrapper'>",
-                    "<i class='easemobWidget-right-corner'></i>",
-                    "<div class='easemobWidget-msg-status hide'><span>发送失败</span><i></i></div>",
-                    //"<div class='easemobWidget-msg-loading'>" + LOADING + "</div>",
-                    "<div class='easemobWidget-msg-loading'>LOADING</div>",
-                    "<div class='easemobWidget-msg-container'>",
-                        "<p>" + Easemob.im.Utils.parseLink(Easemob.im.Utils.parseEmotions(Easemob.im.utils.encode(this.value))) + "</p>",
-                    "</div>",
-                "</div>",
-            "</div>"
-        ].join('');
-    }
-    Message.txt.prototype.set = function ( to, value, success, fail ) {
-
-        this.value = value;
-
-        this.body = {
-            id: this.id
-            , to: to
-            , msg: value 
-            , type : 'chat'
-            , success: success
-            , fail: fail
-        };
-    }
-
 
     /*
         表情包集成

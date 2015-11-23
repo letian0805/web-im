@@ -237,6 +237,12 @@ input, textarea, button, img {
     color: #fff;
     background-color: rgb(229, 229, 229);
 }
+.emim-msg-status,
+.emim-msg-container:before,
+.emim-msg-container:after {
+    font-family: webim;
+    font-size: 30px;
+}
 /*
     footer
 */
@@ -458,7 +464,7 @@ footer {
 }
 .emim-contact-msg {
     float: left;
-    margin: -28px 0 0 66px;
+    margin: -28px 0 0 60px;
     width: 168px;
     overflow: hidden;
     white-space: nowrap;
@@ -649,11 +655,141 @@ footer {
     padding: 10px;
     box-sizing: border-box;
 }
-
-
-
-
 /*
     message
 */
-
+.emim-notme,
+.emim-me {
+    text-decoration: none;
+    margin-top: 15px;
+}
+.emim-notme .emim-msg-avatar {
+    float: left;
+    margin-right: 10px;
+}
+.emim-me .emim-msg-avatar {
+    float: right;
+    margin-left: 10px;
+}
+.emim-msg-loading {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+.emim-notme .emim-msg-loading {
+    float: left;
+    margin-right: 10px;
+}
+.emim-me .emim-msg-loading {
+    float: right;
+    margin-left: 10px;
+}
+.emim-msg-container {
+    position: relative;
+    display: inline-block;
+    border-radius: 12px;
+    padding: 10px;
+    min-width: 20px;
+    min-height: 20px;
+    vertical-align: middle;
+    text-align: left;
+    font-size: 13px;
+    border: 1px solid #e5e5e5;
+}
+.emim-notme .emim-msg-container {
+    float: left;
+    background-color: rgb(242, 242, 242);
+}
+.emim-me .emim-msg-container {
+    float: right;
+    background-color: rgb(26, 26, 26);
+}
+.emim-msg-container img {
+    border-radius: 2px;
+    max-width: 190px;
+    word-wrap: break-word;
+    vertical-align: middle;
+}
+.emim-msg-container p {
+    word-break: break-all;
+}
+.emim-msg-unimage {
+    color: #999;
+}
+.emim-notme .emim-msg-container:before {
+    content: '1';
+    position: absolute;
+    top: 0;
+    left: -17px;
+    width: 30px;
+    height: 30px;
+    color: rgb(242, 242, 242);
+    text-shadow: -1px 0 0 #e5e5e5;
+}
+.emim-me .emim-msg-container:after {
+    content: '2';
+    position: absolute;
+    top: 0;
+    right: -17px;
+    width: 30px;
+    height: 30px;
+    color: rgb(26, 26, 26);
+    text-shadow: 1px 0 0 #c3cbd9;
+}
+.emim-msg-status {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 22px;
+    text-align: center;
+    cursor: pointer;
+}
+.emim-me .emim-msg-status {
+    float: right;
+}
+.emim-notme .emim-msg-status {
+    float: left;
+}
+.emim-notme .emim-msg-voice {
+    display: block;
+    background-position: -2px -234px;
+    width: 26px;
+    height: 22px;
+    vertical-align: middle;
+    border: none;
+    cursor: pointer;
+}
+.emim-notme .emim-msg-voice.one {
+    background-position: -2px -174px;
+}
+.emim-me .emim-msg-voice.two {
+    background-position: -2px -204px;
+}
+.emim-msg-mapinfo {
+    display: inline-block;
+    width: 150px;
+    text-align: left;
+}
+.emim-msg-maplink {
+    color: #1a1a1a;
+}
+.emim-me .emim-msg-mapico {
+    float: left;
+    margin: -10px 10px -10px -10px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -1px 1px rgba(0,0,0,.2) inset;
+}
+.emim-notme .emim-msg-mapico {
+    float: right;
+    margin: -10px -10px -10px 10px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+.emim-msg-status {
+    color: rgb(255, 42, 0);
+}
