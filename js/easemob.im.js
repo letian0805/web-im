@@ -587,6 +587,7 @@
                 var msg = new Message('txt', conn.getUniqueId());
                 msg.set(send.text, to, function ( id ) {
                     Easemob.im.utils.$(id + '_loading').remove();
+                    Easemob.im.utils.$(id + '_failed').remove();
                 }, function ( id ) {
                     Easemob.im.utils.addClass(Easemob.im.utils.$(id + '_loading'), 'emim-hide');
                     Easemob.im.utils.removeClass(Easemob.im.utils.$(id + '_failed'), 'emim-hide');

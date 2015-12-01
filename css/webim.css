@@ -450,7 +450,7 @@ footer {
 }
 .emim-contact-avatar {
     vertical-align: middle;
-    margin: 10px;   
+    margin: 6px 6px 6px 10px;   
 }
 .emim-contact-username {
     display: inline-block;
@@ -464,17 +464,19 @@ footer {
 }
 .emim-contact-msg {
     float: left;
-    margin: -28px 0 0 60px;
+    margin: -22px 0 0 60px;
     width: 168px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     color: #AFAFAF;
     font-size: 12px;
+    line-height: 20px;
 }
 .emim-contact-msg img {
     width: 16px;
     margin: 0;
+    vertical-align: top
 }
 .emim-contact-count:before {
     content: '';
@@ -708,7 +710,8 @@ footer {
     border-radius: 2px;
     max-width: 190px;
     word-wrap: break-word;
-    vertical-align: middle;
+    vertical-align: bottom;
+    margin: 0 1px;
 }
 .emim-msg-container p {
     word-break: break-all;
