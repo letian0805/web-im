@@ -2,22 +2,18 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 <title>WebIM-DEMO</title>
 <!--SDK-->
 <script src="static/sdk/strophe.js"></script>
-<script src="static/sdk/easemob.im-1.1.0.js"></script>
+<script src="static/sdk/easemob.im-1.0.8.js"></script>
 
 <!--DEMO依赖-->
 <script src="static/js/jquery-1.11.1.js"></script>
-<script src="static/js/bootstrap.js"></script>
-<script src="static/js/webim.js"></script>
-<link rel="stylesheet" href="css/bootstrap.css" />
-<link rel="stylesheet" href="static/css/webim.css" />
-
-<!--[if lte IE 9]>
-<script src="static/js/jplayer/jquery.jplayer.min.js"></script>
 <script src="static/js/swfupload/swfupload.js"></script>
-<![endif]-->
+<script src="static/js/bootstrap.js"></script>
+<link rel="stylesheet" href="static/css/bootstrap.css" />
+<link rel="stylesheet" href="static/css/webim.css" />
 
 <script src="easemob.im.config.js"></script>
 </head>
@@ -78,16 +74,16 @@
     </div>
 
     <div id="waitLoginmodal" class="modal hide" data-backdrop="static">
-        <img src="img/waitting.gif">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;正在努力加载中...</img>
+        <img src="static/img/waitting.gif">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;正在努力加载中...</img>
     </div>
     <div class="content" id="content" style="display: none">
         <div class="leftcontact" id="leftcontact">
             <div id="headerimg" class="leftheader">
-                <span> <img src="img/head/header2.jpg" alt="logo"
+                <span> <img src="static/img/head/header2.jpg" alt="logo"
                     class="img-circle" width="60px" height="60px"
                     style="margin-top: -40px; margin-left: 20px" /></span> <span
                     id="login_user" class="login_user_title"> <a
-                    class="leftheader-font" href="#"></a>
+                    class="leftheader-font" href="javascript:;"></a>
                 </span> <span>
                     <div class="btn-group" style="margin-left: 5px;">
                         <button class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">
@@ -160,13 +156,13 @@
             <div id="chat01">
                 <div class="chat01_title">
                     <ul class="talkTo">
-                        <li id="talkTo"><a href="#"></a></li>
+                        <li id="talkTo"><a href="javascript:;"></a></li>
                         <li id="recycle" style="float: right;"><img
-                            src="img/recycle.png" onclick="clearCurrentChat();"
+                            src="static/img/recycle.png" onclick="clearCurrentChat();"
                             style="margin-right: 15px; cursor: hand; width: 18px;" title="清屏" /></li>
                         <li id="roomInfo" style="float: right;"><img
                             id="roomMemberImg"
-                            src="img/head/find_more_friend_addfriend_icon.png"
+                            src="static/img/head/find_more_friend_addfriend_icon.png"
                             onclick="showRoomMember();"
                             style="margin-right: 15px; cursor: hand; width: 18px; display: none"
                             title="群组成员" /></li>
@@ -179,8 +175,8 @@
                 <div class="chat02_title">
                     <a class="chat02_title_btn ctb01" onclick="showEmotionDialog()"
                         title="选择表情"></a> <a class="chat02_title_btn ctb03" title="选择图片"
-                        onclick="showSendPic()" href="#"> </a> <a
-                        class="chat02_title_btn ctb02" onclick="showSendAudio()" href="#"
+                        onclick="chooseFile()" href="javascript:;"> </a> <a
+                        class="chat02_title_btn ctb02" onclick="chooseFile()" href="javascript:;"
                         title="选择语音"><span></span></a> <label id="chat02_title_t"></label>
                     <div id="wl_faces_box" class="wl_faces_box">
                         <div class="wl_faces_content">
@@ -204,29 +200,12 @@
                 </div>
                 <div class="chat02_bar">
                     <ul>
-                        <li style="right: 5px; top: 5px;"><img src="img/send_btn.jpg"
+                        <li style="right: 5px; top: 5px;"><img src="static/img/send_btn.jpg"
                             onclick="sendText()" /></li>
                     </ul>
                 </div>
 
                 <div style="clear: both;"></div>
-            </div>
-            <div id="fileModal" class="modal hide" role="dialog"
-                aria-hidden="true" data-backdrop="static">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                        aria-hidden="true">&times;</button>
-                    <h3>文件选择框</h3>
-                </div>
-                <div class="modal-body">
-                    <input type='file' id="fileInput" /> <input type='hidden'
-                        id="sendfiletype" />
-                    <div id="send-file-warning"></div>
-                </div>
-                <div class="modal-footer">
-                    <button id="fileSend" class="btn btn-primary" onclick="sendFile()">发送</button>
-                    <button id="cancelfileSend" class="btn" data-dismiss="modal">取消</button>
-                </div>
             </div>
         </div>
 
@@ -305,5 +284,7 @@
             </div>
         </div>
     </div>
+    <input type='file' id="fileInput" class='hide'/>
+    <script src="static/js/webim.js"></script>
 </body>
 </html>

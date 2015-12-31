@@ -89,7 +89,13 @@ a:hover {
 	valign: middle;
 	text-align: center;
 }
-
+.left, .right,
+.left p, .right p {
+    display: inline;
+}
+.hide {
+    display: none;
+}
 .leftcontact {
 	float: left;
 	width: 196px;
